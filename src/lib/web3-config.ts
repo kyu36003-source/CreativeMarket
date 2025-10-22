@@ -1,11 +1,26 @@
-import { http, createConfig } from 'wagmi';
+import { http, createConfig, fallback } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
 
 // Get WalletConnect project ID from environment
 const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
 
-// BNB Chain Configuration
+// Multiple RPC endpoints for fallback (improves reliability)
+const BSC_MAINNET_RPCS = [
+  process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/',
+  'https://bsc-dataseed1.binance.org/',
+  'https://bsc-dataseed2.binance.org/',
+  'https://bsc-dataseed3.binance.org/',
+  'https://bsc.publicnode.com',
+];
+
+const BSC_TESTNET_RPCS = [
+  process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  'https://data-seed-prebsc-2-s1.binance.org:8545/',
+  'https://bsc-testnet.publicnode.com',
+];
+
+// BNB Chain Configuration with fallback transports
 export const bnbChainConfig = createConfig({
   chains: [bsc, bscTestnet],
   connectors: [
@@ -14,12 +29,45 @@ export const bnbChainConfig = createConfig({
     walletConnect({
       projectId: walletConnectProjectId,
       showQrModal: true,
+      metadata: {
+        name: 'PredictBNB',
+        description: 'AI-Powered Prediction Markets on BNB Chain',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://predictbnb.app',
+        icons: ['https://predictbnb.app/icon.png'],
+      },
     }),
   ],
   transports: {
-    [bsc.id]: http(process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/'),
-    [bscTestnet.id]: http(process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/'),
+    // Use fallback transport with multiple RPC endpoints for better reliability
+    [bsc.id]: fallback(
+      BSC_MAINNET_RPCS.map((url) => 
+        http(url, {
+          timeout: 10000, // 10 second timeout
+          retryCount: 3,
+          retryDelay: 1000, // 1 second between retries
+        })
+      ),
+      {
+        rank: true, // Automatically rank transports by latency
+      }
+    ),
+    [bscTestnet.id]: fallback(
+      BSC_TESTNET_RPCS.map((url) => 
+        http(url, {
+          timeout: 10000,
+          retryCount: 3,
+          retryDelay: 1000,
+        })
+      ),
+      {
+        rank: true,
+      }
+    ),
   },
+  // Automatically reconnect on mount
+  ssr: true,
+  // Additional stability options
+  multiInjectedProviderDiscovery: true,
 });
 
 // Chain IDs for easy reference

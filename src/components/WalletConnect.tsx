@@ -10,9 +10,21 @@ export function WalletConnect() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showConnectors, setShowConnectors] = useState(false);
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const getConnectorName = (connectorId: string) => {
+    switch (connectorId) {
+      case 'injected':
+        return 'MetaMask';
+      case 'walletConnect':
+        return 'WalletConnect';
+      default:
+        return connectorId;
+    }
   };
 
   if (isConnected && address) {
@@ -57,17 +69,37 @@ export function WalletConnect() {
   }
 
   return (
-    <div className="flex gap-2">
-      {connectors.map((connector) => (
-        <Button
-          key={connector.id}
-          onClick={() => connect({ connector })}
-          className="gap-2"
-        >
-          <Wallet className="h-4 w-4" />
-          Connect Wallet
-        </Button>
-      ))}
+    <div className="relative">
+      <Button
+        onClick={() => setShowConnectors(!showConnectors)}
+        className="gap-2"
+      >
+        <Wallet className="h-4 w-4" />
+        Connect Wallet
+      </Button>
+      
+      {showConnectors && (
+        <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg overflow-hidden z-50">
+          {connectors.map((connector) => (
+            <button
+              key={connector.id}
+              onClick={() => {
+                connect({ connector });
+                setShowConnectors(false);
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 border-b last:border-b-0"
+            >
+              <Wallet className="h-5 w-5 text-gray-600" />
+              <div>
+                <div className="font-medium">{getConnectorName(connector.id)}</div>
+                <div className="text-xs text-gray-500">
+                  {connector.id === 'injected' ? 'Browser Wallet' : 'Mobile & Desktop'}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 
+// Export all custom hooks
+export { useWeb3Connection } from './use-web3-connection';
+export * from './use-copy-trading';
+
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
