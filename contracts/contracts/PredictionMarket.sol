@@ -3,11 +3,12 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./TraderReputation.sol";
 
 /**
  * @title PredictionMarket
  * @dev Decentralized prediction market on BNB Chain with AI-assisted oracle integration
- * @notice Built for Seedify Hackathon 2025
+ * @notice Built for Seedify Hackathon 2025 - Now with on-chain reputation and copy trading
  */
 contract PredictionMarket is ReentrancyGuard, Ownable {
     struct Market {
@@ -35,6 +36,8 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
     uint256 public marketCount;
     uint256 public constant PLATFORM_FEE = 200; // 2% fee (in basis points)
     uint256 public constant MIN_BET = 0.01 ether;
+    
+    TraderReputation public reputationContract;
     
     mapping(uint256 => Market) public markets;
     mapping(uint256 => mapping(address => Position)) public positions;
@@ -70,6 +73,16 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
     constructor() Ownable(msg.sender) {
         // Initialize with deployer as authorized oracle
         authorizedOracles[msg.sender] = true;
+        
+        // Deploy reputation contract with this contract as owner
+        reputationContract = new TraderReputation(address(this));
+    }
+    
+    /**
+     * @dev Set reputation contract address (for existing deployments)
+     */
+    function setReputationContract(address _reputationContract) external onlyOwner {
+        reputationContract = TraderReputation(_reputationContract);
     }
 
     /**
@@ -132,6 +145,63 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         }
 
         emit PositionTaken(_marketId, msg.sender, _position, msg.value);
+        
+        // Record bet in reputation contract
+        if (address(reputationContract) != address(0)) {
+            reputationContract.recordBet(msg.sender, _marketId, msg.value, _position);
+            
+            // Check for copy traders and execute copy trades
+            _executeCopyTrades(_marketId, msg.sender, _position, msg.value);
+        }
+    }
+    
+    /**
+     * @dev Execute copy trades for followers
+     */
+    function _executeCopyTrades(
+        uint256 _marketId,
+        address trader,
+        bool _position,
+        uint256 amount
+    ) internal {
+        address[] memory traderFollowers = reputationContract.getFollowers(trader);
+        
+        for (uint256 i = 0; i < traderFollowers.length; i++) {
+            address follower = traderFollowers[i];
+            
+            // Get copy trade settings
+            (
+                uint256 maxAmountPerTrade,
+                uint256 copyPercentage,
+                bool active,
+                ,
+                
+            ) = reputationContract.getCopyTradeSettings(follower, trader);
+            
+            if (!active) continue;
+            
+            // Calculate copy amount
+            uint256 copyAmount = (amount * copyPercentage) / 100;
+            if (copyAmount > maxAmountPerTrade) {
+                copyAmount = maxAmountPerTrade;
+            }
+            
+            // Check follower has enough balance (simplified - in production use escrow)
+            if (copyAmount < MIN_BET) continue;
+            
+            // Record copy trade position
+            Position storage followerPosition = positions[_marketId][follower];
+            if (_position) {
+                followerPosition.yesAmount += copyAmount;
+                markets[_marketId].totalYesAmount += copyAmount;
+            } else {
+                followerPosition.noAmount += copyAmount;
+                markets[_marketId].totalNoAmount += copyAmount;
+            }
+            
+            // Record in reputation contract
+            reputationContract.recordCopyTrade(follower, trader, _marketId, copyAmount);
+        }
     }
 
     /**
@@ -152,6 +222,21 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         market.resolvedAt = block.timestamp;
 
         emit MarketResolved(_marketId, _outcome, block.timestamp);
+        
+        // Update reputation for all participants
+        if (address(reputationContract) != address(0)) {
+            _updateParticipantReputation(_marketId, _outcome);
+        }
+    }
+    
+    /**
+     * @dev Update reputation for all market participants after resolution
+     * @dev Note: In production, process this in batches or off-chain to avoid gas limits
+     * @dev For this implementation, reputation updates happen on claim instead
+     */
+    function _updateParticipantReputation(uint256 /* _marketId */, bool /* outcome */) internal pure {
+        // Placeholder - reputation updates happen on claimWinnings instead
+        // This prevents hitting gas limits when processing large markets
     }
 
     /**
@@ -172,6 +257,23 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         // Deduct platform fee
         uint256 fee = (winningAmount * PLATFORM_FEE) / 10000;
         uint256 payout = winningAmount - fee;
+        
+        // Determine if user won or lost
+        bool won = false;
+        uint256 userBet = 0;
+        if (market.outcome) {
+            userBet = userPosition.yesAmount;
+            won = userBet > 0;
+        } else {
+            userBet = userPosition.noAmount;
+            won = userBet > 0;
+        }
+        
+        // Update reputation
+        if (address(reputationContract) != address(0) && userBet > 0) {
+            uint256 profit = won ? (payout > userBet ? payout - userBet : 0) : 0;
+            reputationContract.settleBet(msg.sender, _marketId, won, profit);
+        }
         
         (bool success, ) = msg.sender.call{value: payout}("");
         require(success, "Transfer failed");

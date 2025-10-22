@@ -8,14 +8,14 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     const [owner, oracle, user1, user2, user3, user4, user5, user6, user7, user8] = await ethers.getSigners();
 
     const PredictionMarket = await ethers.getContractFactory("PredictionMarket");
-    const predictionMarket = await PredictionMarket.deploy(owner.address);
+    const predictionMarket = await PredictionMarket.deploy();
 
     const AIOracle = await ethers.getContractFactory("AIOracle");
     const aiOracle = await AIOracle.deploy(predictionMarket.target);
 
     // Authorize oracle
-    await predictionMarket.authorizeOracle(oracle.address);
-    await predictionMarket.authorizeOracle(aiOracle.target);
+    await predictionMarket.setAuthorizedOracle(oracle.address, true);
+    await predictionMarket.setAuthorizedOracle(aiOracle.target, true);
 
     return { predictionMarket, aiOracle, owner, oracle, user1, user2, user3, user4, user5, user6, user7, user8 };
   }
