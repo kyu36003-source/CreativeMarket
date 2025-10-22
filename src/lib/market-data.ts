@@ -59,7 +59,9 @@ export async function fetchMarkets(category?: string, searchQuery?: string): Pro
   if (!response.ok) {
     throw new Error('Failed to fetch markets');
   }
-  return response.json();
+  const data = await response.json();
+  // API returns { markets: [...], total, page, limit }
+  return data.markets || [];
 }
 
 export async function fetchMarketById(marketId: string): Promise<Market> {

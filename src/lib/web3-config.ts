@@ -3,19 +3,17 @@ import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
 
 // Get WalletConnect project ID from environment
-const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
-
-if (!walletConnectProjectId) {
-  console.warn('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. WalletConnect may not work properly.');
-}
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
 
 // BNB Chain Configuration
 export const bnbChainConfig = createConfig({
   chains: [bsc, bscTestnet],
   connectors: [
     injected(),
+    // WalletConnect - Get free project ID at https://cloud.walletconnect.com
     walletConnect({
-      projectId: walletConnectProjectId || '',
+      projectId: walletConnectProjectId,
+      showQrModal: true,
     }),
   ],
   transports: {
