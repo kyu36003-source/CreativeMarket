@@ -1,4 +1,4 @@
-import { Market, MarketCategory } from '@/types/market';
+import { Market, MarketCategoryInfo } from '@/types/market';
 
 // Helper function to get market odds
 export const calculateMarketOdds = (
@@ -40,7 +40,7 @@ export const formatUSD = (amount: bigint, bnbPrice: number = 600): string => {
 };
 
 // API functions to fetch dynamic data
-export async function fetchMarketCategories(): Promise<MarketCategory[]> {
+export async function fetchMarketCategories(): Promise<MarketCategoryInfo[]> {
   // TODO: Implement API call to fetch categories from backend or blockchain
   const response = await fetch('/api/categories');
   if (!response.ok) {

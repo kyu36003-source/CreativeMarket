@@ -13,7 +13,7 @@ import { WalletConnect } from '@/components/WalletConnect';
 import { MarketCard } from '@/components/MarketCard';
 import { PredictionModal } from '@/components/PredictionModal';
 import { fetchMarkets, fetchMarketCategories, calculateMarketOdds } from '@/lib/market-data';
-import { Market, MarketCategory } from '@/types/market';
+import { Market, MarketCategoryInfo } from '@/types/market';
 import { TrendingUp, Zap, Shield, Sparkles, Search, Filter } from 'lucide-react';
 
 export default function HomePage() {
@@ -21,7 +21,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [markets, setMarkets] = useState<Market[]>([]);
-  const [categories, setCategories] = useState<MarketCategory[]>([]);
+  const [categories, setCategories] = useState<MarketCategoryInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

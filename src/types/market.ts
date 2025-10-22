@@ -1,3 +1,10 @@
+// ============================================================================
+// Market Types - Enhanced for Copy Trading Platform
+// ============================================================================
+
+export type MarketStatus = 'open' | 'closed' | 'resolving' | 'resolved' | 'cancelled';
+export type MarketCategory = 'crypto' | 'sports' | 'politics' | 'entertainment' | 'other';
+
 export interface Market {
   id: string;
   question: string;
@@ -12,6 +19,41 @@ export interface Market {
   resolvedAt: number | null;
   imageUrl?: string;
   tags?: string[];
+  
+  // Enhanced fields for copy trading
+  status?: MarketStatus;
+  totalBets?: number;
+  uniqueBettors?: number;
+  volume24h?: bigint;
+  featured?: boolean;
+}
+
+export interface MarketDetails extends Market {
+  // Historical data
+  oddsHistory?: Array<{
+    timestamp: number;
+    yesOdds: number;
+    noOdds: number;
+  }>;
+  
+  // Recent activity
+  recentBets?: Array<{
+    trader: string;
+    username?: string;
+    position: 'YES' | 'NO';
+    amount: bigint;
+    timestamp: number;
+    isCopy?: boolean;
+  }>;
+  
+  // Top bettors
+  topBettors?: Array<{
+    trader: string;
+    username?: string;
+    totalBet: bigint;
+    position: 'YES' | 'NO';
+    badge?: string;
+  }>;
 }
 
 export interface UserPosition {
@@ -21,6 +63,11 @@ export interface UserPosition {
   yesShares: bigint;
   noShares: bigint;
   potentialWinnings: bigint;
+  
+  // Copy trading info
+  isCopy?: boolean;
+  copiedFrom?: string;
+  timestamp?: number;
 }
 
 export interface MarketOdds {
@@ -39,7 +86,7 @@ export interface OracleResolution {
   timestamp: number;
 }
 
-export interface MarketCategory {
+export interface MarketCategoryInfo {
   id: string;
   name: string;
   icon: string;
