@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { WalletConnect } from '@/components/WalletConnect';
+import { RainbowKitButton } from '@/components/RainbowKitButton';
 import { MarketCard } from '@/components/MarketCard';
 import { PredictionModal } from '@/components/PredictionModal';
 import { fetchMarkets, fetchMarketCategories, calculateMarketOdds } from '@/lib/market-data';
 import { Market, MarketCategoryInfo } from '@/types/market';
-import { TrendingUp, Zap, Shield, Sparkles, Search, Filter } from 'lucide-react';
+import { TrendingUp, Zap, Shield, Sparkles, Search, Filter, Brain, Palette } from 'lucide-react';
 
 export default function HomePage() {
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
@@ -100,7 +101,7 @@ export default function HomePage() {
                 <p className="text-xs text-gray-600">Powered by BNB Chain</p>
               </div>
             </div>
-            <WalletConnect />
+            <RainbowKitButton />
           </div>
         </div>
       </header>
@@ -120,19 +121,44 @@ export default function HomePage() {
               BNB Chain
             </span>
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Trade on real-world events with AI-assisted oracles, gasless transactions,
-            and instant market resolution. The future of prediction markets is here.
+          <p className="text-xl text-gray-600 mb-8">
+            Predict the future of creative work. Trade predictions with AI assistance and gasless transactions.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" className="gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Explore Markets
-            </Button>
-            <Button variant="outline" size="lg" className="gap-2">
-              <Zap className="h-5 w-5" />
-              Create Market
-            </Button>
+          
+          {/* New: Creative Markets CTA */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Link href="/creative-markets">
+              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2">
+                <Palette className="h-5 w-5" />
+                Explore Creative Markets
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/leaderboard">
+              <Button size="lg" variant="outline" className="gap-2">
+                <TrendingUp className="h-5 w-5" />
+                View Leaderboard
+              </Button>
+            </Link>
+          </div>
+          
+          {/* Feature Highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-purple-100">
+              <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900 mb-1">AI Oracle</h3>
+              <p className="text-sm text-gray-600">Subjective judging in minutes, not days</p>
+            </div>
+            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-green-100">
+              <Zap className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900 mb-1">Gasless Trading</h3>
+              <p className="text-sm text-gray-600">No crypto knowledge needed</p>
+            </div>
+            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-blue-100">
+              <Shield className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900 mb-1">Pooled Liquidity</h3>
+              <p className="text-sm text-gray-600">45% better pricing</p>
+            </div>
           </div>
         </div>
 

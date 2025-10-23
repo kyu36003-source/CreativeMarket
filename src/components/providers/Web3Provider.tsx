@@ -135,7 +135,9 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <Web3ErrorBoundary>
       <WagmiProvider config={bnbChainConfig} reconnectOnMount={true}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       </WagmiProvider>
     </Web3ErrorBoundary>
   );
