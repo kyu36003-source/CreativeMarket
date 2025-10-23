@@ -19,11 +19,22 @@ export function WalletConnect() {
   const getConnectorName = (connectorId: string) => {
     switch (connectorId) {
       case 'injected':
-        return 'MetaMask';
+        return 'MetaMask / Browser Wallet';
       case 'walletConnect':
         return 'WalletConnect';
       default:
         return connectorId;
+    }
+  };
+
+  const getConnectorDescription = (connectorId: string) => {
+    switch (connectorId) {
+      case 'injected':
+        return 'MetaMask, Coinbase Wallet, etc.';
+      case 'walletConnect':
+        return 'Mobile & Desktop Wallets';
+      default:
+        return 'Connect your wallet';
     }
   };
 
@@ -93,11 +104,16 @@ export function WalletConnect() {
               <div>
                 <div className="font-medium">{getConnectorName(connector.id)}</div>
                 <div className="text-xs text-gray-500">
-                  {connector.id === 'injected' ? 'Browser Wallet' : 'Mobile & Desktop'}
+                  {getConnectorDescription(connector.id)}
                 </div>
               </div>
             </button>
           ))}
+          {connectors.length === 0 && (
+            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+              No wallet connectors available
+            </div>
+          )}
         </div>
       )}
     </div>

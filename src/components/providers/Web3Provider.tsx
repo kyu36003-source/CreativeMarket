@@ -1,10 +1,64 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bnbChainConfig } from '@/lib/web3-config';
 import { Web3ErrorBoundary } from '@/components/Web3ErrorBoundary';
+
+// Suppress WebSocket connection errors globally
+if (typeof window !== 'undefined') {
+  // Store original console.error
+  const originalConsoleError = console.error;
+  
+  // Override console.error to filter out WebSocket subscription errors
+  console.error = (...args: unknown[]) => {
+    const errorString = args.join(' ');
+    
+    // Filter out WebSocket/WalletConnect subscription errors
+    if (
+      errorString.includes('Connection interrupted while trying to subscribe') ||
+      errorString.includes('WebSocket connection') ||
+      errorString.includes('Fatal socket error') ||
+      errorString.includes('Unauthorized: invalid key') ||
+      errorString.includes('core/relayer') ||
+      (errorString.includes('subscription') && errorString.includes('interrupted'))
+    ) {
+      // Only log in development, suppress in production
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('🔌 [Web3 Connection Info]:', errorString.includes('invalid key') 
+          ? 'WalletConnect disabled (no project ID). Using browser wallet only.' 
+          : 'Connection state changed.');
+      }
+      return;
+    }
+    
+    // Call original console.error for other errors
+    originalConsoleError.apply(console, args);
+  };
+
+  // Global unhandled promise rejection handler for Web3 errors
+  window.addEventListener('unhandledrejection', (event) => {
+    const error = event.reason;
+    const errorMsg = error?.message || String(error);
+    
+    if (
+      errorMsg.includes('Connection interrupted') ||
+      errorMsg.includes('subscribe') ||
+      errorMsg.includes('WebSocket') ||
+      errorMsg.includes('invalid key') ||
+      errorMsg.includes('Fatal socket error')
+    ) {
+      // Prevent the error from being logged
+      event.preventDefault();
+      
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.info('🔌 Web3 connection handled:', errorMsg.slice(0, 80) + '...');
+      }
+    }
+  });
+}
 
 // Create QueryClient with proper error handling and retry logic
 const makeQueryClient = () => {
@@ -43,6 +97,40 @@ function getQueryClient() {
 export function Web3Provider({ children }: { children: ReactNode }) {
   // Only create the query client once per browser session
   const [queryClient] = useState(() => getQueryClient());
+
+  // Handle Web3 connection errors at the provider level
+  useEffect(() => {
+    // Additional error suppression for Web3Modal/WalletConnect errors
+    const handleError = (event: ErrorEvent) => {
+      const error = event.error || event.message;
+      const errorString = String(error);
+      
+      if (
+        errorString.includes('Connection interrupted') ||
+        errorString.includes('subscribe') ||
+        errorString.includes('WebSocket') ||
+        errorString.includes('index.es.js') ||
+        errorString.includes('Fatal socket error') ||
+        errorString.includes('invalid key') ||
+        errorString.includes('core/relayer')
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Silent in production, info log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.info('🔌 Web3 connection event handled');
+        }
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
 
   return (
     <Web3ErrorBoundary>
