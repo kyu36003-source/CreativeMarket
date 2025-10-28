@@ -3,7 +3,7 @@
  * Fetches real-time cryptocurrency data from Binance API
  */
 
-import { BaseAdapter, AdapterConfig } from "./base-adapter";
+import { BaseAdapter, AdapterConfig } from './base-adapter';
 import {
   ResolutionQuery,
   SourceData,
@@ -11,7 +11,7 @@ import {
   CryptoData,
   OracleError,
   ErrorCode,
-} from "../types";
+} from '../types';
 
 interface BinanceTickerPrice {
   symbol: string;
@@ -47,8 +47,8 @@ export class BinanceAdapter extends BaseAdapter {
 
   constructor(apiKey?: string, secretKey?: string) {
     super({
-      name: "Binance",
-      baseUrl: "https://api.binance.com/api/v3",
+      name: 'Binance',
+      baseUrl: 'https://api.binance.com/api/v3',
       apiKey: apiKey,
       secretKey: secretKey,
       timeout: 10000,
@@ -77,7 +77,7 @@ export class BinanceAdapter extends BaseAdapter {
     const symbol = this.extractTradingSymbol(market.question);
     if (!symbol) {
       throw new OracleError(
-        "Could not extract trading symbol from market question",
+        'Could not extract trading symbol from market question',
         ErrorCode.INVALID_MARKET,
         { question: market.question }
       );
@@ -98,7 +98,7 @@ export class BinanceAdapter extends BaseAdapter {
     // Validate data
     if (!this.validate(data)) {
       throw new OracleError(
-        "Invalid data received from Binance",
+        'Invalid data received from Binance',
         ErrorCode.DATA_SOURCE_INVALID_RESPONSE,
         { data }
       );
@@ -111,7 +111,7 @@ export class BinanceAdapter extends BaseAdapter {
       data: data,
       confidence: this.calculateConfidence(data),
       metadata: {
-        apiVersion: "v3",
+        apiVersion: 'v3',
         rateLimit: {
           remaining: 1200 - this.requestCount,
           reset: new Date(Date.now() + 60000),
@@ -194,34 +194,34 @@ export class BinanceAdapter extends BaseAdapter {
   private extractTradingSymbol(question: string): string | null {
     // Common cryptocurrency mappings to Binance symbols
     const symbolMappings: Record<string, string> = {
-      bitcoin: "BTCUSDT",
-      btc: "BTCUSDT",
-      ethereum: "ETHUSDT",
-      eth: "ETHUSDT",
-      bnb: "BNBUSDT",
-      "binance coin": "BNBUSDT",
-      cardano: "ADAUSDT",
-      ada: "ADAUSDT",
-      solana: "SOLUSDT",
-      sol: "SOLUSDT",
-      dogecoin: "DOGEUSDT",
-      doge: "DOGEUSDT",
-      polkadot: "DOTUSDT",
-      dot: "DOTUSDT",
-      matic: "MATICUSDT",
-      polygon: "MATICUSDT",
-      avalanche: "AVAXUSDT",
-      avax: "AVAXUSDT",
-      chainlink: "LINKUSDT",
-      link: "LINKUSDT",
-      uniswap: "UNIUSDT",
-      uni: "UNIUSDT",
-      cosmos: "ATOMUSDT",
-      atom: "ATOMUSDT",
-      ripple: "XRPUSDT",
-      xrp: "XRPUSDT",
-      litecoin: "LTCUSDT",
-      ltc: "LTCUSDT",
+      bitcoin: 'BTCUSDT',
+      btc: 'BTCUSDT',
+      ethereum: 'ETHUSDT',
+      eth: 'ETHUSDT',
+      bnb: 'BNBUSDT',
+      'binance coin': 'BNBUSDT',
+      cardano: 'ADAUSDT',
+      ada: 'ADAUSDT',
+      solana: 'SOLUSDT',
+      sol: 'SOLUSDT',
+      dogecoin: 'DOGEUSDT',
+      doge: 'DOGEUSDT',
+      polkadot: 'DOTUSDT',
+      dot: 'DOTUSDT',
+      matic: 'MATICUSDT',
+      polygon: 'MATICUSDT',
+      avalanche: 'AVAXUSDT',
+      avax: 'AVAXUSDT',
+      chainlink: 'LINKUSDT',
+      link: 'LINKUSDT',
+      uniswap: 'UNIUSDT',
+      uni: 'UNIUSDT',
+      cosmos: 'ATOMUSDT',
+      atom: 'ATOMUSDT',
+      ripple: 'XRPUSDT',
+      xrp: 'XRPUSDT',
+      litecoin: 'LTCUSDT',
+      ltc: 'LTCUSDT',
     };
 
     const lowerQuestion = question.toLowerCase();
@@ -244,9 +244,7 @@ export class BinanceAdapter extends BaseAdapter {
     if (symbolMatch) {
       const symbol = symbolMatch[1];
       // Check if it's a known crypto symbol
-      if (
-        ["BTC", "ETH", "BNB", "ADA", "SOL", "DOGE", "DOT"].includes(symbol)
-      ) {
+      if (['BTC', 'ETH', 'BNB', 'ADA', 'SOL', 'DOGE', 'DOT'].includes(symbol)) {
         return `${symbol}USDT`;
       }
     }
@@ -259,19 +257,19 @@ export class BinanceAdapter extends BaseAdapter {
    */
   private needsHistoricalData(question: string): boolean {
     const historicalKeywords = [
-      "was",
-      "did",
-      "historical",
-      "past",
-      "previous",
-      "yesterday",
-      "last week",
-      "last month",
-      "ended",
-      "closed",
+      'was',
+      'did',
+      'historical',
+      'past',
+      'previous',
+      'yesterday',
+      'last week',
+      'last month',
+      'ended',
+      'closed',
     ];
 
-    return historicalKeywords.some((keyword) =>
+    return historicalKeywords.some(keyword =>
       question.toLowerCase().includes(keyword)
     );
   }
@@ -282,21 +280,21 @@ export class BinanceAdapter extends BaseAdapter {
   private extractTargetDate(question: string): Date | null {
     const now = new Date();
 
-    if (question.toLowerCase().includes("yesterday")) {
+    if (question.toLowerCase().includes('yesterday')) {
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
       yesterday.setHours(0, 0, 0, 0);
       return yesterday;
     }
 
-    if (question.toLowerCase().includes("last week")) {
+    if (question.toLowerCase().includes('last week')) {
       const lastWeek = new Date(now);
       lastWeek.setDate(lastWeek.getDate() - 7);
       lastWeek.setHours(0, 0, 0, 0);
       return lastWeek;
     }
 
-    if (question.toLowerCase().includes("last month")) {
+    if (question.toLowerCase().includes('last month')) {
       const lastMonth = new Date(now);
       lastMonth.setMonth(lastMonth.getMonth() - 1);
       lastMonth.setHours(0, 0, 0, 0);
@@ -347,18 +345,18 @@ export class BinanceAdapter extends BaseAdapter {
    * Validate data structure
    */
   validate(data: unknown): boolean {
-    if (!data || typeof data !== "object") return false;
+    if (!data || typeof data !== 'object') return false;
 
     const cryptoData = data as CryptoData;
 
     return (
-      typeof cryptoData.symbol === "string" &&
+      typeof cryptoData.symbol === 'string' &&
       cryptoData.symbol.length > 0 &&
-      typeof cryptoData.price === "number" &&
+      typeof cryptoData.price === 'number' &&
       cryptoData.price > 0 &&
       !isNaN(cryptoData.price) &&
       cryptoData.timestamp instanceof Date &&
-      typeof cryptoData.source === "string"
+      typeof cryptoData.source === 'string'
     );
   }
 
@@ -367,7 +365,7 @@ export class BinanceAdapter extends BaseAdapter {
    */
   async isAvailable(): Promise<boolean> {
     try {
-      const response = await this.makeRequest("/ping");
+      const response = await this.makeRequest('/ping');
       return response.ok;
     } catch {
       return false;

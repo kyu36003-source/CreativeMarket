@@ -3,10 +3,23 @@
  * Using Wagmi v2 for type-safe contract interactions
  */
 
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount, useChainId } from 'wagmi';
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+  useChainId,
+} from 'wagmi';
 import { parseEther, formatEther } from 'viem';
-import { CONTRACT_ADDRESSES, getContractAddress } from './addresses';
-import { PREDICTION_MARKET_ABI, AI_ORACLE_ABI, TRADER_REPUTATION_ABI } from './abis';
+import {
+  CONTRACT_ADDRESSES,
+  getContractAddress,
+} from '../lib/contracts/addresses';
+import {
+  PREDICTION_MARKET_ABI,
+  AI_ORACLE_ABI,
+  TRADER_REPUTATION_ABI,
+} from '../lib/contracts/abis';
 
 // ============================================================================
 // Prediction Market Hooks
@@ -17,7 +30,7 @@ import { PREDICTION_MARKET_ABI, AI_ORACLE_ABI, TRADER_REPUTATION_ABI } from './a
  */
 export function useMarket(marketId: number) {
   const chainId = useChainId();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
@@ -31,7 +44,7 @@ export function useMarket(marketId: number) {
  */
 export function useMarketCount() {
   const chainId = useChainId();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
@@ -45,7 +58,7 @@ export function useMarketCount() {
 export function usePosition(marketId: number) {
   const chainId = useChainId();
   const { address } = useAccount();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
@@ -62,7 +75,9 @@ export function usePosition(marketId: number) {
  */
 export function useCreateMarket() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const createMarket = async (params: {
     question: string;
@@ -72,9 +87,12 @@ export function useCreateMarket() {
     aiOracleEnabled: boolean;
   }) => {
     const chainId = useChainId();
-    
+
     return writeContract({
-      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      address: getContractAddress(
+        chainId,
+        'PREDICTION_MARKET'
+      ) as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,
       functionName: 'createMarket',
       args: [
@@ -102,12 +120,21 @@ export function useCreateMarket() {
  */
 export function usePlaceBet() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
   const chainId = useChainId();
 
-  const placeBet = async (marketId: number, position: boolean, amount: string) => {
+  const placeBet = async (
+    marketId: number,
+    position: boolean,
+    amount: string
+  ) => {
     return writeContract({
-      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      address: getContractAddress(
+        chainId,
+        'PREDICTION_MARKET'
+      ) as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,
       functionName: 'placeBet',
       args: [BigInt(marketId), position],
@@ -130,12 +157,17 @@ export function usePlaceBet() {
  */
 export function useClaimWinnings() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
   const chainId = useChainId();
 
   const claimWinnings = async (marketId: number) => {
     return writeContract({
-      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      address: getContractAddress(
+        chainId,
+        'PREDICTION_MARKET'
+      ) as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,
       functionName: 'claimWinnings',
       args: [BigInt(marketId)],
@@ -157,12 +189,17 @@ export function useClaimWinnings() {
  */
 export function useResolveMarket() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
   const chainId = useChainId();
 
   const resolveMarket = async (marketId: number, outcome: boolean) => {
     return writeContract({
-      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      address: getContractAddress(
+        chainId,
+        'PREDICTION_MARKET'
+      ) as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,
       functionName: 'resolveMarket',
       args: [BigInt(marketId), outcome],
@@ -188,7 +225,9 @@ export function useResolveMarket() {
  */
 export function useRequestResolution() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
   const chainId = useChainId();
 
   const requestResolution = async (marketId: number, dataSource: string) => {
@@ -215,7 +254,7 @@ export function useRequestResolution() {
  */
 export function useResolutionRequest(requestId: number) {
   const chainId = useChainId();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'AI_ORACLE') as `0x${string}`,
     abi: AI_ORACLE_ABI,
@@ -235,7 +274,7 @@ export function useTraderReputation(traderAddress?: string) {
   const chainId = useChainId();
   const { address } = useAccount();
   const targetAddress = traderAddress || address;
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: TRADER_REPUTATION_ABI,
@@ -254,7 +293,7 @@ export function useSuccessRate(traderAddress?: string) {
   const chainId = useChainId();
   const { address } = useAccount();
   const targetAddress = traderAddress || address;
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: TRADER_REPUTATION_ABI,
@@ -273,7 +312,7 @@ export function useTraderTier(traderAddress?: string) {
   const chainId = useChainId();
   const { address } = useAccount();
   const targetAddress = traderAddress || address;
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: TRADER_REPUTATION_ABI,
@@ -290,12 +329,17 @@ export function useTraderTier(traderAddress?: string) {
  */
 export function useEnableCopyTrading() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
   const chainId = useChainId();
 
   const enableCopyTrading = async () => {
     return writeContract({
-      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      address: getContractAddress(
+        chainId,
+        'PREDICTION_MARKET'
+      ) as `0x${string}`,
       abi: TRADER_REPUTATION_ABI,
       functionName: 'enableCopyTrading',
     });
@@ -320,7 +364,7 @@ export function useEnableCopyTrading() {
  */
 export function usePlatformFee() {
   const chainId = useChainId();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
@@ -333,7 +377,7 @@ export function usePlatformFee() {
  */
 export function useMinBet() {
   const chainId = useChainId();
-  
+
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
@@ -350,7 +394,7 @@ export function useCalculateWinnings(
   betAmount: string
 ) {
   const { data: market } = useMarket(marketId);
-  
+
   if (!market || !betAmount) {
     return { potentialWinnings: '0', odds: 0 };
   }

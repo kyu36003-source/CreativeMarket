@@ -23,14 +23,14 @@ export interface Market {
 }
 
 export enum MarketCategory {
-  CRYPTO = "crypto",
-  SPORTS = "sports",
-  POLITICS = "politics",
-  WEATHER = "weather",
-  ENTERTAINMENT = "entertainment",
-  TECHNOLOGY = "technology",
-  FINANCE = "finance",
-  OTHER = "other",
+  CRYPTO = 'crypto',
+  SPORTS = 'sports',
+  POLITICS = 'politics',
+  WEATHER = 'weather',
+  ENTERTAINMENT = 'entertainment',
+  TECHNOLOGY = 'technology',
+  FINANCE = 'finance',
+  OTHER = 'other',
 }
 
 export interface ResolutionRequest {
@@ -43,14 +43,14 @@ export interface ResolutionRequest {
 }
 
 export enum ResolutionStatus {
-  PENDING = "pending",
-  FETCHING_DATA = "fetching_data",
-  ANALYZING = "analyzing",
-  UPLOADING_EVIDENCE = "uploading_evidence",
-  SUBMITTING = "submitting",
-  COMPLETED = "completed",
-  FAILED = "failed",
-  MANUAL_REVIEW = "manual_review",
+  PENDING = 'pending',
+  FETCHING_DATA = 'fetching_data',
+  ANALYZING = 'analyzing',
+  UPLOADING_EVIDENCE = 'uploading_evidence',
+  SUBMITTING = 'submitting',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  MANUAL_REVIEW = 'manual_review',
 }
 
 // ============================================================================
@@ -107,7 +107,7 @@ export interface SportsData {
   awayTeam: string;
   homeScore?: number;
   awayScore?: number;
-  status: "scheduled" | "live" | "finished" | "postponed" | "cancelled";
+  status: 'scheduled' | 'live' | 'finished' | 'postponed' | 'cancelled';
   timestamp: Date;
   source: string;
 }
@@ -158,7 +158,7 @@ export interface GPTFunction {
   name: string;
   description: string;
   parameters: {
-    type: "object";
+    type: 'object';
     properties: Record<string, any>;
     required: string[];
   };
@@ -266,44 +266,44 @@ export class OracleError extends Error {
     public details?: Record<string, any>
   ) {
     super(message);
-    this.name = "OracleError";
+    this.name = 'OracleError';
   }
 }
 
 export enum ErrorCode {
   // Data Source Errors
-  DATA_SOURCE_UNAVAILABLE = "DATA_SOURCE_UNAVAILABLE",
-  DATA_SOURCE_RATE_LIMIT = "DATA_SOURCE_RATE_LIMIT",
-  DATA_SOURCE_INVALID_RESPONSE = "DATA_SOURCE_INVALID_RESPONSE",
-  DATA_SOURCE_TIMEOUT = "DATA_SOURCE_TIMEOUT",
+  DATA_SOURCE_UNAVAILABLE = 'DATA_SOURCE_UNAVAILABLE',
+  DATA_SOURCE_RATE_LIMIT = 'DATA_SOURCE_RATE_LIMIT',
+  DATA_SOURCE_INVALID_RESPONSE = 'DATA_SOURCE_INVALID_RESPONSE',
+  DATA_SOURCE_TIMEOUT = 'DATA_SOURCE_TIMEOUT',
 
   // AI Analysis Errors
-  AI_ANALYSIS_FAILED = "AI_ANALYSIS_FAILED",
-  AI_LOW_CONFIDENCE = "AI_LOW_CONFIDENCE",
-  AI_API_ERROR = "AI_API_ERROR",
-  AI_RATE_LIMIT = "AI_RATE_LIMIT",
+  AI_ANALYSIS_FAILED = 'AI_ANALYSIS_FAILED',
+  AI_LOW_CONFIDENCE = 'AI_LOW_CONFIDENCE',
+  AI_API_ERROR = 'AI_API_ERROR',
+  AI_RATE_LIMIT = 'AI_RATE_LIMIT',
 
   // IPFS Errors
-  IPFS_UPLOAD_FAILED = "IPFS_UPLOAD_FAILED",
-  IPFS_RETRIEVAL_FAILED = "IPFS_RETRIEVAL_FAILED",
-  IPFS_PIN_FAILED = "IPFS_PIN_FAILED",
+  IPFS_UPLOAD_FAILED = 'IPFS_UPLOAD_FAILED',
+  IPFS_RETRIEVAL_FAILED = 'IPFS_RETRIEVAL_FAILED',
+  IPFS_PIN_FAILED = 'IPFS_PIN_FAILED',
 
   // Blockchain Errors
-  BLOCKCHAIN_TX_FAILED = "BLOCKCHAIN_TX_FAILED",
-  BLOCKCHAIN_GAS_TOO_HIGH = "BLOCKCHAIN_GAS_TOO_HIGH",
-  BLOCKCHAIN_UNAUTHORIZED = "BLOCKCHAIN_UNAUTHORIZED",
-  BLOCKCHAIN_CONTRACT_ERROR = "BLOCKCHAIN_CONTRACT_ERROR",
+  BLOCKCHAIN_TX_FAILED = 'BLOCKCHAIN_TX_FAILED',
+  BLOCKCHAIN_GAS_TOO_HIGH = 'BLOCKCHAIN_GAS_TOO_HIGH',
+  BLOCKCHAIN_UNAUTHORIZED = 'BLOCKCHAIN_UNAUTHORIZED',
+  BLOCKCHAIN_CONTRACT_ERROR = 'BLOCKCHAIN_CONTRACT_ERROR',
 
   // Validation Errors
-  INVALID_MARKET = "INVALID_MARKET",
-  MARKET_NOT_ENDED = "MARKET_NOT_ENDED",
-  MARKET_ALREADY_RESOLVED = "MARKET_ALREADY_RESOLVED",
-  INSUFFICIENT_DATA = "INSUFFICIENT_DATA",
+  INVALID_MARKET = 'INVALID_MARKET',
+  MARKET_NOT_ENDED = 'MARKET_NOT_ENDED',
+  MARKET_ALREADY_RESOLVED = 'MARKET_ALREADY_RESOLVED',
+  INSUFFICIENT_DATA = 'INSUFFICIENT_DATA',
 
   // System Errors
-  CONFIG_ERROR = "CONFIG_ERROR",
-  NETWORK_ERROR = "NETWORK_ERROR",
-  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+  CONFIG_ERROR = 'CONFIG_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
 // ============================================================================
@@ -374,7 +374,7 @@ export interface MonitoringMetrics {
 export interface ServiceConfig {
   oracle: OracleAgentConfig;
   ai: {
-    provider: "openai" | "anthropic" | "google";
+    provider: 'openai' | 'anthropic' | 'google';
     model: string;
     apiKey: string;
     maxTokens: number;
@@ -382,7 +382,7 @@ export interface ServiceConfig {
     minConfidence: number;
   };
   ipfs: {
-    provider: "pinata" | "web3storage" | "infura";
+    provider: 'pinata' | 'web3storage' | 'infura';
     apiKey: string;
     secretKey?: string;
     gateway: string;

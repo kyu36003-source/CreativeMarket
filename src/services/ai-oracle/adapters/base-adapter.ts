@@ -12,7 +12,7 @@ import {
   RateLimitConfig,
   OracleError,
   ErrorCode,
-} from "../types";
+} from '../types';
 
 export interface AdapterConfig {
   name: string;
@@ -71,7 +71,7 @@ export abstract class BaseAdapter implements DataSourceAdapter {
    */
   async isAvailable(): Promise<boolean> {
     try {
-      const response = await this.makeRequest("/", "GET");
+      const response = await this.makeRequest('/', 'GET');
       return response.ok;
     } catch {
       return false;
@@ -83,7 +83,7 @@ export abstract class BaseAdapter implements DataSourceAdapter {
    */
   protected async makeRequest(
     endpoint: string,
-    method: "GET" | "POST" = "GET",
+    method: 'GET' | 'POST' = 'GET',
     body?: any,
     headers: Record<string, string> = {}
   ): Promise<Response> {
@@ -97,12 +97,12 @@ export abstract class BaseAdapter implements DataSourceAdapter {
 
         // Prepare headers
         const requestHeaders: Record<string, string> = {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...headers,
         };
 
         if (this.config.apiKey) {
-          requestHeaders["Authorization"] = `Bearer ${this.config.apiKey}`;
+          requestHeaders['Authorization'] = `Bearer ${this.config.apiKey}`;
         }
 
         // Make request
@@ -119,7 +119,7 @@ export abstract class BaseAdapter implements DataSourceAdapter {
         if (!response.ok) {
           // Handle rate limiting
           if (response.status === 429) {
-            const retryAfter = response.headers.get("Retry-After");
+            const retryAfter = response.headers.get('Retry-After');
             const delay = retryAfter
               ? parseInt(retryAfter) * 1000
               : retry.delayMs * Math.pow(retry.backoffMultiplier, attempt);
@@ -156,7 +156,7 @@ export abstract class BaseAdapter implements DataSourceAdapter {
         if (error instanceof OracleError) throw error;
 
         // Timeout error
-        if (error instanceof Error && error.name === "TimeoutError") {
+        if (error instanceof Error && error.name === 'TimeoutError') {
           if (attempt < retry.maxAttempts - 1) {
             const delay =
               retry.delayMs * Math.pow(retry.backoffMultiplier, attempt);
@@ -261,7 +261,7 @@ export abstract class BaseAdapter implements DataSourceAdapter {
    * Sleep utility
    */
   protected sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -270,29 +270,29 @@ export abstract class BaseAdapter implements DataSourceAdapter {
   protected extractKeywords(question: string): string[] {
     // Remove common words and split
     const stopWords = [
-      "will",
-      "the",
-      "be",
-      "to",
-      "a",
-      "an",
-      "in",
-      "on",
-      "at",
-      "by",
-      "above",
-      "below",
-      "reach",
-      "hit",
-      "before",
-      "after",
+      'will',
+      'the',
+      'be',
+      'to',
+      'a',
+      'an',
+      'in',
+      'on',
+      'at',
+      'by',
+      'above',
+      'below',
+      'reach',
+      'hit',
+      'before',
+      'after',
     ];
 
     const words = question
       .toLowerCase()
-      .replace(/[^\w\s]/g, "")
+      .replace(/[^\w\s]/g, '')
       .split(/\s+/)
-      .filter((word) => word.length > 2 && !stopWords.includes(word));
+      .filter(word => word.length > 2 && !stopWords.includes(word));
 
     return [...new Set(words)]; // Remove duplicates
   }

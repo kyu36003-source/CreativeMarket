@@ -3,7 +3,7 @@
  * Fetches cryptocurrency price and market data from CoinGecko API
  */
 
-import { BaseAdapter, AdapterConfig } from "./base-adapter";
+import { BaseAdapter, AdapterConfig } from './base-adapter';
 import {
   ResolutionQuery,
   SourceData,
@@ -11,7 +11,7 @@ import {
   CryptoData,
   OracleError,
   ErrorCode,
-} from "../types";
+} from '../types';
 
 interface CoinGeckoPrice {
   [coinId: string]: {
@@ -47,8 +47,8 @@ export class CoinGeckoAdapter extends BaseAdapter {
 
   constructor(apiKey?: string) {
     super({
-      name: "CoinGecko",
-      baseUrl: "https://api.coingecko.com/api/v3",
+      name: 'CoinGecko',
+      baseUrl: 'https://api.coingecko.com/api/v3',
       apiKey: apiKey,
       timeout: 15000,
       retry: {
@@ -76,7 +76,7 @@ export class CoinGeckoAdapter extends BaseAdapter {
     const coinSymbol = this.extractCoinSymbol(market.question);
     if (!coinSymbol) {
       throw new OracleError(
-        "Could not extract coin symbol from market question",
+        'Could not extract coin symbol from market question',
         ErrorCode.INVALID_MARKET,
         { question: market.question }
       );
@@ -97,7 +97,7 @@ export class CoinGeckoAdapter extends BaseAdapter {
     // Validate data
     if (!this.validate(data)) {
       throw new OracleError(
-        "Invalid data received from CoinGecko",
+        'Invalid data received from CoinGecko',
         ErrorCode.DATA_SOURCE_INVALID_RESPONSE,
         { data }
       );
@@ -110,7 +110,7 @@ export class CoinGeckoAdapter extends BaseAdapter {
       data: data,
       confidence: this.calculateConfidence(data),
       metadata: {
-        apiVersion: "v3",
+        apiVersion: 'v3',
         rateLimit: {
           remaining: 50 - this.requestCount,
           reset: new Date(Date.now() + 60000),
@@ -214,21 +214,21 @@ export class CoinGeckoAdapter extends BaseAdapter {
 
     // Common mappings
     const commonMappings: Record<string, string> = {
-      BTC: "bitcoin",
-      ETH: "ethereum",
-      BNB: "binancecoin",
-      ADA: "cardano",
-      SOL: "solana",
-      DOGE: "dogecoin",
-      DOT: "polkadot",
-      MATIC: "matic-network",
-      AVAX: "avalanche-2",
-      LINK: "chainlink",
-      UNI: "uniswap",
-      ATOM: "cosmos",
-      XRP: "ripple",
-      LTC: "litecoin",
-      BCH: "bitcoin-cash",
+      BTC: 'bitcoin',
+      ETH: 'ethereum',
+      BNB: 'binancecoin',
+      ADA: 'cardano',
+      SOL: 'solana',
+      DOGE: 'dogecoin',
+      DOT: 'polkadot',
+      MATIC: 'matic-network',
+      AVAX: 'avalanche-2',
+      LINK: 'chainlink',
+      UNI: 'uniswap',
+      ATOM: 'cosmos',
+      XRP: 'ripple',
+      LTC: 'litecoin',
+      BCH: 'bitcoin-cash',
     };
 
     const normalizedSymbol = symbol.toUpperCase();
@@ -275,9 +275,9 @@ export class CoinGeckoAdapter extends BaseAdapter {
       if (match) {
         // Convert common names to symbols
         const nameToSymbol: Record<string, string> = {
-          bitcoin: "BTC",
-          ethereum: "ETH",
-          "binance coin": "BNB",
+          bitcoin: 'BTC',
+          ethereum: 'ETH',
+          'binance coin': 'BNB',
         };
 
         const matched = match[1] || match[0];
@@ -293,17 +293,17 @@ export class CoinGeckoAdapter extends BaseAdapter {
    */
   private needsHistoricalData(question: string): boolean {
     const historicalKeywords = [
-      "was",
-      "did",
-      "historical",
-      "past",
-      "previous",
-      "yesterday",
-      "last week",
-      "last month",
+      'was',
+      'did',
+      'historical',
+      'past',
+      'previous',
+      'yesterday',
+      'last week',
+      'last month',
     ];
 
-    return historicalKeywords.some((keyword) =>
+    return historicalKeywords.some(keyword =>
       question.toLowerCase().includes(keyword)
     );
   }
@@ -315,19 +315,19 @@ export class CoinGeckoAdapter extends BaseAdapter {
     // Look for date patterns
     const now = new Date();
 
-    if (question.toLowerCase().includes("yesterday")) {
+    if (question.toLowerCase().includes('yesterday')) {
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
       return yesterday;
     }
 
-    if (question.toLowerCase().includes("last week")) {
+    if (question.toLowerCase().includes('last week')) {
       const lastWeek = new Date(now);
       lastWeek.setDate(lastWeek.getDate() - 7);
       return lastWeek;
     }
 
-    if (question.toLowerCase().includes("last month")) {
+    if (question.toLowerCase().includes('last month')) {
       const lastMonth = new Date(now);
       lastMonth.setMonth(lastMonth.getMonth() - 1);
       return lastMonth;
@@ -374,16 +374,16 @@ export class CoinGeckoAdapter extends BaseAdapter {
    * Validate data structure
    */
   validate(data: unknown): boolean {
-    if (!data || typeof data !== "object") return false;
+    if (!data || typeof data !== 'object') return false;
 
     const cryptoData = data as CryptoData;
 
     return (
-      typeof cryptoData.symbol === "string" &&
-      typeof cryptoData.price === "number" &&
+      typeof cryptoData.symbol === 'string' &&
+      typeof cryptoData.price === 'number' &&
       cryptoData.price > 0 &&
       cryptoData.timestamp instanceof Date &&
-      typeof cryptoData.source === "string"
+      typeof cryptoData.source === 'string'
     );
   }
 }

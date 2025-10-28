@@ -78,7 +78,7 @@ export default function MarketsPage() {
     aiOracleEnabled: i % 3 !== 0,
   }));
 
-  const filteredMarkets = sampleMarkets.filter((market) => {
+  const filteredMarkets = sampleMarkets.filter(market => {
     if (selectedCategory !== 'All' && market.category !== selectedCategory) {
       return false;
     }
@@ -122,19 +122,20 @@ export default function MarketsPage() {
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Active Markets</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.filter((m) => !m.resolved).length}
+            {sampleMarkets.filter(m => !m.resolved).length}
           </p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Volume</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.reduce((sum, m) => sum + m.totalPool, 0).toFixed(2)} BNB
+            {sampleMarkets.reduce((sum, m) => sum + m.totalPool, 0).toFixed(2)}{' '}
+            BNB
           </p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Resolved Today</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.filter((m) => m.resolved).length}
+            {sampleMarkets.filter(m => m.resolved).length}
           </p>
         </Card>
       </div>
@@ -148,7 +149,7 @@ export default function MarketsPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search markets..."
               className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -158,7 +159,7 @@ export default function MarketsPage() {
           <div>
             <p className="text-sm font-medium mb-2">Category</p>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <Button
                   key={cat}
                   variant={selectedCategory === cat ? 'default' : 'outline'}
@@ -175,7 +176,7 @@ export default function MarketsPage() {
           <div>
             <p className="text-sm font-medium mb-2">Status</p>
             <div className="flex flex-wrap gap-2">
-              {statusFilters.map((status) => (
+              {statusFilters.map(status => (
                 <Button
                   key={status}
                   variant={selectedStatus === status ? 'default' : 'outline'}
@@ -193,7 +194,7 @@ export default function MarketsPage() {
       {/* Markets Grid */}
       <div className="space-y-4">
         {filteredMarkets.length > 0 ? (
-          filteredMarkets.map((market) => {
+          filteredMarkets.map(market => {
             const hasEnded = market.endTime < Date.now();
             const endingSoon = market.endTime - Date.now() < 86400000; // 24 hours
 
@@ -226,7 +227,9 @@ export default function MarketsPage() {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{market.question}</h3>
+                    <h3 className="text-xl font-semibold mb-2">
+                      {market.question}
+                    </h3>
                   </div>
                 </div>
 

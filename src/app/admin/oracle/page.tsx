@@ -53,7 +53,9 @@ interface ServiceMetrics {
 export default function OracleDashboard() {
   const { address, isConnected } = useAccount();
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [serviceStatus, setServiceStatus] = useState<'running' | 'stopped' | 'unknown'>('unknown');
+  const [serviceStatus, setServiceStatus] = useState<
+    'running' | 'stopped' | 'unknown'
+  >('unknown');
   const [metrics, setMetrics] = useState<ServiceMetrics>({
     uptime: 0,
     totalResolutions: 0,
@@ -64,7 +66,9 @@ export default function OracleDashboard() {
     ipfsUploads: 0,
     gasSpent: 0,
   });
-  const [recentResolutions, setRecentResolutions] = useState<ResolutionRecord[]>([]);
+  const [recentResolutions, setRecentResolutions] = useState<
+    ResolutionRecord[]
+  >([]);
   const [pendingMarkets, setPendingMarkets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,7 +76,7 @@ export default function OracleDashboard() {
     // In production, check if user is authorized oracle operator
     // For now, allow access if connected
     setIsAuthorized(isConnected);
-    
+
     if (isConnected) {
       loadDashboardData();
     }
@@ -80,7 +84,7 @@ export default function OracleDashboard() {
 
   const loadDashboardData = async () => {
     setIsLoading(true);
-    
+
     // Simulated data - in production, fetch from oracle service API
     setTimeout(() => {
       setServiceStatus('running');
@@ -94,7 +98,7 @@ export default function OracleDashboard() {
         ipfsUploads: 47,
         gasSpent: 0.0234,
       });
-      
+
       setRecentResolutions([
         {
           marketId: 5,
@@ -203,7 +207,9 @@ export default function OracleDashboard() {
             >
               <Server
                 className={`w-6 h-6 ${
-                  serviceStatus === 'running' ? 'text-green-500' : 'text-red-500'
+                  serviceStatus === 'running'
+                    ? 'text-green-500'
+                    : 'text-red-500'
                 }`}
               />
             </div>
@@ -302,7 +308,9 @@ export default function OracleDashboard() {
             <DollarSign className="w-5 h-5 text-yellow-500" />
             <p className="text-sm font-medium">Gas Spent</p>
           </div>
-          <p className="text-2xl font-bold mb-2">{metrics.gasSpent.toFixed(4)} BNB</p>
+          <p className="text-2xl font-bold mb-2">
+            {metrics.gasSpent.toFixed(4)} BNB
+          </p>
           <p className="text-xs text-muted-foreground">
             ~${(metrics.gasSpent * 300).toFixed(2)} USD
           </p>
@@ -317,7 +325,7 @@ export default function OracleDashboard() {
         </h3>
         <div className="space-y-3">
           {pendingMarkets.length > 0 ? (
-            pendingMarkets.map((market) => (
+            pendingMarkets.map(market => (
               <div
                 key={market.id}
                 className="flex items-center justify-between p-4 bg-muted rounded-lg"
@@ -325,7 +333,10 @@ export default function OracleDashboard() {
                 <div>
                   <p className="font-medium mb-1">{market.question}</p>
                   <p className="text-sm text-muted-foreground">
-                    Ends {formatDistanceToNow(new Date(market.endTime), { addSuffix: true })}
+                    Ends{' '}
+                    {formatDistanceToNow(new Date(market.endTime), {
+                      addSuffix: true,
+                    })}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" className="gap-2">
@@ -349,7 +360,7 @@ export default function OracleDashboard() {
           Recent Resolutions
         </h3>
         <div className="space-y-4">
-          {recentResolutions.map((resolution) => (
+          {recentResolutions.map(resolution => (
             <div
               key={resolution.marketId}
               className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
@@ -389,7 +400,9 @@ export default function OracleDashboard() {
                         style={{ width: `${resolution.confidence}%` }}
                       />
                     </div>
-                    <span className="font-medium">{resolution.confidence}%</span>
+                    <span className="font-medium">
+                      {resolution.confidence}%
+                    </span>
                   </div>
                 </div>
                 <div>
@@ -398,7 +411,9 @@ export default function OracleDashboard() {
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-1">Sources</p>
-                  <p className="font-medium">{resolution.sources.length} sources</p>
+                  <p className="font-medium">
+                    {resolution.sources.length} sources
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-1">Evidence</p>
@@ -417,10 +432,7 @@ export default function OracleDashboard() {
               <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
                 <span>Sources:</span>
                 {resolution.sources.map((source, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-0.5 bg-muted rounded"
-                  >
+                  <span key={i} className="px-2 py-0.5 bg-muted rounded">
                     {source}
                   </span>
                 ))}

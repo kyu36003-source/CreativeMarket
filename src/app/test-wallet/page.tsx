@@ -10,11 +10,13 @@ export default function TestWalletPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold mb-6">Wallet Connection Test</h1>
-        
+
         <div className="space-y-6">
           {/* RainbowKit Button */}
           <div className="p-4 border-2 border-purple-200 rounded-lg">
-            <h2 className="text-lg font-semibold mb-3">RainbowKit Connect Button:</h2>
+            <h2 className="text-lg font-semibold mb-3">
+              RainbowKit Connect Button:
+            </h2>
             <RainbowKitButton />
           </div>
 
@@ -24,7 +26,9 @@ export default function TestWalletPage() {
             <div className="space-y-2">
               <p className="text-sm">
                 <span className="font-medium">Connected:</span>{' '}
-                <span className={isConnected ? 'text-green-600' : 'text-red-600'}>
+                <span
+                  className={isConnected ? 'text-green-600' : 'text-red-600'}
+                >
                   {isConnected ? '✅ Yes' : '❌ No'}
                 </span>
               </p>
@@ -53,10 +57,7 @@ export default function TestWalletPage() {
 
         {/* Back to Home */}
         <div className="mt-6 pt-6 border-t">
-          <a 
-            href="/" 
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
+          <a href="/" className="text-blue-600 hover:text-blue-700 font-medium">
             ← Back to Home
           </a>
         </div>

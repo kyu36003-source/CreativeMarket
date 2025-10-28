@@ -83,19 +83,14 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
           {market.tags && market.tags.length > 0 && (
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              <span>
-                {market.tags.length} tags
-              </span>
+              <span>{market.tags.length} tags</span>
             </div>
           )}
         </div>
 
         {/* Action Button */}
         {!market.resolved && onPredict && (
-          <Button
-            className="w-full"
-            onClick={() => onPredict(market.id)}
-          >
+          <Button className="w-full" onClick={() => onPredict(market.id)}>
             Make Prediction
           </Button>
         )}

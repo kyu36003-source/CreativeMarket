@@ -2,8 +2,18 @@
 // Market Types - Enhanced for Copy Trading Platform
 // ============================================================================
 
-export type MarketStatus = 'open' | 'closed' | 'resolving' | 'resolved' | 'cancelled';
-export type MarketCategory = 'crypto' | 'sports' | 'politics' | 'entertainment' | 'other';
+export type MarketStatus =
+  | 'open'
+  | 'closed'
+  | 'resolving'
+  | 'resolved'
+  | 'cancelled';
+export type MarketCategory =
+  | 'crypto'
+  | 'sports'
+  | 'politics'
+  | 'entertainment'
+  | 'other';
 
 export interface Market {
   id: string;
@@ -19,7 +29,7 @@ export interface Market {
   resolvedAt: number | null;
   imageUrl?: string;
   tags?: string[];
-  
+
   // Enhanced fields for copy trading
   status?: MarketStatus;
   totalBets?: number;
@@ -35,7 +45,7 @@ export interface MarketDetails extends Market {
     yesOdds: number;
     noOdds: number;
   }>;
-  
+
   // Recent activity
   recentBets?: Array<{
     trader: string;
@@ -45,7 +55,7 @@ export interface MarketDetails extends Market {
     timestamp: number;
     isCopy?: boolean;
   }>;
-  
+
   // Top bettors
   topBettors?: Array<{
     trader: string;
@@ -63,7 +73,7 @@ export interface UserPosition {
   yesShares: bigint;
   noShares: bigint;
   potentialWinnings: bigint;
-  
+
   // Copy trading info
   isCopy?: boolean;
   copiedFrom?: string;

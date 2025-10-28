@@ -10,38 +10,44 @@ import { Web3ErrorBoundary } from '@/components/Web3ErrorBoundary';
 if (typeof window !== 'undefined') {
   // Store original console.error
   const originalConsoleError = console.error;
-  
+
   // Override console.error to filter out WebSocket subscription errors
   console.error = (...args: unknown[]) => {
     const errorString = args.join(' ');
-    
+
     // Filter out WebSocket/WalletConnect subscription errors
     if (
-      errorString.includes('Connection interrupted while trying to subscribe') ||
+      errorString.includes(
+        'Connection interrupted while trying to subscribe'
+      ) ||
       errorString.includes('WebSocket connection') ||
       errorString.includes('Fatal socket error') ||
       errorString.includes('Unauthorized: invalid key') ||
       errorString.includes('core/relayer') ||
-      (errorString.includes('subscription') && errorString.includes('interrupted'))
+      (errorString.includes('subscription') &&
+        errorString.includes('interrupted'))
     ) {
       // Only log in development, suppress in production
       if (process.env.NODE_ENV === 'development') {
-        console.warn('🔌 [Web3 Connection Info]:', errorString.includes('invalid key') 
-          ? 'WalletConnect disabled (no project ID). Using browser wallet only.' 
-          : 'Connection state changed.');
+        console.warn(
+          '🔌 [Web3 Connection Info]:',
+          errorString.includes('invalid key')
+            ? 'WalletConnect disabled (no project ID). Using browser wallet only.'
+            : 'Connection state changed.'
+        );
       }
       return;
     }
-    
+
     // Call original console.error for other errors
     originalConsoleError.apply(console, args);
   };
 
   // Global unhandled promise rejection handler for Web3 errors
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     const error = event.reason;
     const errorMsg = error?.message || String(error);
-    
+
     if (
       errorMsg.includes('Connection interrupted') ||
       errorMsg.includes('subscribe') ||
@@ -51,10 +57,13 @@ if (typeof window !== 'undefined') {
     ) {
       // Prevent the error from being logged
       event.preventDefault();
-      
+
       // Only log in development
       if (process.env.NODE_ENV === 'development') {
-        console.info('🔌 Web3 connection handled:', errorMsg.slice(0, 80) + '...');
+        console.info(
+          '🔌 Web3 connection handled:',
+          errorMsg.slice(0, 80) + '...'
+        );
       }
     }
   });
@@ -69,7 +78,7 @@ const makeQueryClient = () => {
         refetchOnWindowFocus: false,
         // Retry failed requests with exponential backoff
         retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
         // Cache time
         staleTime: 60000, // 1 minute
       },
@@ -104,7 +113,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     const handleError = (event: ErrorEvent) => {
       const error = event.error || event.message;
       const errorString = String(error);
-      
+
       if (
         errorString.includes('Connection interrupted') ||
         errorString.includes('subscribe') ||
@@ -116,7 +125,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       ) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         // Silent in production, info log in development
         if (process.env.NODE_ENV === 'development') {
           console.info('🔌 Web3 connection event handled');
@@ -126,7 +135,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener('error', handleError);
-    
+
     return () => {
       window.removeEventListener('error', handleError);
     };

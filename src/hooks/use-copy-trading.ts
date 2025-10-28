@@ -6,7 +6,11 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
-import type { TraderProfile, LeaderboardTrader, CopyTradingSettings } from '@/types/trader';
+import type {
+  TraderProfile,
+  LeaderboardTrader,
+  CopyTradingSettings,
+} from '@/types/trader';
 
 // ============================================================================
 // Trader Hooks
@@ -34,10 +38,15 @@ export function useTraderProfile(traderId: string) {
 
 export function useFollowTrader() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ traderId, settings }: { traderId: string; settings: CopyTradingSettings }) =>
-      api.trader.followTrader(traderId, settings),
+    mutationFn: ({
+      traderId,
+      settings,
+    }: {
+      traderId: string;
+      settings: CopyTradingSettings;
+    }) => api.trader.followTrader(traderId, settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', 'following'] });
       queryClient.invalidateQueries({ queryKey: ['traders'] });
@@ -47,7 +56,7 @@ export function useFollowTrader() {
 
 export function useUnfollowTrader() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (traderId: string) => api.trader.unfollowTrader(traderId),
     onSuccess: () => {
@@ -58,13 +67,20 @@ export function useUnfollowTrader() {
 
 export function useUpdateCopySettings() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ traderId, settings }: { traderId: string; settings: Partial<CopyTradingSettings> }) =>
-      api.trader.updateCopySettings(traderId, settings),
+    mutationFn: ({
+      traderId,
+      settings,
+    }: {
+      traderId: string;
+      settings: Partial<CopyTradingSettings>;
+    }) => api.trader.updateCopySettings(traderId, settings),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user', 'following'] });
-      queryClient.invalidateQueries({ queryKey: ['trader', variables.traderId] });
+      queryClient.invalidateQueries({
+        queryKey: ['trader', variables.traderId],
+      });
     },
   });
 }
@@ -137,7 +153,7 @@ export function useAchievements() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: Record<string, unknown>) => api.user.updateProfile(data),
     onSuccess: () => {

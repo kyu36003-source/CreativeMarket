@@ -8,10 +8,10 @@ import {
   IPFSUploadResult,
   OracleError,
   ErrorCode,
-} from "./types";
+} from './types';
 
 export interface IPFSStorageConfig {
-  provider: "pinata" | "web3storage" | "infura";
+  provider: 'pinata' | 'web3storage' | 'infura';
   apiKey: string;
   secretKey?: string;
   gateway?: string;
@@ -23,7 +23,7 @@ export class EvidenceStorage {
 
   constructor(config: IPFSStorageConfig) {
     this.config = {
-      gateway: "https://gateway.pinata.cloud",
+      gateway: 'https://gateway.pinata.cloud',
       ...config,
     };
   }
@@ -41,13 +41,13 @@ export class EvidenceStorage {
       let result: IPFSUploadResult;
 
       switch (this.config.provider) {
-        case "pinata":
+        case 'pinata':
           result = await this.uploadToPinata(evidence);
           break;
-        case "web3storage":
+        case 'web3storage':
           result = await this.uploadToWeb3Storage(evidence);
           break;
-        case "infura":
+        case 'infura':
           result = await this.uploadToInfura(evidence);
           break;
         default:
@@ -79,7 +79,7 @@ export class EvidenceStorage {
   private async uploadToPinata(
     evidence: EvidencePackage
   ): Promise<IPFSUploadResult> {
-    const url = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
+    const url = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
 
     const body = {
       pinataContent: evidence,
@@ -98,11 +98,11 @@ export class EvidenceStorage {
     };
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         pinata_api_key: this.config.apiKey,
-        pinata_secret_api_key: this.config.secretKey || "",
+        pinata_secret_api_key: this.config.secretKey || '',
       },
       body: JSON.stringify(body),
     });
@@ -129,22 +129,18 @@ export class EvidenceStorage {
   private async uploadToWeb3Storage(
     evidence: EvidencePackage
   ): Promise<IPFSUploadResult> {
-    const url = "https://api.web3.storage/upload";
+    const url = 'https://api.web3.storage/upload';
 
     // Convert evidence to blob
     const blob = new Blob([JSON.stringify(evidence, null, 2)], {
-      type: "application/json",
+      type: 'application/json',
     });
 
     const formData = new FormData();
-    formData.append(
-      "file",
-      blob,
-      `evidence_market_${evidence.marketId}.json`
-    );
+    formData.append('file', blob, `evidence_market_${evidence.marketId}.json`);
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
       },
@@ -175,22 +171,22 @@ export class EvidenceStorage {
   private async uploadToInfura(
     evidence: EvidencePackage
   ): Promise<IPFSUploadResult> {
-    const url = "https://ipfs.infura.io:5001/api/v0/add";
+    const url = 'https://ipfs.infura.io:5001/api/v0/add';
 
     // Create form data
     const blob = new Blob([JSON.stringify(evidence, null, 2)], {
-      type: "application/json",
+      type: 'application/json',
     });
     const formData = new FormData();
-    formData.append("file", blob);
+    formData.append('file', blob);
 
     // Create basic auth header
     const auth = Buffer.from(
       `${this.config.apiKey}:${this.config.secretKey}`
-    ).toString("base64");
+    ).toString('base64');
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Basic ${auth}`,
       },
@@ -219,7 +215,7 @@ export class EvidenceStorage {
   async verify(cid: string): Promise<boolean> {
     try {
       const url = `${this.config.gateway}/ipfs/${cid}`;
-      const response = await fetch(url, { method: "HEAD" });
+      const response = await fetch(url, { method: 'HEAD' });
       return response.ok;
     } catch {
       return false;
@@ -253,23 +249,23 @@ export class EvidenceStorage {
    * Pin an existing CID
    */
   async pin(cid: string): Promise<void> {
-    if (this.config.provider !== "pinata") {
+    if (this.config.provider !== 'pinata') {
       throw new OracleError(
-        "Pin operation only supported for Pinata",
+        'Pin operation only supported for Pinata',
         ErrorCode.CONFIG_ERROR,
         { provider: this.config.provider }
       );
     }
 
     try {
-      const url = "https://api.pinata.cloud/pinning/pinByHash";
+      const url = 'https://api.pinata.cloud/pinning/pinByHash';
 
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           pinata_api_key: this.config.apiKey,
-          pinata_secret_api_key: this.config.secretKey || "",
+          pinata_secret_api_key: this.config.secretKey || '',
         },
         body: JSON.stringify({
           hashToPin: cid,

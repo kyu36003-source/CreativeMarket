@@ -113,19 +113,25 @@ export function PredictionModal({
             <div className="bg-gray-50 p-4 rounded-lg space-y-3">
               {loadingAnalysis ? (
                 <div className="text-center py-4">
-                  <p className="text-sm text-gray-500">Loading AI analysis...</p>
+                  <p className="text-sm text-gray-500">
+                    Loading AI analysis...
+                  </p>
                 </div>
               ) : aiAnalysis ? (
                 <>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold">AI Confidence:</span>
+                    <span className="text-sm font-semibold">
+                      AI Confidence:
+                    </span>
                     <span className="text-lg font-bold text-green-600">
                       {aiAnalysis.confidence}%
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold">Sentiment:</span>
-                    <span className={`text-lg font-bold ${getSentimentColor(aiAnalysis.sentiment)}`}>
+                    <span
+                      className={`text-lg font-bold ${getSentimentColor(aiAnalysis.sentiment)}`}
+                    >
                       {getSentimentLabel(aiAnalysis.sentiment)}
                     </span>
                   </div>
@@ -135,20 +141,29 @@ export function PredictionModal({
                       <ul className="list-disc list-inside space-y-1">
                         {aiAnalysis.factors.map((factor, index) => (
                           <li key={index}>
-                            {factor.name} ({factor.impact > 0.7 ? 'High' : factor.impact > 0.4 ? 'Medium' : 'Low'} Impact)
+                            {factor.name} (
+                            {factor.impact > 0.7
+                              ? 'High'
+                              : factor.impact > 0.4
+                                ? 'Medium'
+                                : 'Low'}{' '}
+                            Impact)
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
                   <div className="text-xs text-gray-500 italic">
-                    Last updated: {new Date(aiAnalysis.lastUpdated * 1000).toLocaleString()} • 
+                    Last updated:{' '}
+                    {new Date(aiAnalysis.lastUpdated * 1000).toLocaleString()} •
                     Sources: {aiAnalysis.sources?.length || 0} analyzed
                   </div>
                 </>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-sm text-gray-500">No AI analysis available</p>
+                  <p className="text-sm text-gray-500">
+                    No AI analysis available
+                  </p>
                 </div>
               )}
             </div>
@@ -156,7 +171,9 @@ export function PredictionModal({
 
           {/* Position Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold">Choose Your Position</label>
+            <label className="text-sm font-semibold">
+              Choose Your Position
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setPosition(true)}
@@ -173,9 +190,7 @@ export function PredictionModal({
                 <div className="text-2xl font-bold text-green-600">
                   {yesOdds}%
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Current odds
-                </div>
+                <div className="text-xs text-gray-500 mt-1">Current odds</div>
               </button>
               <button
                 onClick={() => setPosition(false)}
@@ -190,9 +205,7 @@ export function PredictionModal({
                   <span className="font-bold text-lg">NO</span>
                 </div>
                 <div className="text-2xl font-bold text-red-600">{noOdds}%</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Current odds
-                </div>
+                <div className="text-xs text-gray-500 mt-1">Current odds</div>
               </button>
             </div>
           </div>
@@ -204,7 +217,7 @@ export function PredictionModal({
               <input
                 type="number"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={e => setAmount(e.target.value)}
                 step="0.01"
                 min="0.01"
                 className="w-full p-3 pr-16 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -215,7 +228,7 @@ export function PredictionModal({
               </span>
             </div>
             <div className="flex gap-2">
-              {['0.1', '0.5', '1', '5'].map((preset) => (
+              {['0.1', '0.5', '1', '5'].map(preset => (
                 <Button
                   key={preset}
                   size="sm"
@@ -232,7 +245,9 @@ export function PredictionModal({
           {position !== null && amount && (
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold">Potential Winnings:</span>
+                <span className="text-sm font-semibold">
+                  Potential Winnings:
+                </span>
                 <span className="text-2xl font-bold text-blue-600">
                   {calculatePotentialWinnings()} BNB
                 </span>
@@ -258,11 +273,7 @@ export function PredictionModal({
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={onClose}
-            >
+            <Button variant="outline" className="flex-1" onClick={onClose}>
               Cancel
             </Button>
             <Button

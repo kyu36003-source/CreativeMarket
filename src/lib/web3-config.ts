@@ -3,7 +3,7 @@
 // ============================================================================
 //
 // 🟡 IMPORTANT: This dApp ONLY works on BNB Chain (BSC)
-// 
+//
 // Supported Networks:
 // ✅ BNB Chain Mainnet (Chain ID: 56)
 // ✅ BNB Chain Testnet (Chain ID: 97)
@@ -11,7 +11,7 @@
 // NOT Supported:
 // ❌ Ethereum, Polygon, Arbitrum, Optimism, Avalanche, etc.
 //
-// Why BNB Chain exclusive? 
+// Why BNB Chain exclusive?
 // - Ultra-low transaction fees ($0.10-0.30 vs $5-50 on Ethereum)
 // - 3-second block times (vs 12s on Ethereum)
 // - 50M+ active wallets
@@ -35,7 +35,8 @@ const BSC_MAINNET_RPCS = [
 ];
 
 const BSC_TESTNET_RPCS = [
-  process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL ||
+    'https://data-seed-prebsc-1-s1.binance.org:8545/',
   'https://data-seed-prebsc-2-s1.binance.org:8545/',
   'https://bsc-testnet.publicnode.com',
 ];
@@ -51,7 +52,7 @@ export const bnbChainConfig = createConfig({
   transports: {
     // Use fallback transport with multiple RPC endpoints for better reliability
     [bsc.id]: fallback(
-      BSC_MAINNET_RPCS.map((url) => 
+      BSC_MAINNET_RPCS.map(url =>
         http(url, {
           batch: {
             wait: 100, // Batch requests to reduce connection count
@@ -70,7 +71,7 @@ export const bnbChainConfig = createConfig({
       }
     ),
     [bscTestnet.id]: fallback(
-      BSC_TESTNET_RPCS.map((url) => 
+      BSC_TESTNET_RPCS.map(url =>
         http(url, {
           batch: {
             wait: 100,
@@ -104,8 +105,11 @@ export const CHAIN_IDS = {
 
 // RPC URLs - fetch from environment or use defaults
 export const RPC_URLS = {
-  [CHAIN_IDS.BSC_MAINNET]: process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/',
-  [CHAIN_IDS.BSC_TESTNET]: process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [CHAIN_IDS.BSC_MAINNET]:
+    process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/',
+  [CHAIN_IDS.BSC_TESTNET]:
+    process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL ||
+    'https://data-seed-prebsc-1-s1.binance.org:8545/',
 } as const;
 
 // Block Explorer URLs

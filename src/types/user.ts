@@ -11,23 +11,23 @@ export interface UserProfile {
   avatar?: string;
   bio?: string;
   tier: UserTier;
-  
+
   // Stats
   totalBets: number;
   winRate: number;
   totalProfit: bigint;
   level: number;
   xp: number;
-  
+
   // Social
   followers: number;
   following: number;
-  
+
   // Settings
   notifications: boolean;
   emailNotifications: boolean;
   copyTradingEnabled: boolean;
-  
+
   createdAt: number;
   lastActiveAt: number;
 }
@@ -36,24 +36,24 @@ export interface UserPortfolio {
   totalValue: bigint;
   availableBalance: bigint;
   lockedInBets: bigint;
-  
+
   // Copy trading
   followedTraders: number;
   totalCopied: bigint;
   copyTradingProfit: bigint;
-  
+
   // Direct trading
   directBetsProfit: bigint;
-  
+
   // Performance
   profitLoss: bigint;
   profitLossPercentage: number;
   roi: number;
-  
+
   // Recent activity
   recentBets: number;
   activeBets: number;
-  
+
   // Breakdown
   breakdown: {
     crypto: { bets: number; profit: bigint };
@@ -84,7 +84,13 @@ export interface UserAchievements {
 
 export interface Notification {
   id: string;
-  type: 'bet_won' | 'bet_lost' | 'achievement' | 'follower' | 'copy_trade' | 'market_update';
+  type:
+    | 'bet_won'
+    | 'bet_lost'
+    | 'achievement'
+    | 'follower'
+    | 'copy_trade'
+    | 'market_update';
   title: string;
   message: string;
   read: boolean;

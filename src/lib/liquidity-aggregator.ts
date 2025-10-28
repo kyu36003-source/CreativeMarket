@@ -1,6 +1,6 @@
 /**
  * Liquidity Aggregation Service
- * 
+ *
  * Solves: "Liquidity spread across many small markets"
  * Pools liquidity from similar creative markets for better pricing
  */
@@ -42,13 +42,21 @@ export class LiquidityAggregator {
    * Initialize default liquidity pools for each creative category
    */
   private initializeDefaultPools() {
-    const categories: Array<{ type: CreativeMarketType; name: string; category: string }> = [
+    const categories: Array<{
+      type: CreativeMarketType;
+      name: string;
+      category: string;
+    }> = [
       { type: 'design-contest', name: 'Design Pool', category: 'Design' },
       { type: 'music-release', name: 'Music Pool', category: 'Music' },
       { type: 'content-virality', name: 'Content Pool', category: 'Content' },
       { type: 'art-auction', name: 'Art Pool', category: 'Art' },
       { type: 'brand-approval', name: 'Marketing Pool', category: 'Marketing' },
-      { type: 'influencer-collab', name: 'Influencer Pool', category: 'Influencer Marketing' },
+      {
+        type: 'influencer-collab',
+        name: 'Influencer Pool',
+        category: 'Influencer Marketing',
+      },
     ];
 
     categories.forEach(({ type, name, category }) => {
@@ -84,7 +92,9 @@ export class LiquidityAggregator {
   /**
    * Get pool by market type
    */
-  getPoolByMarketType(marketType: CreativeMarketType): LiquidityPool | undefined {
+  getPoolByMarketType(
+    marketType: CreativeMarketType
+  ): LiquidityPool | undefined {
     const poolId = `pool-${marketType}`;
     return this.pools.get(poolId);
   }
@@ -93,9 +103,12 @@ export class LiquidityAggregator {
    * Calculate effective liquidity for a market
    * Markets benefit from pooled liquidity of similar markets
    */
-  getEffectiveLiquidity(marketId: string, marketType: CreativeMarketType): MarketLiquidity {
+  getEffectiveLiquidity(
+    marketId: string,
+    marketType: CreativeMarketType
+  ): MarketLiquidity {
     const pool = this.getPoolByMarketType(marketType);
-    
+
     if (!pool) {
       return {
         marketId,
@@ -132,7 +145,7 @@ export class LiquidityAggregator {
     gasEstimate: string;
   }> {
     const pool = this.getPoolByMarketType(marketType);
-    
+
     if (!pool) {
       // No pool, standard pricing
       return {
@@ -147,9 +160,9 @@ export class LiquidityAggregator {
     const totalLiquidity = parseFloat(pool.totalLiquidity);
     const priceImpact = (amount / totalLiquidity) * 100; // Percentage
     const reducedImpact = priceImpact * 0.6; // 40% reduction due to pooling
-    
+
     const basePrice = 0.5;
-    const effectivePrice = basePrice + (reducedImpact / 200); // Adjust for impact
+    const effectivePrice = basePrice + reducedImpact / 200; // Adjust for impact
 
     return {
       price: basePrice,
@@ -172,7 +185,7 @@ export class LiquidityAggregator {
     share: number;
   }> {
     const pool = this.getPoolByMarketType(marketType);
-    
+
     if (!pool) {
       return {
         success: false,
@@ -184,7 +197,8 @@ export class LiquidityAggregator {
     // Calculate LP tokens to mint
     const amountNum = parseFloat(amount);
     const currentLiquidity = parseFloat(pool.totalLiquidity);
-    const lpTokensToMint = (amountNum / currentLiquidity) * parseFloat(pool.lpTokens);
+    const lpTokensToMint =
+      (amountNum / currentLiquidity) * parseFloat(pool.lpTokens);
     const userShare = amountNum / (currentLiquidity + amountNum);
 
     // Update pool (in production, this would be on-chain)
@@ -209,7 +223,7 @@ export class LiquidityAggregator {
     fees: string;
   }> {
     const pool = this.getPoolByMarketType(marketType);
-    
+
     if (!pool) {
       return {
         success: false,
@@ -241,7 +255,7 @@ export class LiquidityAggregator {
     marketsSupported: number;
   } | null {
     const pool = this.getPoolByMarketType(marketType);
-    
+
     if (!pool) return null;
 
     // Calculate utilization (how much of the pool is actively being used)
@@ -278,15 +292,16 @@ export class LiquidityAggregator {
     // Isolated market (traditional approach)
     const isolatedSlippage = (tradeAmount / 1000) * 100; // High slippage on small pool
     const isolatedImpact = isolatedSlippage * 1.5;
-    
+
     // Pooled liquidity (our approach)
     const pool = this.getPoolByMarketType(marketType);
-    const pooledSlippage = pool 
+    const pooledSlippage = pool
       ? (tradeAmount / parseFloat(pool.totalLiquidity)) * 100
       : isolatedSlippage;
     const pooledImpact = pooledSlippage * 0.8; // Reduced due to depth
 
-    const improvement = ((isolatedImpact - pooledImpact) / isolatedImpact) * 100;
+    const improvement =
+      ((isolatedImpact - pooledImpact) / isolatedImpact) * 100;
 
     return {
       isolated: {

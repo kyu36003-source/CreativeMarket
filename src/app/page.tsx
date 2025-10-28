@@ -13,9 +13,22 @@ import {
 import { RainbowKitButton } from '@/components/RainbowKitButton';
 import { MarketCard } from '@/components/MarketCard';
 import { PredictionModal } from '@/components/PredictionModal';
-import { fetchMarkets, fetchMarketCategories, calculateMarketOdds } from '@/lib/market-data';
+import {
+  fetchMarkets,
+  fetchMarketCategories,
+  calculateMarketOdds,
+} from '@/lib/market-data';
 import { Market, MarketCategoryInfo } from '@/types/market';
-import { TrendingUp, Zap, Shield, Sparkles, Search, Filter, Brain, Palette } from 'lucide-react';
+import {
+  TrendingUp,
+  Zap,
+  Shield,
+  Sparkles,
+  Search,
+  Filter,
+  Brain,
+  Palette,
+} from 'lucide-react';
 
 export default function HomePage() {
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
@@ -58,22 +71,30 @@ export default function HomePage() {
     loadMarkets();
   }, [selectedCategory, searchQuery]);
 
-  const selectedMarket = markets.find((m) => m.id === selectedMarketId);
-  const filteredMarkets = markets.filter((market) => {
-    const matchesCategory = selectedCategory === 'all' || market.category === selectedCategory;
-    const matchesSearch = market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         market.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const selectedMarket = markets.find(m => m.id === selectedMarketId);
+  const filteredMarkets = markets.filter(market => {
+    const matchesCategory =
+      selectedCategory === 'all' || market.category === selectedCategory;
+    const matchesSearch =
+      market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      market.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   const handlePredictionSubmit = async (position: boolean, amount: string) => {
-    console.log('Prediction submitted:', { marketId: selectedMarketId, position, amount });
+    console.log('Prediction submitted:', {
+      marketId: selectedMarketId,
+      position,
+      amount,
+    });
     // TODO: Implement smart contract interaction
     // Call contract method to place prediction
     try {
       // const tx = await placePrediction(selectedMarketId, position, amount);
       // await tx.wait();
-      alert(`Prediction placed! Position: ${position ? 'YES' : 'NO'}, Amount: ${amount} BNB`);
+      alert(
+        `Prediction placed! Position: ${position ? 'YES' : 'NO'}, Amount: ${amount} BNB`
+      );
       setSelectedMarketId(null);
       // Refresh markets after successful prediction
       const data = await fetchMarkets(selectedCategory, searchQuery);
@@ -122,13 +143,17 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Predict the future of creative work. Trade predictions with AI assistance and gasless transactions.
+            Predict the future of creative work. Trade predictions with AI
+            assistance and gasless transactions.
           </p>
-          
+
           {/* New: Creative Markets CTA */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Link href="/creative-markets">
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2"
+              >
                 <Palette className="h-5 w-5" />
                 Explore Creative Markets
                 <Sparkles className="h-4 w-4" />
@@ -141,22 +166,30 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
-          
+
           {/* Feature Highlights */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
             <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-purple-100">
               <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
               <h3 className="font-semibold text-gray-900 mb-1">AI Oracle</h3>
-              <p className="text-sm text-gray-600">Subjective judging in minutes, not days</p>
+              <p className="text-sm text-gray-600">
+                Subjective judging in minutes, not days
+              </p>
             </div>
             <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-green-100">
               <Zap className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">Gasless Trading</h3>
-              <p className="text-sm text-gray-600">No crypto knowledge needed</p>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                Gasless Trading
+              </h3>
+              <p className="text-sm text-gray-600">
+                No crypto knowledge needed
+              </p>
             </div>
             <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-blue-100">
               <Shield className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">Pooled Liquidity</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                Pooled Liquidity
+              </h3>
               <p className="text-sm text-gray-600">45% better pricing</p>
             </div>
           </div>
@@ -176,8 +209,9 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Our advanced AI oracle system analyzes multiple data sources to provide
-                faster, more accurate market resolutions compared to traditional methods.
+                Our advanced AI oracle system analyzes multiple data sources to
+                provide faster, more accurate market resolutions compared to
+                traditional methods.
               </p>
             </CardContent>
           </Card>
@@ -194,8 +228,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Trade without worrying about gas fees. Our account abstraction layer
-                makes prediction markets accessible to everyone.
+                Trade without worrying about gas fees. Our account abstraction
+                layer makes prediction markets accessible to everyone.
               </p>
             </CardContent>
           </Card>
@@ -212,8 +246,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Our liquidity aggregation technology ensures competitive odds and
-                minimal slippage across all markets.
+                Our liquidity aggregation technology ensures competitive odds
+                and minimal slippage across all markets.
               </p>
             </CardContent>
           </Card>
@@ -233,7 +267,7 @@ export default function HomePage() {
             >
               All Markets
             </button>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
@@ -255,7 +289,7 @@ export default function HomePage() {
               type="text"
               placeholder="Search markets..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -272,7 +306,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMarkets.map((market) => (
+            {filteredMarkets.map(market => (
               <MarketCard
                 key={market.id}
                 market={market}
@@ -284,7 +318,9 @@ export default function HomePage() {
 
         {!loading && !error && filteredMarkets.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No markets found matching your criteria.</p>
+            <p className="text-gray-500">
+              No markets found matching your criteria.
+            </p>
           </div>
         )}
       </section>
@@ -293,7 +329,8 @@ export default function HomePage() {
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
           <p className="mb-2">
-            Built for Seedify Prediction Markets Hackathon 2025 • Powered by BNB Chain
+            Built for Seedify Prediction Markets Hackathon 2025 • Powered by BNB
+            Chain
           </p>
           <p className="text-xs">
             🏆 YZi Labs Track: AI Oracles + Gasless UX + Liquidity Aggregation
@@ -306,8 +343,18 @@ export default function HomePage() {
         <PredictionModal
           marketId={selectedMarket.id}
           question={selectedMarket.question}
-          yesOdds={calculateMarketOdds(selectedMarket.totalYesAmount, selectedMarket.totalNoAmount).yesOdds}
-          noOdds={calculateMarketOdds(selectedMarket.totalYesAmount, selectedMarket.totalNoAmount).noOdds}
+          yesOdds={
+            calculateMarketOdds(
+              selectedMarket.totalYesAmount,
+              selectedMarket.totalNoAmount
+            ).yesOdds
+          }
+          noOdds={
+            calculateMarketOdds(
+              selectedMarket.totalYesAmount,
+              selectedMarket.totalNoAmount
+            ).noOdds
+          }
           onClose={() => setSelectedMarketId(null)}
           onSubmit={handlePredictionSubmit}
         />

@@ -2,7 +2,7 @@
 
 /**
  * AI Market Analytics Component
- * 
+ *
  * Shows AI-powered predictions and trading signals
  * Helps users make informed decisions
  */
@@ -33,7 +33,11 @@ interface AIAnalyticsProps {
   showRecommendation?: boolean;
 }
 
-export function AIMarketAnalytics({ marketId, marketData, showRecommendation = true }: AIAnalyticsProps) {
+export function AIMarketAnalytics({
+  marketId,
+  marketData,
+  showRecommendation = true,
+}: AIAnalyticsProps) {
   const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,49 +92,51 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
     signal: string
   ): string => {
     const diff = aiProb - marketProb;
-    
+
     if (Math.abs(diff) < 0.05) {
       return 'Market is fairly priced. Consider holding position.';
     }
-    
+
     if (diff > 0.1) {
       return 'AI predicts higher probability than market price. Consider buying YES shares.';
     }
-    
+
     if (diff < -0.1) {
       return 'AI predicts lower probability than market price. Consider buying NO shares.';
     }
-    
+
     return 'Market appears balanced. Wait for better entry point.';
   };
 
   const generateKeyFactors = (market: typeof marketData): string[] => {
     const factors: string[] = [];
-    
+
     // Time-based factors
-    const daysUntilDeadline = (market.deadline - Date.now()) / (1000 * 60 * 60 * 24);
+    const daysUntilDeadline =
+      (market.deadline - Date.now()) / (1000 * 60 * 60 * 24);
     if (daysUntilDeadline < 7) {
       factors.push('⏰ Deadline approaching - high urgency');
     } else if (daysUntilDeadline > 30) {
       factors.push('📅 Long timeframe - more uncertainty');
     }
-    
+
     // Category-based factors
     if (market.category) {
       factors.push(`🎯 ${market.category} vertical analysis enabled`);
     }
-    
+
     // Pool size factors
-    const totalLiquidity = parseFloat(market.yesPool) + parseFloat(market.noPool);
+    const totalLiquidity =
+      parseFloat(market.yesPool) + parseFloat(market.noPool);
     if (totalLiquidity > 5000) {
       factors.push('💰 High liquidity - stable pricing');
     } else if (totalLiquidity < 1000) {
       factors.push('⚠️ Low liquidity - volatile pricing');
     }
-    
+
     // AI confidence factors
     factors.push('🤖 AI model: Claude-powered analysis');
-    
+
     return factors;
   };
 
@@ -154,14 +160,26 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
     return null;
   }
 
-  const SignalIcon = analysis.signal === 'bullish' ? TrendingUp : 
-                     analysis.signal === 'bearish' ? TrendingDown : Minus;
-  
-  const signalColor = analysis.signal === 'bullish' ? 'text-green-600' :
-                      analysis.signal === 'bearish' ? 'text-red-600' : 'text-gray-600';
+  const SignalIcon =
+    analysis.signal === 'bullish'
+      ? TrendingUp
+      : analysis.signal === 'bearish'
+        ? TrendingDown
+        : Minus;
 
-  const signalBg = analysis.signal === 'bullish' ? 'bg-green-100' :
-                   analysis.signal === 'bearish' ? 'bg-red-100' : 'bg-gray-100';
+  const signalColor =
+    analysis.signal === 'bullish'
+      ? 'text-green-600'
+      : analysis.signal === 'bearish'
+        ? 'text-red-600'
+        : 'text-gray-600';
+
+  const signalBg =
+    analysis.signal === 'bullish'
+      ? 'bg-green-100'
+      : analysis.signal === 'bearish'
+        ? 'bg-red-100'
+        : 'bg-gray-100';
 
   return (
     <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-200 rounded-lg p-6">
@@ -169,9 +187,13 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Brain className="h-6 w-6 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900">AI Market Analysis</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            AI Market Analysis
+          </h3>
         </div>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${signalBg}`}>
+        <div
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${signalBg}`}
+        >
           <SignalIcon className={`h-4 w-4 ${signalColor}`} />
           <span className={`text-sm font-medium ${signalColor} uppercase`}>
             {analysis.signal}
@@ -215,7 +237,10 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
           </h4>
           <div className="space-y-1.5">
             {analysis.keyFactors.map((factor, index) => (
-              <div key={index} className="text-sm text-gray-600 flex items-start gap-2">
+              <div
+                key={index}
+                className="text-sm text-gray-600 flex items-start gap-2"
+              >
                 <span className="text-purple-500">•</span>
                 <span>{factor}</span>
               </div>
@@ -233,7 +258,9 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
               <h4 className="text-sm font-semibold text-purple-900 mb-1">
                 AI Recommendation
               </h4>
-              <p className="text-sm text-purple-700">{analysis.recommendation}</p>
+              <p className="text-sm text-purple-700">
+                {analysis.recommendation}
+              </p>
             </div>
           </div>
         </div>
@@ -254,18 +281,26 @@ export function AIMarketAnalytics({ marketId, marketData, showRecommendation = t
 /**
  * Compact AI Signal Badge (for market cards)
  */
-export function AISignalBadge({ 
-  probability, 
-  signal 
-}: { 
-  probability: number; 
-  signal: 'bullish' | 'bearish' | 'neutral' 
+export function AISignalBadge({
+  probability,
+  signal,
+}: {
+  probability: number;
+  signal: 'bullish' | 'bearish' | 'neutral';
 }) {
-  const SignalIcon = signal === 'bullish' ? TrendingUp : 
-                     signal === 'bearish' ? TrendingDown : Minus;
-  
-  const signalColor = signal === 'bullish' ? 'text-green-600' :
-                      signal === 'bearish' ? 'text-red-600' : 'text-gray-600';
+  const SignalIcon =
+    signal === 'bullish'
+      ? TrendingUp
+      : signal === 'bearish'
+        ? TrendingDown
+        : Minus;
+
+  const signalColor =
+    signal === 'bullish'
+      ? 'text-green-600'
+      : signal === 'bearish'
+        ? 'text-red-600'
+        : 'text-gray-600';
 
   return (
     <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-purple-50 border border-purple-200 rounded-full">

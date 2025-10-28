@@ -20,7 +20,7 @@ async function fetchAPI<T>(
   options?: RequestInit
 ): Promise<T> {
   const url = `${apiConfig.baseUrl}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -59,27 +59,41 @@ export const traderAPI = {
     limit?: number;
   }): Promise<LeaderboardTrader[]> => {
     const query = new URLSearchParams(params as Record<string, string>);
-    return fetchAPI<LeaderboardTrader[]>(`${apiConfig.endpoints.topTraders}?${query}`);
+    return fetchAPI<LeaderboardTrader[]>(
+      `${apiConfig.endpoints.topTraders}?${query}`
+    );
   },
 
   getTraderProfile: async (id: string): Promise<TraderProfile> => {
     return fetchAPI<TraderProfile>(apiConfig.endpoints.traderProfile(id));
   },
 
-  followTrader: async (id: string, settings: unknown): Promise<{ success: boolean }> => {
-    return fetchAPI<{ success: boolean }>(apiConfig.endpoints.followTrader(id), {
-      method: 'POST',
-      body: JSON.stringify(settings),
-    });
+  followTrader: async (
+    id: string,
+    settings: unknown
+  ): Promise<{ success: boolean }> => {
+    return fetchAPI<{ success: boolean }>(
+      apiConfig.endpoints.followTrader(id),
+      {
+        method: 'POST',
+        body: JSON.stringify(settings),
+      }
+    );
   },
 
   unfollowTrader: async (id: string): Promise<{ success: boolean }> => {
-    return fetchAPI<{ success: boolean }>(apiConfig.endpoints.unfollowTrader(id), {
-      method: 'POST',
-    });
+    return fetchAPI<{ success: boolean }>(
+      apiConfig.endpoints.unfollowTrader(id),
+      {
+        method: 'POST',
+      }
+    );
   },
 
-  updateCopySettings: async (id: string, settings: Record<string, unknown>): Promise<{ success: boolean }> => {
+  updateCopySettings: async (
+    id: string,
+    settings: Record<string, unknown>
+  ): Promise<{ success: boolean }> => {
     return fetchAPI<{ success: boolean }>(apiConfig.endpoints.copySettings, {
       method: 'PUT',
       body: JSON.stringify({ traderId: id, ...settings }),

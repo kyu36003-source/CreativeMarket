@@ -6,10 +6,10 @@ import { bsc, bscTestnet } from 'wagmi/chains';
 
 /**
  * NetworkGuard Component
- * 
+ *
  * Ensures users are on BNB Chain (BSC) networks only.
  * Shows warning banner if connected to unsupported networks.
- * 
+ *
  * Supported Networks:
  * - BNB Mainnet (Chain ID: 56)
  * - BNB Testnet (Chain ID: 97)
@@ -22,7 +22,9 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
 
   // Supported BNB Chain IDs
   const SUPPORTED_CHAINS = [bsc.id, bscTestnet.id] as const; // 56, 97
-  const isSupported = SUPPORTED_CHAINS.includes(chainId as typeof SUPPORTED_CHAINS[number]);
+  const isSupported = SUPPORTED_CHAINS.includes(
+    chainId as (typeof SUPPORTED_CHAINS)[number]
+  );
 
   // Reset dismissed state when chain changes
   useEffect(() => {
@@ -68,8 +70,10 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
               <div className="flex-1">
                 <p className="font-bold text-lg">Wrong Network Detected</p>
                 <p className="text-sm">
-                  You're connected to <span className="font-semibold">{getChainName(chainId)}</span>.
-                  This dApp only works on <span className="font-semibold">BNB Chain</span>.
+                  You're connected to{' '}
+                  <span className="font-semibold">{getChainName(chainId)}</span>
+                  . This dApp only works on{' '}
+                  <span className="font-semibold">BNB Chain</span>.
                 </p>
               </div>
             </div>
@@ -112,8 +116,8 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
               className="underline font-semibold hover:text-black"
             >
               BNB Faucet
-            </a>
-            {' '}or buy BNB on{' '}
+            </a>{' '}
+            or buy BNB on{' '}
             <a
               href="https://www.binance.com"
               target="_blank"
@@ -127,16 +131,14 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Add padding to content to prevent overlap with banner */}
-      <div className={!isSupported ? 'pt-28' : ''}>
-        {children}
-      </div>
+      <div className={!isSupported ? 'pt-28' : ''}>{children}</div>
     </>
   );
 }
 
 /**
  * useNetworkCheck Hook
- * 
+ *
  * Returns whether the current network is supported
  * and provides helpers for network switching
  */
@@ -146,7 +148,9 @@ export function useNetworkCheck() {
   const { switchChain, isPending } = useSwitchChain();
 
   const SUPPORTED_CHAINS = [bsc.id, bscTestnet.id] as const;
-  const isSupported = SUPPORTED_CHAINS.includes(chainId as typeof SUPPORTED_CHAINS[number]);
+  const isSupported = SUPPORTED_CHAINS.includes(
+    chainId as (typeof SUPPORTED_CHAINS)[number]
+  );
   const isBNBMainnet = chainId === bsc.id;
   const isBNBTestnet = chainId === bscTestnet.id;
 

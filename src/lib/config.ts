@@ -1,7 +1,7 @@
 // ============================================================================
 // Site Configuration - BNB Chain Exclusive Prediction Markets
 // ============================================================================
-// 
+//
 // 🟡 NETWORK SUPPORT: BNB CHAIN EXCLUSIVE
 // This dApp is built exclusively for BNB Chain (BSC).
 // Supported: BNB Mainnet (56), BNB Testnet (97)
@@ -12,11 +12,13 @@
 
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || 'PredictBNB',
-  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'BNB Chain Exclusive - Follow Top Traders. Auto-Copy Their Predictions. Earn While You Learn.',
+  description:
+    process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
+    'BNB Chain Exclusive - Follow Top Traders. Auto-Copy Their Predictions. Earn While You Learn.',
   tagline: 'Copy Trading for Prediction Markets on BNB Chain',
   url: process.env.NEXT_PUBLIC_SITE_URL || '',
   ogImage: process.env.NEXT_PUBLIC_OG_IMAGE || '',
-  
+
   // Network Configuration - BNB Chain Only
   network: {
     name: 'BNB Chain',
@@ -36,14 +38,14 @@ export const siteConfig = {
       faucet: 'https://www.bnbchain.org/en/testnet-faucet',
     },
   },
-  
+
   links: {
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL || '',
     github: process.env.NEXT_PUBLIC_GITHUB_URL || '',
     discord: process.env.NEXT_PUBLIC_DISCORD_URL || '',
     telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || '',
   },
-  
+
   social: {
     twitterHandle: '@PredictBNB',
     discordInvite: 'https://discord.gg/predictbnb',
@@ -55,12 +57,12 @@ export const siteConfig = {
 // ============================================================================
 
 export const apiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || (
-    process.env.NODE_ENV === 'production'
+  baseUrl:
+    process.env.NEXT_PUBLIC_API_URL ||
+    (process.env.NODE_ENV === 'production'
       ? '/api'
-      : 'http://localhost:3000/api'
-  ),
-  
+      : 'http://localhost:3000/api'),
+
   endpoints: {
     // Copy Trading
     topTraders: '/traders/leaderboard',
@@ -69,24 +71,24 @@ export const apiConfig = {
     unfollowTrader: (id: string) => `/traders/${id}/unfollow`,
     copySettings: '/user/copy-settings',
     traderStats: (id: string) => `/traders/${id}/stats`,
-    
+
     // Markets
     markets: '/markets',
     marketById: (id: string) => `/markets/${id}`,
     trendingMarkets: '/markets/trending',
-    
+
     // User
     profile: '/user/profile',
     portfolio: '/user/portfolio',
     followedTraders: '/user/following',
     followers: '/user/followers',
     achievements: '/user/achievements',
-    
+
     // Analytics
     marketStats: (id: string) => `/analytics/market/${id}`,
     userStats: '/analytics/user',
   },
-  
+
   // External APIs
   oracleApiUrl: process.env.NEXT_PUBLIC_ORACLE_API_URL || '',
   marketDataUrl: process.env.NEXT_PUBLIC_MARKET_DATA_URL || '',
@@ -98,16 +100,16 @@ export const apiConfig = {
 
 export const copyTradingConfig = {
   fees: {
-    copyFee: 5,              // 5% of follower profits go to trader
-    platformFee: 5,          // 5% platform fee on copy trades
-    standardTradeFee: 2,     // 2% on direct trades
+    copyFee: 5, // 5% of follower profits go to trader
+    platformFee: 5, // 5% platform fee on copy trades
+    standardTradeFee: 2, // 2% on direct trades
   },
-  
+
   limits: {
     free: {
       maxFollowedTraders: 3,
-      maxCopyAmount: 1,      // 1 BNB max per copy
-      dailyLimit: 10,        // 10 BNB daily
+      maxCopyAmount: 1, // 1 BNB max per copy
+      dailyLimit: 10, // 10 BNB daily
     },
     premium: {
       maxFollowedTraders: 20,
@@ -115,24 +117,28 @@ export const copyTradingConfig = {
       dailyLimit: 100,
     },
   },
-  
+
   defaults: {
-    copyPercentage: 50,      // Default 50% of trader's bet size
-    maxPerTrade: 0.1,        // Default max 0.1 BNB per trade
-    stopLoss: 20,            // Default 20% stop loss
+    copyPercentage: 50, // Default 50% of trader's bet size
+    maxPerTrade: 0.1, // Default max 0.1 BNB per trade
+    stopLoss: 20, // Default 20% stop loss
   },
-  
+
   verification: {
     minTradesForLeaderboard: 50,
     minDaysHistory: 30,
     kycRequiredForTop10: true,
   },
-  
+
   badges: {
     bronze: { minFollowers: 10, color: '#CD7F32', title: 'Bronze Trader' },
     silver: { minFollowers: 100, color: '#C0C0C0', title: 'Silver Trader' },
     gold: { minFollowers: 500, color: '#FFD700', title: 'Gold Trader' },
-    platinum: { minFollowers: 1000, color: '#E5E4E2', title: 'Platinum Trader' },
+    platinum: {
+      minFollowers: 1000,
+      color: '#E5E4E2',
+      title: 'Platinum Trader',
+    },
   },
 } as const;
 
@@ -144,14 +150,14 @@ export const premiumConfig = {
   price: {
     monthly: {
       usd: 19,
-      bnb: 0.05,             // Approximate, should be dynamic
+      bnb: 0.05, // Approximate, should be dynamic
     },
     yearly: {
-      usd: 190,              // 2 months free
+      usd: 190, // 2 months free
       bnb: 0.5,
     },
   },
-  
+
   features: [
     'Follow unlimited traders',
     'Zero copy trading fees',
@@ -179,13 +185,13 @@ export const gamificationConfig = {
     { id: 'profit_1000', name: '$1K Profit', reward: 100, icon: '💰' },
     { id: 'profit_10000', name: '$10K Profit', reward: 500, icon: '🏆' },
   ],
-  
+
   referralProgram: {
-    referrerBonus: 10,       // 10% of referee's copy fees (lifetime)
-    refereeBonus: 5,         // $5 signup bonus
+    referrerBonus: 10, // 10% of referee's copy fees (lifetime)
+    refereeBonus: 5, // $5 signup bonus
     lifetime: true,
   },
-  
+
   levels: {
     novice: { min: 0, max: 100, title: 'Novice Predictor' },
     trader: { min: 100, max: 500, title: 'Skilled Trader' },
@@ -204,7 +210,7 @@ export const featureFlags = {
   premiumSubscription: true,
   achievements: true,
   referrals: true,
-  aiInsights: false,        // Coming soon
-  liveMarkets: false,       // Coming soon
-  socialFeed: false,        // Coming soon
+  aiInsights: false, // Coming soon
+  liveMarkets: false, // Coming soon
+  socialFeed: false, // Coming soon
 } as const;

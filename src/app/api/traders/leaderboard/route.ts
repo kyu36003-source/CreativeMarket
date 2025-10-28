@@ -30,8 +30,16 @@ export async function GET(request: NextRequest) {
         averageBetSize: '2.89',
       },
       badges: [
-        { name: 'Platinum Trader', tier: 4, unlockedAt: Date.now() - 30 * 24 * 60 * 60 * 1000 },
-        { name: 'High Roller', tier: 3, unlockedAt: Date.now() - 60 * 24 * 60 * 60 * 1000 },
+        {
+          name: 'Platinum Trader',
+          tier: 4,
+          unlockedAt: Date.now() - 30 * 24 * 60 * 60 * 1000,
+        },
+        {
+          name: 'High Roller',
+          tier: 3,
+          unlockedAt: Date.now() - 60 * 24 * 60 * 60 * 1000,
+        },
       ],
       specialties: ['Crypto', 'Technology'],
       followers: 1243,
@@ -57,8 +65,16 @@ export async function GET(request: NextRequest) {
         averageBetSize: '1.87',
       },
       badges: [
-        { name: 'Gold Trader', tier: 3, unlockedAt: Date.now() - 45 * 24 * 60 * 60 * 1000 },
-        { name: 'Tech Guru', tier: 2, unlockedAt: Date.now() - 90 * 24 * 60 * 60 * 1000 },
+        {
+          name: 'Gold Trader',
+          tier: 3,
+          unlockedAt: Date.now() - 45 * 24 * 60 * 60 * 1000,
+        },
+        {
+          name: 'Tech Guru',
+          tier: 2,
+          unlockedAt: Date.now() - 90 * 24 * 60 * 60 * 1000,
+        },
       ],
       specialties: ['Technology', 'Business'],
       followers: 987,
@@ -84,7 +100,11 @@ export async function GET(request: NextRequest) {
         averageBetSize: '2.15',
       },
       badges: [
-        { name: 'Gold Trader', tier: 3, unlockedAt: Date.now() - 20 * 24 * 60 * 60 * 1000 },
+        {
+          name: 'Gold Trader',
+          tier: 3,
+          unlockedAt: Date.now() - 20 * 24 * 60 * 60 * 1000,
+        },
       ],
       specialties: ['Sports'],
       followers: 654,
@@ -110,7 +130,11 @@ export async function GET(request: NextRequest) {
         averageBetSize: '2.23',
       },
       badges: [
-        { name: 'Gold Trader', tier: 3, unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000 },
+        {
+          name: 'Gold Trader',
+          tier: 3,
+          unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000,
+        },
       ],
       specialties: ['Crypto', 'Business'],
       followers: 521,
@@ -136,7 +160,11 @@ export async function GET(request: NextRequest) {
         averageBetSize: '1.80',
       },
       badges: [
-        { name: 'Silver Trader', tier: 2, unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000 },
+        {
+          name: 'Silver Trader',
+          tier: 2,
+          unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000,
+        },
       ],
       specialties: ['Crypto'],
       followers: 389,

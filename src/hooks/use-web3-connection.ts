@@ -22,13 +22,15 @@ export function useWeb3Connection() {
       setConnectionError(null);
       if (isDisconnected && retryCount < 3) {
         reconnect();
-        setRetryCount((prev) => prev + 1);
+        setRetryCount(prev => prev + 1);
       }
     };
 
     const handleOffline = () => {
       console.log('Network offline');
-      setConnectionError('Network connection lost. Please check your internet connection.');
+      setConnectionError(
+        'Network connection lost. Please check your internet connection.'
+      );
     };
 
     // Listen for online/offline events

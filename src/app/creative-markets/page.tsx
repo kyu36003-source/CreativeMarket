@@ -2,7 +2,7 @@
 
 /**
  * Creative Prediction Markets Demo Page
- * 
+ *
  * Showcases all hackathon features:
  * - AI-Judged Creative Markets
  * - Gasless Transactions
@@ -13,20 +13,20 @@
 import { useState, useEffect } from 'react';
 import { CreativeMarketsGrid } from '@/components/CreativeMarketCard';
 import { AIMarketAnalytics } from '@/components/AIMarketAnalytics';
-import { 
-  creativeMarketTemplates, 
+import {
+  creativeMarketTemplates,
   createMarketFromTemplate,
-  getAllCategories 
+  getAllCategories,
 } from '@/lib/creative-templates';
 import { liquidityAggregator } from '@/lib/liquidity-aggregator';
-import { 
-  Brain, 
-  Zap, 
-  Users, 
+import {
+  Brain,
+  Zap,
+  Users,
   TrendingUp,
   Sparkles,
   Award,
-  Target
+  Target,
 } from 'lucide-react';
 
 export default function CreativeMarketsPage() {
@@ -66,9 +66,10 @@ export default function CreativeMarketsPage() {
   }, []);
 
   const categories = ['all', ...getAllCategories()];
-  const filteredMarkets = selectedCategory === 'all'
-    ? markets
-    : markets.filter(m => m.category === selectedCategory);
+  const filteredMarkets =
+    selectedCategory === 'all'
+      ? markets
+      : markets.filter(m => m.category === selectedCategory);
 
   const selectedMarketData = markets.find(m => m.id === selectedMarket);
 
@@ -88,25 +89,25 @@ export default function CreativeMarketsPage() {
             <p className="text-xl text-purple-100 max-w-2xl mx-auto mb-8">
               Predict creative outcomes. Let AI judge. Trade gas-free.
             </p>
-            
+
             {/* Feature Pills */}
             <div className="flex flex-wrap justify-center gap-4">
-              <FeaturePill 
+              <FeaturePill
                 icon={Brain}
                 title="AI Oracle"
                 description="Fast, subjective judging"
               />
-              <FeaturePill 
+              <FeaturePill
                 icon={Zap}
                 title="Gasless Trading"
                 description="No gas fees needed"
               />
-              <FeaturePill 
+              <FeaturePill
                 icon={Users}
                 title="Pooled Liquidity"
                 description="Better pricing"
               />
-              <FeaturePill 
+              <FeaturePill
                 icon={TrendingUp}
                 title="AI Analytics"
                 description="Smart predictions"
@@ -120,25 +121,25 @@ export default function CreativeMarketsPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <StatCard 
+            <StatCard
               label="Total Liquidity"
               value={`$${poolStats.reduce((sum, p) => sum + parseFloat(p.totalLiquidity), 0).toLocaleString()}`}
               icon={Users}
               color="text-blue-600"
             />
-            <StatCard 
+            <StatCard
               label="Active Markets"
               value={markets.length.toString()}
               icon={Target}
               color="text-purple-600"
             />
-            <StatCard 
+            <StatCard
               label="Avg APR"
               value={`${(poolStats.reduce((sum, p) => sum + p.apr, 0) / poolStats.length || 0).toFixed(1)}%`}
               icon={TrendingUp}
               color="text-green-600"
             />
-            <StatCard 
+            <StatCard
               label="AI Accuracy"
               value="87%"
               icon={Brain}
@@ -155,7 +156,7 @@ export default function CreativeMarketsPage() {
             Browse Creative Markets
           </h2>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -173,7 +174,7 @@ export default function CreativeMarketsPage() {
 
         {/* Markets Grid */}
         {filteredMarkets.length > 0 ? (
-          <CreativeMarketsGrid 
+          <CreativeMarketsGrid
             markets={filteredMarkets}
             onSelectMarket={setSelectedMarket}
           />
@@ -195,7 +196,7 @@ export default function CreativeMarketsPage() {
                 ✕
               </button>
             </div>
-            <AIMarketAnalytics 
+            <AIMarketAnalytics
               marketId={selectedMarket}
               marketData={{
                 question: selectedMarketData.question,
@@ -215,7 +216,7 @@ export default function CreativeMarketsPage() {
             Liquidity Pools
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {poolStats.map((pool) => (
+            {poolStats.map(pool => (
               <LiquidityPoolCard key={pool.id} pool={pool} />
             ))}
           </div>
@@ -227,25 +228,25 @@ export default function CreativeMarketsPage() {
             🏆 Hackathon-Winning Features
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <HackathonFeature 
+            <HackathonFeature
               icon={Brain}
               title="AI-Assisted Oracle"
               description="Subjective creative judging in minutes, not 48 hours. Solves YZi Labs Priority #1."
               tech="Claude AI, Vision API"
             />
-            <HackathonFeature 
+            <HackathonFeature
               icon={Zap}
               title="Gasless UX"
               description="Trade predictions without crypto knowledge. Feels like a normal app. Solves YZi Labs Priority #3."
               tech="Account Abstraction, Sponsored Txs"
             />
-            <HackathonFeature 
+            <HackathonFeature
               icon={Users}
               title="Liquidity Aggregation"
               description="Pool liquidity across similar creative markets. 45% better pricing. Solves fragmentation problem."
               tech="AMM Pools, Cross-Market Routing"
             />
-            <HackathonFeature 
+            <HackathonFeature
               icon={Target}
               title="Niche Market Focus"
               description="First prediction market for creative industry. Design, music, art, content. Zero competition."
@@ -285,9 +286,11 @@ function LiquidityPoolCard({ pool }: any) {
     <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900">{pool.name}</h3>
-        <span className="text-2xl">{creativeMarketTemplates.find(t => t.type === pool.marketType)?.icon}</span>
+        <span className="text-2xl">
+          {creativeMarketTemplates.find(t => t.type === pool.marketType)?.icon}
+        </span>
       </div>
-      
+
       {pool.stats && (
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -308,7 +311,7 @@ function LiquidityPoolCard({ pool }: any) {
           </div>
         </div>
       )}
-      
+
       <button className="w-full mt-4 py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all">
         Add Liquidity
       </button>

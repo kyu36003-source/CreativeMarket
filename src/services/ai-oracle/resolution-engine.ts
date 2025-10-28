@@ -3,7 +3,7 @@
  * Coordinates the entire resolution process: data fetching, AI analysis, evidence storage, and blockchain submission
  */
 
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 import {
   Market,
   ResolutionRequest,
@@ -14,9 +14,9 @@ import {
   OracleError,
   ErrorCode,
   DataSourceAdapter,
-} from "./types";
-import { AIAnalyzer } from "./ai-analyzer";
-import { EvidenceStorage } from "./evidence-storage";
+} from './types';
+import { AIAnalyzer } from './ai-analyzer';
+import { EvidenceStorage } from './evidence-storage';
 
 export interface ResolutionEngineConfig {
   adapters: DataSourceAdapter[];
@@ -49,7 +49,7 @@ export class ResolutionEngine {
 
       if (sourceData.length === 0) {
         throw new OracleError(
-          "No data sources available for this market",
+          'No data sources available for this market',
           ErrorCode.INSUFFICIENT_DATA,
           { marketId: market.id, category: market.category }
         );
@@ -77,7 +77,7 @@ export class ResolutionEngine {
       // Step 3: Compile evidence package
       console.log(`[Resolution] Compiling evidence package...`);
       const evidence: EvidencePackage = {
-        version: "1.0",
+        version: '1.0',
         marketId: market.id,
         market: {
           question: market.question,
@@ -130,7 +130,7 @@ export class ResolutionEngine {
       const duration = Date.now() - startTime;
 
       console.log(`[Resolution] ✅ Market ${market.id} resolved successfully!`);
-      console.log(`  Outcome: ${aiAnalysis.outcome ? "YES" : "NO"}`);
+      console.log(`  Outcome: ${aiAnalysis.outcome ? 'YES' : 'NO'}`);
       console.log(`  Confidence: ${aiAnalysis.confidence / 100}%`);
       console.log(`  Evidence: ${ipfsResult.url}`);
       console.log(`  Transaction: ${txResult.hash}`);
@@ -147,7 +147,10 @@ export class ResolutionEngine {
         duration,
       };
     } catch (error) {
-      console.error(`[Resolution] ❌ Failed to resolve market ${market.id}:`, error);
+      console.error(
+        `[Resolution] ❌ Failed to resolve market ${market.id}:`,
+        error
+      );
       throw error;
     }
   }
@@ -158,7 +161,7 @@ export class ResolutionEngine {
   private async fetchData(market: Market): Promise<SourceData[]> {
     // Filter adapters by category
     const applicableAdapters = this.config.adapters
-      .filter((adapter) => adapter.category.includes(market.category))
+      .filter(adapter => adapter.category.includes(market.category))
       .sort((a, b) => a.priority - b.priority);
 
     if (applicableAdapters.length === 0) {
@@ -171,7 +174,7 @@ export class ResolutionEngine {
 
     // Fetch from all adapters in parallel
     const results = await Promise.allSettled(
-      applicableAdapters.map((adapter) =>
+      applicableAdapters.map(adapter =>
         adapter.fetchData({
           market,
           keywords: this.extractKeywords(market.question),
@@ -183,7 +186,7 @@ export class ResolutionEngine {
     const sourceData: SourceData[] = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
-      if (result.status === "fulfilled") {
+      if (result.status === 'fulfilled') {
         sourceData.push(result.value);
       } else {
         console.warn(
@@ -211,7 +214,7 @@ export class ResolutionEngine {
 
     if (gasPrice > this.config.maxGasPrice) {
       throw new OracleError(
-        `Gas price (${ethers.formatUnits(gasPrice, "gwei")} gwei) exceeds maximum (${ethers.formatUnits(this.config.maxGasPrice, "gwei")} gwei)`,
+        `Gas price (${ethers.formatUnits(gasPrice, 'gwei')} gwei) exceeds maximum (${ethers.formatUnits(this.config.maxGasPrice, 'gwei')} gwei)`,
         ErrorCode.BLOCKCHAIN_GAS_TOO_HIGH,
         {
           gasPrice: gasPrice.toString(),
@@ -239,14 +242,14 @@ export class ResolutionEngine {
       const receipt = await tx.wait();
 
       if (!receipt || receipt.status !== 1) {
-        throw new Error("Transaction failed");
+        throw new Error('Transaction failed');
       }
 
       return receipt;
     } catch (error) {
-      if (error instanceof Error && error.message.includes("Not authorized")) {
+      if (error instanceof Error && error.message.includes('Not authorized')) {
         throw new OracleError(
-          "Oracle agent not authorized",
+          'Oracle agent not authorized',
           ErrorCode.BLOCKCHAIN_UNAUTHORIZED,
           { error: error.message }
         );
@@ -267,12 +270,12 @@ export class ResolutionEngine {
     if (sourceData.length < 2) return true; // Single source auto-agrees
 
     // For crypto markets, check if prices are within 1% of each other
-    const cryptoData = sourceData.filter((s) => s.data.price !== undefined);
+    const cryptoData = sourceData.filter(s => s.data.price !== undefined);
     if (cryptoData.length >= 2) {
-      const prices = cryptoData.map((s) => s.data.price);
+      const prices = cryptoData.map(s => s.data.price);
       const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
       const maxDeviation = Math.max(
-        ...prices.map((p) => Math.abs(p - avgPrice) / avgPrice)
+        ...prices.map(p => Math.abs(p - avgPrice) / avgPrice)
       );
       return maxDeviation < 0.01; // Within 1%
     }
@@ -285,7 +288,7 @@ export class ResolutionEngine {
    */
   private calculateDataFreshness(sourceData: SourceData[]): number {
     const now = Date.now();
-    const ages = sourceData.map((s) => (now - s.fetchedAt.getTime()) / 1000);
+    const ages = sourceData.map(s => (now - s.fetchedAt.getTime()) / 1000);
     return Math.max(...ages); // Return oldest data age
   }
 
@@ -297,16 +300,16 @@ export class ResolutionEngine {
 
     // Check if we have multiple sources
     if (sourceData.length < 2) {
-      checks.push("Single source - could not cross-verify");
+      checks.push('Single source - could not cross-verify');
     } else {
       checks.push(`${sourceData.length} sources cross-verified`);
     }
 
     // Check confidence level
     if (aiAnalysis.confidence > 9500) {
-      checks.push("Very high confidence - strong data agreement");
+      checks.push('Very high confidence - strong data agreement');
     } else if (aiAnalysis.confidence < 8500) {
-      checks.push("Moderate confidence - some uncertainty present");
+      checks.push('Moderate confidence - some uncertainty present');
     }
 
     // Check for warnings
@@ -314,7 +317,7 @@ export class ResolutionEngine {
       checks.push(`${aiAnalysis.warnings.length} warning(s) noted by AI`);
     }
 
-    return checks.join("; ");
+    return checks.join('; ');
   }
 
   /**
@@ -329,9 +332,7 @@ export class ResolutionEngine {
     const gasUsed = receipt.gasUsed;
     const gasPrice = receipt.gasPrice;
 
-    const gasCostBNB = parseFloat(
-      ethers.formatEther(gasUsed * gasPrice)
-    );
+    const gasCostBNB = parseFloat(ethers.formatEther(gasUsed * gasPrice));
     const gasCostUSD = gasCostBNB * bnbPriceUSD;
 
     return gasCostUSD;
@@ -342,22 +343,22 @@ export class ResolutionEngine {
    */
   private extractKeywords(question: string): string[] {
     const stopWords = [
-      "will",
-      "the",
-      "be",
-      "to",
-      "a",
-      "an",
-      "in",
-      "on",
-      "at",
-      "by",
+      'will',
+      'the',
+      'be',
+      'to',
+      'a',
+      'an',
+      'in',
+      'on',
+      'at',
+      'by',
     ];
     const words = question
       .toLowerCase()
-      .replace(/[^\w\s]/g, "")
+      .replace(/[^\w\s]/g, '')
       .split(/\s+/)
-      .filter((word) => word.length > 2 && !stopWords.includes(word));
+      .filter(word => word.length > 2 && !stopWords.includes(word));
     return [...new Set(words)];
   }
 

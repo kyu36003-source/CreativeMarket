@@ -10,7 +10,7 @@ export function RainbowKitButton() {
   const { connect, connectors, status } = useConnect();
   const { disconnect } = useDisconnect();
   const [showConnectors, setShowConnectors] = useState(false);
-  
+
   const isConnecting = status === 'pending';
 
   // Format address for display
@@ -19,8 +19,9 @@ export function RainbowKitButton() {
   };
 
   // Check if MetaMask is available
-  const isMetaMaskInstalled = typeof window !== 'undefined' && window.ethereum?.isMetaMask;
-  
+  const isMetaMaskInstalled =
+    typeof window !== 'undefined' && window.ethereum?.isMetaMask;
+
   // Get connector display name
   const getConnectorName = (id: string) => {
     if (id.includes('metaMask') || id.includes('injected')) {
@@ -38,15 +39,19 @@ export function RainbowKitButton() {
         {chain && (
           <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-700">{chain.name}</span>
+            <span className="text-sm font-medium text-green-700">
+              {chain.name}
+            </span>
           </div>
         )}
-        
+
         {/* Address display */}
         <div className="hidden sm:block px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-          <code className="text-sm font-mono text-blue-700">{formatAddress(address)}</code>
+          <code className="text-sm font-mono text-blue-700">
+            {formatAddress(address)}
+          </code>
         </div>
-        
+
         {/* Disconnect button */}
         <Button
           onClick={() => disconnect()}
@@ -76,24 +81,30 @@ export function RainbowKitButton() {
       {showConnectors && (
         <>
           {/* Backdrop to close dropdown */}
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setShowConnectors(false)}
           />
-          
+
           {/* Dropdown menu */}
           <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden z-50">
             <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-              <p className="text-sm font-semibold text-gray-900">Choose Wallet</p>
-              <p className="text-xs text-gray-600 mt-0.5">Select your preferred wallet</p>
+              <p className="text-sm font-semibold text-gray-900">
+                Choose Wallet
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Select your preferred wallet
+              </p>
             </div>
-            
+
             {connectors.length > 0 ? (
               <div className="py-1">
-                {connectors.map((connector) => {
+                {connectors.map(connector => {
                   // Force ready state for injected connector if MetaMask is installed
-                  const isReady = connector.id.includes('injected') ? isMetaMaskInstalled : connector.ready;
-                  
+                  const isReady = connector.id.includes('injected')
+                    ? isMetaMaskInstalled
+                    : connector.ready;
+
                   return (
                     <button
                       key={connector.id}
@@ -103,8 +114,8 @@ export function RainbowKitButton() {
                       }}
                       disabled={!isReady || isConnecting}
                       className={`w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 ${
-                        !isReady || isConnecting 
-                          ? 'opacity-50 cursor-not-allowed' 
+                        !isReady || isConnecting
+                          ? 'opacity-50 cursor-not-allowed'
                           : 'cursor-pointer'
                       }`}
                     >
@@ -131,7 +142,9 @@ export function RainbowKitButton() {
             ) : (
               <div className="px-4 py-6 text-center">
                 <Wallet className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-900 mb-1">No Wallet Detected</p>
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  No Wallet Detected
+                </p>
                 <p className="text-xs text-gray-600 mb-4">
                   Please install MetaMask or another Web3 wallet
                 </p>

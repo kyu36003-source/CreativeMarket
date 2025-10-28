@@ -11,7 +11,15 @@ import { useAccount } from 'wagmi';
 import { useCreateMarket } from '@/hooks/useContracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Loader2, Calendar, Tag, FileText, HelpCircle, Sparkles } from 'lucide-react';
+import {
+  Plus,
+  Loader2,
+  Calendar,
+  Tag,
+  FileText,
+  HelpCircle,
+  Sparkles,
+} from 'lucide-react';
 
 const CATEGORIES = [
   { value: 'crypto', label: 'Crypto', icon: '₿' },
@@ -27,7 +35,8 @@ const CATEGORIES = [
 export default function CreateMarketPage() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  const { createMarket, isPending, isConfirming, isSuccess, error } = useCreateMarket();
+  const { createMarket, isPending, isConfirming, isSuccess, error } =
+    useCreateMarket();
 
   const [question, setQuestion] = useState('');
   const [description, setDescription] = useState('');
@@ -46,7 +55,7 @@ export default function CreateMarketPage() {
 
     try {
       const endDateTime = new Date(`${endDate}T${endTime}`);
-      
+
       if (endDateTime <= new Date()) {
         alert('End date must be in the future');
         return;
@@ -79,7 +88,8 @@ export default function CreateMarketPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Create Prediction Market</h1>
         <p className="text-muted-foreground">
-          Create a new market for others to predict on. Markets can be resolved automatically by our AI Oracle or manually.
+          Create a new market for others to predict on. Markets can be resolved
+          automatically by our AI Oracle or manually.
         </p>
       </div>
 
@@ -94,14 +104,15 @@ export default function CreateMarketPage() {
             <input
               type="text"
               value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              onChange={e => setQuestion(e.target.value)}
               placeholder="Will Bitcoin reach $100,000 by December 31, 2025?"
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
               maxLength={200}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Be specific and unambiguous. Good: "Will BTC close above $50k on Nov 1?" Bad: "Will BTC moon?"
+              Be specific and unambiguous. Good: "Will BTC close above $50k on
+              Nov 1?" Bad: "Will BTC moon?"
             </p>
           </div>
 
@@ -113,14 +124,15 @@ export default function CreateMarketPage() {
             </label>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               placeholder="Provide context and resolution criteria..."
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary h-32"
               required
               maxLength={1000}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Explain what the market is about and how it will be resolved. Include sources if applicable.
+              Explain what the market is about and how it will be resolved.
+              Include sources if applicable.
             </p>
           </div>
 
@@ -131,7 +143,7 @@ export default function CreateMarketPage() {
               Category
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {CATEGORIES.map((cat) => (
+              {CATEGORIES.map(cat => (
                 <button
                   key={cat.value}
                   type="button"
@@ -159,7 +171,7 @@ export default function CreateMarketPage() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={minDateStr}
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 required
@@ -173,7 +185,7 @@ export default function CreateMarketPage() {
               <input
                 type="time"
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={e => setEndTime(e.target.value)}
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -186,7 +198,7 @@ export default function CreateMarketPage() {
               <input
                 type="checkbox"
                 checked={aiOracleEnabled}
-                onChange={(e) => setAiOracleEnabled(e.target.checked)}
+                onChange={e => setAiOracleEnabled(e.target.checked)}
                 className="mt-1 w-4 h-4"
               />
               <div className="flex-1">
@@ -197,12 +209,15 @@ export default function CreateMarketPage() {
                 <p className="text-sm text-muted-foreground">
                   {aiOracleEnabled ? (
                     <>
-                      ✅ This market will be automatically resolved by our AI Oracle using GPT-4 and multiple data sources.
-                      The AI will fetch real-world data and provide evidence-backed resolutions.
+                      ✅ This market will be automatically resolved by our AI
+                      Oracle using GPT-4 and multiple data sources. The AI will
+                      fetch real-world data and provide evidence-backed
+                      resolutions.
                     </>
                   ) : (
                     <>
-                      ⚠️ You will need to manually resolve this market. Make sure you can provide proof of the outcome.
+                      ⚠️ You will need to manually resolve this market. Make
+                      sure you can provide proof of the outcome.
                     </>
                   )}
                 </p>
@@ -215,10 +230,23 @@ export default function CreateMarketPage() {
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-medium mb-2">Preview</h3>
               <div className="space-y-2 text-sm">
-                <p><strong>Question:</strong> {question}</p>
-                <p><strong>Category:</strong> {CATEGORIES.find(c => c.value === category)?.label}</p>
-                <p><strong>Ends:</strong> {endDate && endTime ? new Date(`${endDate}T${endTime}`).toLocaleString() : 'Not set'}</p>
-                <p><strong>Resolution:</strong> {aiOracleEnabled ? '🤖 AI Oracle' : '👤 Manual'}</p>
+                <p>
+                  <strong>Question:</strong> {question}
+                </p>
+                <p>
+                  <strong>Category:</strong>{' '}
+                  {CATEGORIES.find(c => c.value === category)?.label}
+                </p>
+                <p>
+                  <strong>Ends:</strong>{' '}
+                  {endDate && endTime
+                    ? new Date(`${endDate}T${endTime}`).toLocaleString()
+                    : 'Not set'}
+                </p>
+                <p>
+                  <strong>Resolution:</strong>{' '}
+                  {aiOracleEnabled ? '🤖 AI Oracle' : '👤 Manual'}
+                </p>
               </div>
             </div>
           )}
@@ -226,9 +254,7 @@ export default function CreateMarketPage() {
           {/* Error Display */}
           {error && (
             <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
-              <p className="text-sm text-destructive">
-                Error: {error.message}
-              </p>
+              <p className="text-sm text-destructive">Error: {error.message}</p>
             </div>
           )}
 
@@ -283,12 +309,29 @@ export default function CreateMarketPage() {
       <Card className="mt-6 p-6">
         <h3 className="font-semibold mb-3">Tips for Creating Good Markets</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>✅ <strong>Be Specific:</strong> "BTC above $50k" not "BTC moon"</li>
-          <li>✅ <strong>Set Clear Criteria:</strong> Specify exact date, price, source</li>
-          <li>✅ <strong>Choose AI Oracle:</strong> For crypto/sports markets with clear data sources</li>
-          <li>✅ <strong>Manual Resolution:</strong> For subjective or hard-to-verify outcomes</li>
-          <li>✅ <strong>Reasonable Timeline:</strong> Not too short (&lt; 1 hour) or too long (&gt; 1 year)</li>
-          <li>✅ <strong>Popular Topics:</strong> Markets with more interest get more liquidity</li>
+          <li>
+            ✅ <strong>Be Specific:</strong> "BTC above $50k" not "BTC moon"
+          </li>
+          <li>
+            ✅ <strong>Set Clear Criteria:</strong> Specify exact date, price,
+            source
+          </li>
+          <li>
+            ✅ <strong>Choose AI Oracle:</strong> For crypto/sports markets with
+            clear data sources
+          </li>
+          <li>
+            ✅ <strong>Manual Resolution:</strong> For subjective or
+            hard-to-verify outcomes
+          </li>
+          <li>
+            ✅ <strong>Reasonable Timeline:</strong> Not too short (&lt; 1 hour)
+            or too long (&gt; 1 year)
+          </li>
+          <li>
+            ✅ <strong>Popular Topics:</strong> Markets with more interest get
+            more liquidity
+          </li>
         </ul>
       </Card>
     </div>

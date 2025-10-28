@@ -18,10 +18,16 @@ export function WalletConnect() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
-      if (connectorRef.current && !connectorRef.current.contains(event.target as Node)) {
+      if (
+        connectorRef.current &&
+        !connectorRef.current.contains(event.target as Node)
+      ) {
         setShowConnectors(false);
       }
     };
@@ -32,11 +38,14 @@ export function WalletConnect() {
 
   // Log connectors for debugging
   useEffect(() => {
-    console.log('Available connectors:', connectors.map(c => ({ 
-      id: c.id, 
-      name: c.name, 
-      ready: c.ready 
-    })));
+    console.log(
+      'Available connectors:',
+      connectors.map(c => ({
+        id: c.id,
+        name: c.name,
+        ready: c.ready,
+      }))
+    );
   }, [connectors]);
 
   const formatAddress = (addr: string) => {
@@ -116,7 +125,7 @@ export function WalletConnect() {
         <Wallet className="h-4 w-4" />
         {isLoading ? 'Connecting...' : 'Connect Wallet'}
       </Button>
-      
+
       {showConnectors && (
         <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg overflow-hidden z-50">
           {/* Connection Error Display */}
@@ -133,14 +142,20 @@ export function WalletConnect() {
           {connectors.length > 0 ? (
             <>
               <div className="px-4 py-2 bg-gray-50 border-b">
-                <p className="text-xs font-medium text-gray-700">Select Wallet</p>
+                <p className="text-xs font-medium text-gray-700">
+                  Select Wallet
+                </p>
               </div>
-              {connectors.map((connector) => (
+              {connectors.map(connector => (
                 <button
                   key={connector.id}
                   onClick={async () => {
                     try {
-                      console.log('Attempting to connect with:', connector.id, connector.name);
+                      console.log(
+                        'Attempting to connect with:',
+                        connector.id,
+                        connector.name
+                      );
                       setShowConnectors(false);
                       await connect({ connector });
                     } catch (error) {
@@ -150,17 +165,21 @@ export function WalletConnect() {
                   }}
                   disabled={!connector.ready || isLoading}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 border-b last:border-b-0 ${
-                    !connector.ready || isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    !connector.ready || isLoading
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'cursor-pointer'
                   }`}
                 >
                   <Wallet className="h-5 w-5 text-gray-600" />
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{getConnectorName(connector.id)}</div>
+                    <div className="font-medium text-gray-900">
+                      {getConnectorName(connector.id)}
+                    </div>
                     <div className="text-xs text-gray-500">
-                      {isLoading 
-                        ? 'Connecting...' 
-                        : connector.ready 
-                          ? getConnectorDescription(connector.id) 
+                      {isLoading
+                        ? 'Connecting...'
+                        : connector.ready
+                          ? getConnectorDescription(connector.id)
                           : 'Not detected'}
                     </div>
                   </div>
@@ -175,13 +194,15 @@ export function WalletConnect() {
           ) : (
             <div className="px-4 py-6 text-center">
               <AlertCircle className="h-8 w-8 text-orange-500 mx-auto mb-3" />
-              <p className="text-sm font-medium text-gray-900 mb-2">No Wallet Detected</p>
+              <p className="text-sm font-medium text-gray-900 mb-2">
+                No Wallet Detected
+              </p>
               <p className="text-xs text-gray-600 mb-4">
                 Please install a Web3 wallet to connect
               </p>
-              <a 
-                href="https://metamask.io/download/" 
-                target="_blank" 
+              <a
+                href="https://metamask.io/download/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
               >

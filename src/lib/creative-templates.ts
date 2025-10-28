@@ -1,13 +1,13 @@
 /**
  * Creative Market Templates
- * 
+ *
  * Specialized prediction markets for the creative industry
  * Solves: Niche market opportunity + subjective predictions
  */
 
 import type { CreativeWork } from './ai-oracle';
 
-export type CreativeMarketType = 
+export type CreativeMarketType =
   | 'design-contest'
   | 'music-release'
   | 'content-virality'
@@ -89,7 +89,8 @@ export const creativeMarketTemplates: CreativeMarketTemplate[] = [
     type: 'content-virality',
     title: 'Content Virality Prediction',
     question: 'Will this content reach X views/engagement?',
-    description: 'Predict content performance based on quality and market signals',
+    description:
+      'Predict content performance based on quality and market signals',
     category: 'Content',
     judgmentType: 'objective-metric',
     criteria: [
@@ -230,20 +231,24 @@ export function createMarketFromTemplate(
 /**
  * Get template by type
  */
-export function getTemplateByType(type: CreativeMarketType): CreativeMarketTemplate | undefined {
-  return creativeMarketTemplates.find((t) => t.type === type);
+export function getTemplateByType(
+  type: CreativeMarketType
+): CreativeMarketTemplate | undefined {
+  return creativeMarketTemplates.find(t => t.type === type);
 }
 
 /**
  * Get templates by category
  */
-export function getTemplatesByCategory(category: string): CreativeMarketTemplate[] {
-  return creativeMarketTemplates.filter((t) => t.category === category);
+export function getTemplatesByCategory(
+  category: string
+): CreativeMarketTemplate[] {
+  return creativeMarketTemplates.filter(t => t.category === category);
 }
 
 /**
  * Get all categories
  */
 export function getAllCategories(): string[] {
-  return Array.from(new Set(creativeMarketTemplates.map((t) => t.category)));
+  return Array.from(new Set(creativeMarketTemplates.map(t => t.category)));
 }

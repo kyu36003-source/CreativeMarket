@@ -24,7 +24,7 @@ export class Web3ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     // Check if it's a Web3/connection related error
-    const isWeb3Error = 
+    const isWeb3Error =
       error.message.includes('Connection interrupted') ||
       error.message.includes('connection') ||
       error.message.includes('subscribe') ||
@@ -76,15 +76,16 @@ export class Web3ErrorBoundary extends Component<Props, State> {
                 </svg>
               </div>
             </div>
-            
+
             <h2 className="mb-2 text-center text-xl font-semibold text-gray-900">
               Connection Issue
             </h2>
-            
+
             <p className="mb-4 text-center text-sm text-gray-600">
-              We're having trouble connecting to the blockchain network. This could be due to:
+              We're having trouble connecting to the blockchain network. This
+              could be due to:
             </p>
-            
+
             <ul className="mb-6 list-inside list-disc space-y-1 text-sm text-gray-600">
               <li>Temporary network interruption</li>
               <li>RPC endpoint unavailability</li>
@@ -98,7 +99,7 @@ export class Web3ErrorBoundary extends Component<Props, State> {
               >
                 Reconnect
               </button>
-              
+
               <button
                 onClick={() => this.setState({ hasError: false, error: null })}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

@@ -1,6 +1,6 @@
 /**
  * Gasless Transaction Service
- * 
+ *
  * Solves YZi Labs Priority #3: Make prediction markets feel like normal apps
  * Users don't need crypto or gas fees - we sponsor their transactions
  */
@@ -35,7 +35,8 @@ export class GaslessService {
 
   constructor() {
     // In production, this would be a dedicated relayer wallet
-    this.relayerAddress = (process.env.NEXT_PUBLIC_RELAYER_ADDRESS || '0x0') as Address;
+    this.relayerAddress = (process.env.NEXT_PUBLIC_RELAYER_ADDRESS ||
+      '0x0') as Address;
     this.enabled = process.env.NEXT_PUBLIC_GASLESS_ENABLED === 'true';
     this.gasBalance = BigInt(1e18); // Mock: 1 BNB balance
     this.maxGasPerTx = BigInt(5e17); // Max 0.5 BNB per tx
@@ -46,7 +47,7 @@ export class GaslessService {
    */
   async isGaslessAvailable(userAddress: Address): Promise<boolean> {
     if (!this.enabled) return false;
-    
+
     // Check if user is eligible (e.g., new user, small transaction)
     const eligibility = await this.checkEligibility(userAddress);
     return eligibility.eligible;
@@ -62,7 +63,7 @@ export class GaslessService {
   }> {
     // Mock eligibility check
     // In production: check user's tx history, market participation, etc.
-    
+
     return {
       eligible: true,
       reason: 'New user promotion - 10 free transactions',
@@ -123,7 +124,9 @@ export class GaslessService {
   /**
    * Estimate gas for transaction
    */
-  private async estimateGas(request: GaslessTransactionRequest): Promise<bigint> {
+  private async estimateGas(
+    request: GaslessTransactionRequest
+  ): Promise<bigint> {
     // Mock gas estimation
     // In production: use viem's estimateGas
     return BigInt(100000); // ~100k gas units
@@ -138,7 +141,12 @@ export class GaslessService {
     if (typeof window !== 'undefined') {
       crypto.getRandomValues(randomBytes);
     }
-    return '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    return (
+      '0x' +
+      Array.from(randomBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+    );
   }
 
   /**
@@ -176,9 +184,9 @@ export class GaslessService {
   ): Promise<GaslessTransactionResult> {
     // Combine multiple user actions into one sponsored transaction
     // E.g., approve + trade in one tx
-    
+
     const totalGas = BigInt(requests.length) * BigInt(100000);
-    
+
     if (totalGas > this.maxGasPerTx) {
       return {
         success: false,
@@ -199,7 +207,6 @@ export class GaslessService {
 
 // Singleton instance
 export const gaslessService = new GaslessService();
-
 
 /**
  * React hook for gasless transactions

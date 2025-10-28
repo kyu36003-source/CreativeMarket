@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     {
       id: '1',
       question: 'Will Bitcoin reach $100,000 by end of 2025?',
-      description: 'Predict if Bitcoin (BTC) will reach or exceed $100,000 USD by December 31, 2025.',
+      description:
+        'Predict if Bitcoin (BTC) will reach or exceed $100,000 USD by December 31, 2025.',
       category: 'crypto',
       creator: '0x0000000000000000000000000000000000000000',
       endTime: new Date('2025-12-31').getTime() / 1000,
@@ -33,7 +34,8 @@ export async function GET(request: NextRequest) {
     {
       id: '2',
       question: 'Will Ethereum merge to Proof of Stake be successful?',
-      description: 'Predict if Ethereum 2.0 merge will be completed without major issues.',
+      description:
+        'Predict if Ethereum 2.0 merge will be completed without major issues.',
       category: 'crypto',
       creator: '0x0000000000000000000000000000000000000000',
       endTime: new Date('2025-11-30').getTime() / 1000,
@@ -51,7 +53,8 @@ export async function GET(request: NextRequest) {
     {
       id: '3',
       question: 'Will SpaceX land humans on Mars by 2030?',
-      description: 'Predict if SpaceX successfully lands humans on Mars before January 1, 2030.',
+      description:
+        'Predict if SpaceX successfully lands humans on Mars before January 1, 2030.',
       category: 'technology',
       creator: '0x0000000000000000000000000000000000000000',
       endTime: new Date('2030-01-01').getTime() / 1000,
@@ -69,7 +72,8 @@ export async function GET(request: NextRequest) {
     {
       id: '4',
       question: 'Will the 2026 World Cup final be played in North America?',
-      description: 'Predict if the final match of 2026 FIFA World Cup will be hosted in a North American venue.',
+      description:
+        'Predict if the final match of 2026 FIFA World Cup will be hosted in a North American venue.',
       category: 'sports',
       creator: '0x0000000000000000000000000000000000000000',
       endTime: new Date('2026-07-19').getTime() / 1000,
@@ -87,7 +91,8 @@ export async function GET(request: NextRequest) {
     {
       id: '5',
       question: 'Will AI replace 50% of software jobs by 2030?',
-      description: 'Predict if artificial intelligence will replace at least 50% of traditional software development jobs.',
+      description:
+        'Predict if artificial intelligence will replace at least 50% of traditional software development jobs.',
       category: 'technology',
       creator: '0x0000000000000000000000000000000000000000',
       endTime: new Date('2030-12-31').getTime() / 1000,
@@ -106,16 +111,20 @@ export async function GET(request: NextRequest) {
 
   // Filter by category
   let filteredMarkets = category
-    ? allMarkets.filter((m) => m.category === category)
+    ? allMarkets.filter(m => m.category === category)
     : allMarkets;
 
   // Filter by status
   if (status === 'active') {
-    filteredMarkets = filteredMarkets.filter((m) => !m.resolved && m.endTime * 1000 > Date.now());
+    filteredMarkets = filteredMarkets.filter(
+      m => !m.resolved && m.endTime * 1000 > Date.now()
+    );
   } else if (status === 'resolved') {
-    filteredMarkets = filteredMarkets.filter((m) => m.resolved);
+    filteredMarkets = filteredMarkets.filter(m => m.resolved);
   } else if (status === 'ended') {
-    filteredMarkets = filteredMarkets.filter((m) => m.endTime * 1000 < Date.now() && !m.resolved);
+    filteredMarkets = filteredMarkets.filter(
+      m => m.endTime * 1000 < Date.now() && !m.resolved
+    );
   }
 
   // Apply limit
@@ -136,10 +145,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Validate required fields
     const { question, description, category, endTime } = body;
-    
+
     if (!question || !description || !category || !endTime) {
       return NextResponse.json(
         { error: 'Missing required fields' },

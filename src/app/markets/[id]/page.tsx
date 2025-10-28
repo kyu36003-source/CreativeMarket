@@ -45,7 +45,9 @@ export default function MarketDetailPage() {
   const { claimWinnings, isPending: isClaiming } = useClaimWinnings();
 
   const [betAmount, setBetAmount] = useState('0.1');
-  const [selectedPosition, setSelectedPosition] = useState<boolean | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<boolean | null>(
+    null
+  );
   const [showBetForm, setShowBetForm] = useState(false);
 
   const { potentialWinnings, odds } = useCalculateWinnings(
@@ -397,7 +399,7 @@ export default function MarketDetailPage() {
               <input
                 type="number"
                 value={betAmount}
-                onChange={(e) => setBetAmount(e.target.value)}
+                onChange={e => setBetAmount(e.target.value)}
                 step="0.01"
                 min="0.01"
                 placeholder="0.1"

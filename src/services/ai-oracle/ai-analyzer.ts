@@ -3,7 +3,7 @@
  * Uses OpenAI GPT-4 to analyze market data and provide resolution suggestions
  */
 
-import OpenAI from "openai";
+import OpenAI from 'openai';
 import {
   AIAnalysisRequest,
   AIAnalysisResponse,
@@ -11,7 +11,7 @@ import {
   OracleError,
   ErrorCode,
   SourceData,
-} from "./types";
+} from './types';
 
 export interface AIAnalyzerConfig {
   apiKey: string;
@@ -27,7 +27,7 @@ export class AIAnalyzer {
 
   constructor(config: AIAnalyzerConfig) {
     this.config = {
-      model: "gpt-4-turbo-preview",
+      model: 'gpt-4-turbo-preview',
       maxTokens: 2000,
       temperature: 0.1, // Low temperature for consistent, factual responses
       minConfidence: 8000, // 80%
@@ -54,16 +54,16 @@ export class AIAnalyzer {
         model: this.config.model,
         messages: [
           {
-            role: "system",
+            role: 'system',
             content: this.getSystemPrompt(market.category),
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt,
           },
         ],
         functions: [this.getResolutionFunction()],
-        function_call: { name: "resolve_prediction_market" },
+        function_call: { name: 'resolve_prediction_market' },
         temperature: this.config.temperature,
         max_tokens: this.config.maxTokens,
       });
@@ -72,7 +72,7 @@ export class AIAnalyzer {
 
       if (!response.message.function_call) {
         throw new OracleError(
-          "AI did not provide a function call response",
+          'AI did not provide a function call response',
           ErrorCode.AI_ANALYSIS_FAILED,
           { response }
         );
@@ -117,7 +117,7 @@ export class AIAnalyzer {
       }
 
       throw new OracleError(
-        "Unknown error during AI analysis",
+        'Unknown error during AI analysis',
         ErrorCode.AI_ANALYSIS_FAILED,
         { error }
       );
@@ -128,11 +128,11 @@ export class AIAnalyzer {
    * Build the analysis prompt from market and source data
    */
   private buildPrompt(
-    market: AIAnalysisRequest["market"],
+    market: AIAnalysisRequest['market'],
     sourceData: SourceData[]
   ): string {
     const dataSection = sourceData
-      .map((source) => {
+      .map(source => {
         return `
 **Source: ${source.source}**
 - Category: ${source.category}
@@ -141,7 +141,7 @@ export class AIAnalyzer {
 - Data: ${JSON.stringify(source.data, null, 2)}
 `;
       })
-      .join("\n");
+      .join('\n');
 
     return `
 # Prediction Market Resolution Analysis
@@ -282,66 +282,66 @@ For finance markets:
    */
   private getResolutionFunction(): OpenAI.Chat.ChatCompletionCreateParams.Function {
     return {
-      name: "resolve_prediction_market",
+      name: 'resolve_prediction_market',
       description:
-        "Analyze the market data and provide a resolution with confidence score",
+        'Analyze the market data and provide a resolution with confidence score',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           outcome: {
-            type: "boolean",
+            type: 'boolean',
             description:
-              "The resolution outcome: true for YES, false for NO. Base this strictly on the data provided.",
+              'The resolution outcome: true for YES, false for NO. Base this strictly on the data provided.',
           },
           confidence: {
-            type: "number",
+            type: 'number',
             description:
-              "Confidence level from 0-10000 (0-100%). Must be >= 8000 (80%) to proceed with automatic resolution.",
+              'Confidence level from 0-10000 (0-100%). Must be >= 8000 (80%) to proceed with automatic resolution.',
             minimum: 0,
             maximum: 10000,
           },
           reasoning: {
-            type: "array",
+            type: 'array',
             description:
-              "Step-by-step reasoning that led to this conclusion. Each step should be clear and data-driven.",
+              'Step-by-step reasoning that led to this conclusion. Each step should be clear and data-driven.',
             items: {
-              type: "string",
+              type: 'string',
             },
           },
           dataPoints: {
-            type: "array",
+            type: 'array',
             description:
-              "Specific data points from the sources that support this resolution. Include source name and exact values.",
+              'Specific data points from the sources that support this resolution. Include source name and exact values.',
             items: {
-              type: "string",
+              type: 'string',
             },
           },
           warnings: {
-            type: "array",
+            type: 'array',
             description:
-              "Any concerns, data inconsistencies, or edge cases to be aware of. Leave empty if none.",
+              'Any concerns, data inconsistencies, or edge cases to be aware of. Leave empty if none.',
             items: {
-              type: "string",
+              type: 'string',
             },
           },
           alternativeOutcomes: {
-            type: "array",
+            type: 'array',
             description:
-              "Other possible interpretations or outcomes with their probabilities. Useful for borderline cases.",
+              'Other possible interpretations or outcomes with their probabilities. Useful for borderline cases.',
             items: {
-              type: "object",
+              type: 'object',
               properties: {
-                outcome: { type: "boolean" },
+                outcome: { type: 'boolean' },
                 probability: {
-                  type: "number",
-                  description: "0-100",
+                  type: 'number',
+                  description: '0-100',
                 },
-                reasoning: { type: "string" },
+                reasoning: { type: 'string' },
               },
             },
           },
         },
-        required: ["outcome", "confidence", "reasoning", "dataPoints"],
+        required: ['outcome', 'confidence', 'reasoning', 'dataPoints'],
       },
     };
   }
@@ -360,9 +360,9 @@ For finance markets:
    * Validate AI response
    */
   validateResponse(response: AIAnalysisResponse): boolean {
-    if (typeof response.outcome !== "boolean") return false;
+    if (typeof response.outcome !== 'boolean') return false;
     if (
-      typeof response.confidence !== "number" ||
+      typeof response.confidence !== 'number' ||
       response.confidence < 0 ||
       response.confidence > 10000
     )

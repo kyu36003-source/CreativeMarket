@@ -65,7 +65,10 @@ export default function ReputationPage() {
   }
 
   const [totalTrades, winningTrades, totalVolume, roi] = reputationData || [
-    0, 0, BigInt(0), 0,
+    0,
+    0,
+    BigInt(0),
+    0,
   ];
   const successRate = successRateData || 0;
   const tier = tierData || 0;
@@ -96,7 +99,8 @@ export default function ReputationPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Trading Reputation</h1>
         <p className="text-muted-foreground">
-          Track your performance and build your reputation in the prediction markets
+          Track your performance and build your reputation in the prediction
+          markets
         </p>
       </div>
 
@@ -118,7 +122,9 @@ export default function ReputationPage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground mb-1">Reputation Score</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Reputation Score
+            </p>
             <p className="text-4xl font-bold">{Number(totalTrades) * 10}</p>
           </div>
         </div>
@@ -172,7 +178,9 @@ export default function ReputationPage() {
         </h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Win Rate Breakdown</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Win Rate Breakdown
+            </p>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
@@ -208,7 +216,9 @@ export default function ReputationPage() {
           </div>
 
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Recent Performance</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Recent Performance
+            </p>
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => (
                 <div
@@ -247,8 +257,8 @@ export default function ReputationPage() {
               Copy Trading
             </h3>
             <p className="text-sm text-muted-foreground">
-              Allow others to automatically copy your trades and earn a share of their
-              profits
+              Allow others to automatically copy your trades and earn a share of
+              their profits
             </p>
           </div>
           <Button
@@ -277,7 +287,8 @@ export default function ReputationPage() {
               <p className="font-medium text-green-500">Copy Trading Active</p>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Other traders can now copy your positions. You earn 10% of their profits!
+              Other traders can now copy your positions. You earn 10% of their
+              profits!
             </p>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
@@ -318,7 +329,9 @@ export default function ReputationPage() {
           <div className="p-4 border rounded-lg text-center opacity-50">
             <div className="text-4xl mb-2">🔥</div>
             <p className="font-medium mb-1">Hot Streak</p>
-            <p className="text-xs text-muted-foreground">Win 5 trades in a row</p>
+            <p className="text-xs text-muted-foreground">
+              Win 5 trades in a row
+            </p>
           </div>
           <div className="p-4 border rounded-lg text-center opacity-50">
             <div className="text-4xl mb-2">💰</div>
@@ -330,23 +343,17 @@ export default function ReputationPage() {
           <div className="p-4 border rounded-lg text-center opacity-50">
             <div className="text-4xl mb-2">🎓</div>
             <p className="font-medium mb-1">Market Master</p>
-            <p className="text-xs text-muted-foreground">
-              Complete 100 trades
-            </p>
+            <p className="text-xs text-muted-foreground">Complete 100 trades</p>
           </div>
           <div className="p-4 border rounded-lg text-center opacity-50">
             <div className="text-4xl mb-2">⭐</div>
             <p className="font-medium mb-1">Top Trader</p>
-            <p className="text-xs text-muted-foreground">
-              Reach Diamond tier
-            </p>
+            <p className="text-xs text-muted-foreground">Reach Diamond tier</p>
           </div>
           <div className="p-4 border rounded-lg text-center opacity-50">
             <div className="text-4xl mb-2">👥</div>
             <p className="font-medium mb-1">Influencer</p>
-            <p className="text-xs text-muted-foreground">
-              Have 100+ copiers
-            </p>
+            <p className="text-xs text-muted-foreground">Have 100+ copiers</p>
           </div>
         </div>
       </Card>

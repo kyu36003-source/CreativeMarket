@@ -3,7 +3,7 @@ import { Market, MarketCategoryInfo } from '@/types/market';
 // Helper function to get market odds
 export const calculateMarketOdds = (
   totalYes: bigint,
-  totalNo: bigint,
+  totalNo: bigint
 ): { yesOdds: number; noOdds: number; yesPrice: number; noPrice: number } => {
   const total = Number(totalYes + totalNo);
   if (total === 0) {
@@ -49,12 +49,15 @@ export async function fetchMarketCategories(): Promise<MarketCategoryInfo[]> {
   return response.json();
 }
 
-export async function fetchMarkets(category?: string, searchQuery?: string): Promise<Market[]> {
+export async function fetchMarkets(
+  category?: string,
+  searchQuery?: string
+): Promise<Market[]> {
   // TODO: Implement API call to fetch markets from blockchain or backend
   const params = new URLSearchParams();
   if (category && category !== 'all') params.append('category', category);
   if (searchQuery) params.append('search', searchQuery);
-  
+
   const response = await fetch(`/api/markets?${params.toString()}`);
   if (!response.ok) {
     throw new Error('Failed to fetch markets');
