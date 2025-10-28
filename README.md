@@ -4,8 +4,17 @@
 > Predict design approvals, music virality, and creative success — resolved by AI in under 30 minutes.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
-[![BNB Chain](https://img.shields.io/badge/BNB-Chain-yellow)](https://www.bnbchain.org)
+[![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
+## 🟡 BNB Chain Exclusive
+
+**This project is built exclusively for BNB Chain (BSC).** We chose BNB Chain for:
+- ⚡ **Ultra-low fees** - Perfect for high-frequency prediction trading
+- 🚀 **Fast finality** - ~3 second block times
+- 💰 **Lower gas costs** - Gasless transactions are more affordable
+- 🌐 **Large ecosystem** - 50M+ active wallets
+- 🔧 **EVM compatibility** - Easy development with Solidity
 
 ```bash
 npm install && npm run dev
@@ -17,12 +26,17 @@ npm install && npm run dev
 
 **Get Running in 2 Minutes:**
 
-1. Get testnet BNB → [BNB Faucet](https://www.bnbchain.org/en/testnet-faucet)
-2. Clone & install → `npm install`
-3. Start dev server → `npm run dev`
-4. Visit → `http://localhost:3000`
+1. **Add BNB Chain to MetaMask** (Network will be added automatically on connection)
+2. Get testnet BNB → [BNB Faucet](https://www.bnbchain.org/en/testnet-faucet)
+3. Clone & install → `npm install`
+4. Start dev server → `npm run dev`
+5. Visit → `http://localhost:3000`
 
-**Network:** BNB Testnet (Chain ID: 97)
+**Supported Networks (BNB Chain Only):**
+- 🧪 **BNB Testnet** (Chain ID: 97) - For development & testing
+- 🟢 **BNB Mainnet** (Chain ID: 56) - Production deployment
+
+> ⚠️ **Note:** This dApp only works on BNB Chain. Other networks (Ethereum, Polygon, etc.) are not supported.
 
 ---
 
@@ -98,11 +112,18 @@ Traditional prediction markets fail on subjective outcomes:
 
 ```
 Frontend:  Next.js 15 • React 18 • TypeScript • Tailwind CSS
-Web3:      Wagmi v2 • RainbowKit • Viem • Ethers.js
+Web3:      Wagmi v2 • Viem • Ethers.js
 Smart:     Solidity 0.8 • Hardhat • OpenZeppelin
 AI:        Claude API • Multi-source verification
-Chain:     BNB Testnet & Mainnet
+Chain:     BNB Chain EXCLUSIVE (Testnet: 97 | Mainnet: 56)
 ```
+
+**Why BNB Chain?**
+- ✅ Lowest gas fees among major EVM chains
+- ✅ 3-second block times (vs 12s on Ethereum)
+- ✅ 50M+ active users in the ecosystem
+- ✅ Perfect for gasless transaction implementations
+- ✅ Native integration with Binance ecosystem
 
 ---
 
@@ -252,6 +273,8 @@ npm run format        # Format code
 
 ### Documentation
 - 📖 [Complete Docs](docs/README.md) - Full documentation hub
+- 🟡 [BNB Chain Exclusive Guide](docs/BNB_CHAIN_EXCLUSIVE.md) - Why BNB Chain only
+- 📋 [Quick Reference](BNB_CHAIN_QUICK_REFERENCE.md) - One-page BNB Chain guide
 - 🏗️ [Architecture](PROJECT_STRUCTURE.md) - Project structure
 - 🤝 [Contributing](CONTRIBUTING.md) - Development guide
 - 📝 [Smart Contracts](contracts/README.md) - Contract documentation

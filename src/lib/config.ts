@@ -1,13 +1,41 @@
 // ============================================================================
-// Site Configuration - Copy Trading for Prediction Markets
+// Site Configuration - BNB Chain Exclusive Prediction Markets
+// ============================================================================
+// 
+// 🟡 NETWORK SUPPORT: BNB CHAIN EXCLUSIVE
+// This dApp is built exclusively for BNB Chain (BSC).
+// Supported: BNB Mainnet (56), BNB Testnet (97)
+// NOT Supported: Ethereum, Polygon, Arbitrum, or any other chains
+//
+// Why BNB Chain? See: /docs/BNB_CHAIN_EXCLUSIVE.md
 // ============================================================================
 
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || 'PredictBNB',
-  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Follow Top Traders. Auto-Copy Their Predictions. Earn While You Learn.',
-  tagline: 'Copy Trading for Prediction Markets',
+  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'BNB Chain Exclusive - Follow Top Traders. Auto-Copy Their Predictions. Earn While You Learn.',
+  tagline: 'Copy Trading for Prediction Markets on BNB Chain',
   url: process.env.NEXT_PUBLIC_SITE_URL || '',
   ogImage: process.env.NEXT_PUBLIC_OG_IMAGE || '',
+  
+  // Network Configuration - BNB Chain Only
+  network: {
+    name: 'BNB Chain',
+    mainnet: {
+      chainId: 56,
+      name: 'BNB Smart Chain Mainnet',
+      nativeCurrency: 'BNB',
+      rpcUrl: 'https://bsc-dataseed.binance.org/',
+      explorer: 'https://bscscan.com',
+    },
+    testnet: {
+      chainId: 97,
+      name: 'BNB Smart Chain Testnet',
+      nativeCurrency: 'BNB',
+      rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      explorer: 'https://testnet.bscscan.com',
+      faucet: 'https://www.bnbchain.org/en/testnet-faucet',
+    },
+  },
   
   links: {
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL || '',

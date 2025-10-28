@@ -6,6 +6,8 @@
 
 - [Main README](../README.md) - Project overview and getting started
 - [Project Summary](PROJECT_SUMMARY.md) - High-level architecture and features
+- [BNB Chain Exclusive](BNB_CHAIN_EXCLUSIVE.md) - Why we're BNB Chain only
+- [Quick Reference](../BNB_CHAIN_QUICK_REFERENCE.md) - One-page BNB Chain guide
 - [Deployment Guide](guides/DEPLOYMENT_GUIDE.md) - Production deployment instructions
 
 ---
@@ -53,10 +55,8 @@ Seedify Hackathon 2025 materials:
 ### 📊 Project Status
 Current implementation summaries:
 - [Implementation Summary](IMPLEMENTATION_SUMMARY.md) - Overall progress
-- [Frontend Complete](FRONTEND_COMPLETE.md) - Frontend status
-- [Deployment Ready](DEPLOYMENT_READY.md) - Production readiness
 - [Testing Complete](TESTING_COMPLETE.md) - Test coverage
-- [Refactoring Summary](REFACTORING_SUMMARY.md) - Code improvements
+- [On-Chain Reputation](ONCHAIN_REPUTATION.md) - Reputation system
 
 ### 🔐 Smart Contracts
 - [Contracts Documentation](../contracts/README.md) - Smart contract details
@@ -149,10 +149,12 @@ See [Deployment Guide](guides/DEPLOYMENT_GUIDE.md) for production deployment.
 ## 🔑 Key Technologies
 
 - **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
-- **Web3**: Wagmi v2, RainbowKit, Viem
+- **Web3**: Wagmi v2, Viem (BNB Chain exclusive)
 - **Smart Contracts**: Solidity 0.8, Hardhat, OpenZeppelin
 - **AI**: Claude API for creative market judging
-- **Blockchain**: BNB Chain (testnet & mainnet)
+- **Blockchain**: **BNB Chain Exclusive** (Testnet: 97 | Mainnet: 56)
+
+> ℹ️ **Network Support:** This project is built exclusively for BNB Chain. No other chains (Ethereum, Polygon, etc.) are supported.
 
 ---
 

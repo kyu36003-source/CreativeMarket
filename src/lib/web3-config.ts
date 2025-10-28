@@ -1,3 +1,26 @@
+// ============================================================================
+// BNB Chain EXCLUSIVE Web3 Configuration
+// ============================================================================
+//
+// 🟡 IMPORTANT: This dApp ONLY works on BNB Chain (BSC)
+// 
+// Supported Networks:
+// ✅ BNB Chain Mainnet (Chain ID: 56)
+// ✅ BNB Chain Testnet (Chain ID: 97)
+//
+// NOT Supported:
+// ❌ Ethereum, Polygon, Arbitrum, Optimism, Avalanche, etc.
+//
+// Why BNB Chain exclusive? 
+// - Ultra-low transaction fees ($0.10-0.30 vs $5-50 on Ethereum)
+// - 3-second block times (vs 12s on Ethereum)
+// - 50M+ active wallets
+// - Perfect for gasless transaction implementation
+// - Native integration with Binance ecosystem
+//
+// See full explanation: /docs/BNB_CHAIN_EXCLUSIVE.md
+// ============================================================================
+
 import { http, createConfig, fallback } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';

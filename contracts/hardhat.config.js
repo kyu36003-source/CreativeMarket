@@ -1,6 +1,30 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+// ============================================================================
+// BNB Chain EXCLUSIVE Smart Contract Configuration
+// ============================================================================
+//
+// 🟡 NETWORK SUPPORT: BNB CHAIN ONLY
+// This project deploys smart contracts exclusively to BNB Chain (BSC).
+//
+// Supported Networks:
+// ✅ BNB Chain Mainnet (Chain ID: 56)
+// ✅ BNB Chain Testnet (Chain ID: 97)
+// ✅ Hardhat Local Network (for testing only)
+//
+// NOT Supported:
+// ❌ Ethereum, Polygon, Arbitrum, Optimism, Avalanche, etc.
+//
+// Why BNB Chain exclusive?
+// - Ultra-low gas fees ($0.10-0.30 vs $5-50 on Ethereum)
+// - Fast 3-second block times
+// - 50M+ active wallets
+// - Perfect for prediction market & gasless transactions
+//
+// See: /docs/BNB_CHAIN_EXCLUSIVE.md
+// ============================================================================
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
