@@ -402,7 +402,9 @@ npx hardhat verify --network bscTestnet ADDRESS --constructor-args args.js
 
 ## 📜 License
 
-MIT License - Built for Seedify Hackathon 2025
+Apache License 2.0 - Built for Seedify Hackathon 2025
+
+See [LICENSE](../LICENSE) for full details.
 
 ---
 

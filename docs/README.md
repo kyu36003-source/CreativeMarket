@@ -168,7 +168,9 @@ See [Deployment Guide](guides/DEPLOYMENT_GUIDE.md) for production deployment.
 
 ## 📜 License
 
-MIT License - Built for Seedify Hackathon 2025 · Powered by BNB Chain
+Apache License 2.0 - Built for Seedify Hackathon 2025 · Powered by BNB Chain
+
+See [LICENSE](../LICENSE) for full details.
 
 ---
 

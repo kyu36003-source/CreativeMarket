@@ -2,6 +2,7 @@
   "name": "predictbnb",
   "version": "1.0.0",
   "private": true,
+  "license": "Apache-2.0",
   "description": "AI-Powered Prediction Markets on BNB Chain - Seedify Hackathon 2025",
   "scripts": {
     "dev": "next dev",

@@ -5,7 +5,7 @@
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
 
 ## 🟡 BNB Chain Exclusive
 
@@ -289,7 +289,9 @@ npm run format        # Format code
 
 ## 📄 License
 
-MIT License © 2025 CreativeHead
+Apache License 2.0 © 2025 CreativeHead
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for details.
 
 **Built for Seedify Hackathon 2025** • **Powered by BNB Chain**
 
