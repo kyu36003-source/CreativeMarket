@@ -28,6 +28,7 @@
     "oracle:status": "tsx src/services/ai-oracle/index.ts status"
   },
   "dependencies": {
+    "@huggingface/inference": "^4.13.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@rainbow-me/rainbowkit": "^2.2.9",
     "@tanstack/react-query": "^5.90.5",
