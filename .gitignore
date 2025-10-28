@@ -81,7 +81,12 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
-HACKATHON_FEATURES_COMPLETE.md
-RAINBOWKIT_SETUP.md
-WALLET_DEBUG_GUIDE.md
-WALLET_FIXED.md
+
+# Logs
+*.log
+logs/
+
+# Editor backup files
+*~
+.*.swp
+.*.swo
