@@ -1,0 +1,213 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  🚀 VERCEL DEPLOYMENT - QUICK REFERENCE                          ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┌────────────────────────────────────────────────────────────────┐
+│ STEP 1: GET WALLETCONNECT PROJECT ID (REQUIRED)               │
+└────────────────────────────────────────────────────────────────┘
+
+1. Go to: https://cloud.walletconnect.com/
+2. Sign up / Login
+3. Click "Create New Project"
+4. Copy your Project ID
+5. Save it - you'll need it in Vercel
+
+┌────────────────────────────────────────────────────────────────┐
+│ STEP 2: DEPLOY TO VERCEL                                      │
+└────────────────────────────────────────────────────────────────┘
+
+OPTION A: Via Web Dashboard (Easiest)
+──────────────────────────────────────
+
+1. Go to: https://vercel.com/new
+2. Import: github.com/kyu36003-source/CreativeMarket
+3. Before clicking Deploy, add these variables:
+
+   Required Environment Variables:
+   ┌──────────────────────────────────────────────────────────┐
+   │ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID                     │
+   │ → Your WalletConnect ID from Step 1                      │
+   │                                                           │
+   │ NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS                    │
+   │ → 0x5FbDB2315678afecb367f032d93F642f64180aa3            │
+   │                                                           │
+   │ NEXT_PUBLIC_AI_ORACLE_ADDRESS                            │
+   │ → 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512            │
+   │                                                           │
+   │ NEXT_PUBLIC_GASLESS_RELAYER_ADDRESS                      │
+   │ → 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0            │
+   │                                                           │
+   │ NEXT_PUBLIC_DEFAULT_CHAIN_ID                             │
+   │ → 97                                                      │
+   │                                                           │
+   │ NEXT_PUBLIC_ENABLE_TESTNET                               │
+   │ → true                                                    │
+   └──────────────────────────────────────────────────────────┘
+
+4. Click "Deploy"
+5. Wait 2-3 minutes
+6. Done! 🎉
+
+OPTION B: Via CLI (Advanced)
+─────────────────────────────
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Run the setup script
+./scripts/setup-vercel-env.sh
+
+# Deploy
+vercel --prod
+
+┌────────────────────────────────────────────────────────────────┐
+│ STEP 3: UPDATE AFTER DEPLOYING TO BSC TESTNET                │
+└────────────────────────────────────────────────────────────────┘
+
+When you deploy contracts to real BSC Testnet:
+
+1. Go to: vercel.com → Your Project → Settings → Environment Variables
+
+2. Update these addresses:
+   - NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
+   - NEXT_PUBLIC_AI_ORACLE_ADDRESS
+   - NEXT_PUBLIC_GASLESS_RELAYER_ADDRESS
+
+3. Go to: Deployments → ... → Redeploy
+
+┌────────────────────────────────────────────────────────────────┐
+│ OPTIONAL: ADD AI & STORAGE KEYS                               │
+└────────────────────────────────────────────────────────────────┘
+
+For full AI oracle functionality, add these:
+
+┌──────────────────────────────────────────────────────────┐
+│ HUGGINGFACE_API_KEY                                      │
+│ → Get from: https://huggingface.co/settings/tokens      │
+│ → Click "New token" → Copy                               │
+│                                                           │
+│ OPENAI_API_KEY (Alternative)                             │
+│ → Get from: https://platform.openai.com/api-keys        │
+│                                                           │
+│ PINATA_API_KEY (For evidence storage)                    │
+│ → Get from: https://app.pinata.cloud/keys               │
+│                                                           │
+│ PINATA_SECRET_KEY                                        │
+│ → From same Pinata page                                  │
+└──────────────────────────────────────────────────────────┘
+
+⚠️  WARNING: Never share these keys publicly!
+
+┌────────────────────────────────────────────────────────────────┐
+│ NETWORK CONFIGURATION                                         │
+└────────────────────────────────────────────────────────────────┘
+
+BSC Testnet (Current Setup):
+┌──────────────────────────────────────────────────────────┐
+│ NEXT_PUBLIC_DEFAULT_CHAIN_ID = 97                        │
+│ NEXT_PUBLIC_ENABLE_TESTNET = true                        │
+│ RPC: https://data-seed-prebsc-1-s1.binance.org:8545/    │
+│ Faucet: https://testnet.bnbchain.org/faucet-smart       │
+└──────────────────────────────────────────────────────────┘
+
+BSC Mainnet (For Production):
+┌──────────────────────────────────────────────────────────┐
+│ NEXT_PUBLIC_DEFAULT_CHAIN_ID = 56                        │
+│ NEXT_PUBLIC_ENABLE_TESTNET = false                       │
+│ RPC: https://bsc-dataseed.binance.org/                   │
+└──────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING                                               │
+└────────────────────────────────────────────────────────────────┘
+
+❌ Build fails
+   → Check build logs in Vercel dashboard
+   → Fix errors locally first: npm run build
+   → Push fixes to GitHub
+
+❌ "Contract not deployed" error
+   → Your contracts are on local Hardhat only
+   → Deploy to BSC Testnet first
+   → Update contract addresses in Vercel
+
+❌ WalletConnect doesn't work
+   → Check NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is set
+   → Regenerate ID at cloud.walletconnect.com
+
+❌ Wrong network shows
+   → Check NEXT_PUBLIC_DEFAULT_CHAIN_ID = 97 (testnet)
+   → Redeploy after changing
+
+❌ Markets don't load
+   → Contracts must be on same network as CHAIN_ID
+   → For testnet, deploy contracts to BSC Testnet
+   → Update addresses in Vercel
+
+┌────────────────────────────────────────────────────────────────┐
+│ HELPFUL LINKS                                                 │
+└────────────────────────────────────────────────────────────────┘
+
+Vercel Dashboard:
+https://vercel.com/dashboard
+
+WalletConnect Setup:
+https://cloud.walletconnect.com/
+
+BSC Testnet Faucet:
+https://testnet.bnbchain.org/faucet-smart
+
+Hugging Face Tokens:
+https://huggingface.co/settings/tokens
+
+Pinata IPFS:
+https://app.pinata.cloud/
+
+BSCScan (verify contracts):
+https://testnet.bscscan.com/
+
+┌────────────────────────────────────────────────────────────────┐
+│ CHECKLIST                                                     │
+└────────────────────────────────────────────────────────────────┘
+
+Before deploying:
+☐ Got WalletConnect Project ID
+☐ Contract addresses ready
+☐ Git repo pushed to GitHub
+
+Minimum to deploy:
+☐ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+☐ NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS
+☐ NEXT_PUBLIC_AI_ORACLE_ADDRESS
+☐ NEXT_PUBLIC_GASLESS_RELAYER_ADDRESS
+☐ NEXT_PUBLIC_DEFAULT_CHAIN_ID
+☐ NEXT_PUBLIC_ENABLE_TESTNET
+
+For full features:
+☐ HUGGINGFACE_API_KEY
+☐ PINATA_API_KEY
+☐ PINATA_SECRET_KEY
+
+After deploying:
+☐ Test wallet connection
+☐ Test market browsing
+☐ Verify correct network shown
+
+┌────────────────────────────────────────────────────────────────┐
+│ 🎯 READY TO DEPLOY?                                          │
+└────────────────────────────────────────────────────────────────┘
+
+1. Get WalletConnect ID: https://cloud.walletconnect.com/
+2. Go to Vercel: https://vercel.com/new
+3. Import your repo
+4. Add environment variables (see above)
+5. Click Deploy!
+
+Your app will be live at: https://your-project.vercel.app
+
+Good luck! 🚀
+
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
