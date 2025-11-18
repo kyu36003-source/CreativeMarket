@@ -30,12 +30,24 @@ import {
  */
 export function useMarket(marketId: number) {
   const chainId = useChainId();
+  
+  // Default to BSC Testnet (97) if no chain connected - matches our local Hardhat config
+  const effectiveChainId = chainId || 97;
+  
+  // Debug logging
+  console.log('🔍 useMarket DEBUG:', {
+    marketId,
+    chainId,
+    effectiveChainId,
+    address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET'),
+  });
 
   return useReadContract({
-    address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+    address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
     functionName: 'markets',
     args: [BigInt(marketId)],
+    chainId: effectiveChainId,
   });
 }
 
@@ -44,11 +56,15 @@ export function useMarket(marketId: number) {
  */
 export function useMarketCount() {
   const chainId = useChainId();
+  
+  // Default to BSC Testnet (97) if no chain connected
+  const effectiveChainId = chainId || 97;
 
   return useReadContract({
-    address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+    address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
     functionName: 'marketCount',
+    chainId: effectiveChainId,
   });
 }
 
@@ -136,7 +152,7 @@ export function usePlaceBet() {
         'PREDICTION_MARKET'
       ) as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,
-      functionName: 'placeBet',
+      functionName: 'buyPosition',
       args: [BigInt(marketId), position],
       value: parseEther(amount),
     });

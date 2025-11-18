@@ -3,6 +3,9 @@
  * Tests Hugging Face AI to verify it's genuine AI, not mock
  */
 
+// Load environment variables
+require('dotenv').config({ path: '.env.local' });
+
 const { HfInference } = require('@huggingface/inference');
 
 // Test configuration

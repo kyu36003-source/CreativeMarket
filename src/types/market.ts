@@ -29,6 +29,7 @@ export interface Market {
   resolvedAt: number | null;
   imageUrl?: string;
   tags?: string[];
+  aiOracleEnabled?: boolean;
 
   // Enhanced fields for copy trading
   status?: MarketStatus;
@@ -36,6 +37,10 @@ export interface Market {
   uniqueBettors?: number;
   volume24h?: bigint;
   featured?: boolean;
+  yesOdds?: number;
+  noOdds?: number;
+  totalVolume?: bigint;
+  participantCount?: number;
 }
 
 export interface MarketDetails extends Market {
@@ -100,7 +105,7 @@ export interface MarketCategoryInfo {
   id: string;
   name: string;
   icon: string;
-  description: string;
+  count?: number;
 }
 
 export interface Transaction {

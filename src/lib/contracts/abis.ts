@@ -4,26 +4,87 @@
  */
 
 export const PREDICTION_MARKET_ABI = [
-  // View Functions
-  'function markets(uint256) external view returns (uint256 id, string question, string description, string category, address creator, uint256 endTime, uint256 totalYesAmount, uint256 totalNoAmount, bool resolved, bool outcome, uint256 resolvedAt, bool aiOracleEnabled)',
-  'function marketCount() external view returns (uint256)',
-  'function positions(uint256 marketId, address user) external view returns (uint256 yesAmount, uint256 noAmount, bool claimed)',
-  'function authorizedOracles(address) external view returns (bool)',
-  'function reputationContract() external view returns (address)',
-  'function PLATFORM_FEE() external view returns (uint256)',
-  'function MIN_BET() external view returns (uint256)',
-
-  // Write Functions
-  'function createMarket(string memory _question, string memory _description, string memory _category, uint256 _endTime, bool _aiOracleEnabled) external returns (uint256)',
-  'function placeBet(uint256 _marketId, bool _position) external payable',
-  'function resolveMarket(uint256 _marketId, bool _outcome) external',
-  'function claimWinnings(uint256 _marketId) external',
-
-  // Events
-  'event MarketCreated(uint256 indexed marketId, string question, uint256 endTime, address indexed creator)',
-  'event PositionTaken(uint256 indexed marketId, address indexed user, bool position, uint256 amount)',
-  'event MarketResolved(uint256 indexed marketId, bool outcome, uint256 resolvedAt)',
-  'event WinningsClaimed(uint256 indexed marketId, address indexed user, uint256 amount)',
+  {
+    inputs: [{ internalType: 'uint256', name: '_marketId', type: 'uint256' }],
+    name: 'claimWinnings',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'string', name: '_question', type: 'string' },
+      { internalType: 'string', name: '_description', type: 'string' },
+      { internalType: 'string', name: '_category', type: 'string' },
+      { internalType: 'uint256', name: '_endTime', type: 'uint256' },
+      { internalType: 'bool', name: '_aiOracleEnabled', type: 'bool' },
+    ],
+    name: 'createMarket',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'marketCount',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    name: 'markets',
+    outputs: [
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'string', name: 'question', type: 'string' },
+      { internalType: 'string', name: 'description', type: 'string' },
+      { internalType: 'string', name: 'category', type: 'string' },
+      { internalType: 'address', name: 'creator', type: 'address' },
+      { internalType: 'uint256', name: 'endTime', type: 'uint256' },
+      { internalType: 'uint256', name: 'totalYesAmount', type: 'uint256' },
+      { internalType: 'uint256', name: 'totalNoAmount', type: 'uint256' },
+      { internalType: 'bool', name: 'resolved', type: 'bool' },
+      { internalType: 'bool', name: 'outcome', type: 'bool' },
+      { internalType: 'uint256', name: 'resolvedAt', type: 'uint256' },
+      { internalType: 'bool', name: 'aiOracleEnabled', type: 'bool' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '_marketId', type: 'uint256' },
+      { internalType: 'bool', name: '_position', type: 'bool' },
+    ],
+    name: 'buyPosition',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '_marketId', type: 'uint256' },
+      { internalType: 'bool', name: '_outcome', type: 'bool' },
+    ],
+    name: 'resolveMarket',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'address', name: '', type: 'address' },
+    ],
+    name: 'positions',
+    outputs: [
+      { internalType: 'uint256', name: 'yesAmount', type: 'uint256' },
+      { internalType: 'uint256', name: 'noAmount', type: 'uint256' },
+      { internalType: 'bool', name: 'claimed', type: 'bool' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ] as const;
 
 export const AI_ORACLE_ABI = [

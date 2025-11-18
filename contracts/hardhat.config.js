@@ -37,23 +37,23 @@ module.exports = {
     },
   },
   networks: {
-    // Local Hardhat Network
+    // Local Hardhat Network (Mimics BSC Testnet for demo)
     hardhat: {
-      chainId: 31337,
+      chainId: 97, // BSC Testnet Chain ID for realistic demo
       mining: {
         auto: true,
-        interval: 0,
+        interval: 3000, // 3 second blocks like BSC
       },
       accounts: {
         mnemonic: "test test test test test test test test test test test junk",
         count: 10,
-        accountsBalance: "10000000000000000000000", // 10000 ETH
+        accountsBalance: "10000000000000000000000", // 10000 BNB
       },
     },
-    // Local Network (for external testing)
+    // Local Network (for external testing) - Mimics BSC Testnet
     localhost: {
       url: "http://127.0.0.1:8545",
-      chainId: 31337,
+      chainId: 97, // BSC Testnet Chain ID
     },
     // BNB Chain Testnet
     bscTestnet: {

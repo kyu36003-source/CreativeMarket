@@ -30,7 +30,10 @@ export function Leaderboard({
     );
   }
 
-  if (!traders || traders.length === 0) {
+  // Ensure traders is always an array
+  const tradersList = Array.isArray(traders) ? traders : [];
+
+  if (tradersList.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">No traders found</p>
@@ -40,7 +43,7 @@ export function Leaderboard({
 
   return (
     <div className="space-y-4">
-      {traders.map((trader, index) => (
+      {tradersList.map((trader, index) => (
         <TraderCard
           key={trader.address}
           trader={trader}

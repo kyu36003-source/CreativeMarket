@@ -25,36 +25,82 @@ import {
   Users,
   DollarSign,
   CheckCircle,
-  XCircle,
   Loader2,
   ArrowLeft,
   Trophy,
   AlertCircle,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+
+// Helper function to get block explorer URL
+function getExplorerUrl(chainId: number, txHash: string): string | null {
+  switch (chainId) {
+    case 56: // BSC Mainnet
+      return `https://bscscan.com/tx/${txHash}`;
+    case 97: // BSC Testnet
+      return `https://testnet.bscscan.com/tx/${txHash}`;
+    case 31337: // Localhost
+      return null; // No explorer for local network
+    default:
+      return null;
+  }
+}
 
 export default function MarketDetailPage() {
   const params = useParams();
   const router = useRouter();
   const marketId = parseInt(params.id as string);
-  const { address, isConnected } = useAccount();
+  const { isConnected, chainId } = useAccount();
 
   const { data: marketData, isLoading: loadingMarket } = useMarket(marketId);
   const { data: positionData } = usePosition(marketId);
-  const { placeBet, isPending: isBetting } = usePlaceBet();
-  const { claimWinnings, isPending: isClaiming } = useClaimWinnings();
+  const {
+    placeBet,
+    isPending: isBetting,
+    hash: betTxHash,
+    isConfirming: isBetConfirming,
+    isSuccess: isBetSuccess,
+  } = usePlaceBet();
+  const {
+    claimWinnings,
+    isPending: isClaiming,
+    hash: claimTxHash,
+    isConfirming: isClaimConfirming,
+    isSuccess: isClaimSuccess,
+  } = useClaimWinnings();
 
   const [betAmount, setBetAmount] = useState('0.1');
   const [selectedPosition, setSelectedPosition] = useState<boolean | null>(
     null
   );
   const [showBetForm, setShowBetForm] = useState(false);
+  const [showTxModal, setShowTxModal] = useState(false);
 
   const { potentialWinnings, odds } = useCalculateWinnings(
     marketId,
     selectedPosition ?? true,
     betAmount
   );
+
+  // Show transaction modal when transaction is initiated
+  useEffect(() => {
+    if (betTxHash || claimTxHash) {
+      setShowTxModal(true);
+    }
+  }, [betTxHash, claimTxHash]);
+
+  // Close modal and reset form when transaction succeeds
+  useEffect(() => {
+    if (isBetSuccess) {
+      setTimeout(() => {
+        setShowBetForm(false);
+        setBetAmount('0.1');
+        setSelectedPosition(null);
+      }, 3000); // Keep modal open for 3 seconds to show success
+    }
+  }, [isBetSuccess]);
 
   if (loadingMarket) {
     return (
@@ -73,9 +119,9 @@ export default function MarketDetailPage() {
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-xl font-semibold mb-2">Market Not Found</h2>
           <p className="text-muted-foreground mb-4">
-            This market doesn't exist or hasn't been loaded yet.
+            This market doesn&apos;t exist or hasn&apos;t been loaded yet.
           </p>
-          <Button onClick={() => router.push('/markets' as any)}>
+          <Button onClick={() => router.push('/markets')}>
             Back to Markets
           </Button>
         </Card>
@@ -83,20 +129,17 @@ export default function MarketDetailPage() {
     );
   }
 
-  const [
-    id,
-    question,
-    description,
-    category,
-    creator,
-    endTime,
-    totalYesAmount,
-    totalNoAmount,
-    resolved,
-    outcome,
-    resolvedAt,
-    aiOracleEnabled,
-  ] = marketData as any[];
+  const marketArray = marketData as unknown[];
+  const question = marketArray[1] as string;
+  const description = marketArray[2] as string;
+  const category = marketArray[3] as string;
+  const endTime = marketArray[5] as bigint;
+  const totalYesAmount = marketArray[6] as bigint;
+  const totalNoAmount = marketArray[7] as bigint;
+  const resolved = marketArray[8] as boolean;
+  const outcome = marketArray[9] as boolean;
+  const resolvedAt = marketArray[10] as bigint;
+  const aiOracleEnabled = marketArray[11] as boolean;
 
   const endDate = new Date(Number(endTime) * 1000);
   const hasEnded = endDate < new Date();
@@ -107,9 +150,13 @@ export default function MarketDetailPage() {
   const noPercentage = totalPool > 0 ? (noAmount / totalPool) * 100 : 50;
 
   // User position
-  const userYesAmount = positionData ? Number(formatEther(positionData[0])) : 0;
-  const userNoAmount = positionData ? Number(formatEther(positionData[1])) : 0;
-  const hasClaimed = positionData ? positionData[2] : false;
+  const userYesAmount = positionData
+    ? Number(formatEther((positionData as unknown[])[0] as bigint))
+    : 0;
+  const userNoAmount = positionData
+    ? Number(formatEther((positionData as unknown[])[1] as bigint))
+    : 0;
+  const hasClaimed = positionData ? ((positionData as unknown[])[2] as boolean) : false;
   const hasPosition = userYesAmount > 0 || userNoAmount > 0;
 
   // Check if user can claim
@@ -124,9 +171,7 @@ export default function MarketDetailPage() {
 
     try {
       await placeBet(marketId, selectedPosition, betAmount);
-      setShowBetForm(false);
-      setBetAmount('0.1');
-      setSelectedPosition(null);
+      // Transaction modal will show automatically via useEffect
     } catch (error) {
       console.error('Error placing bet:', error);
     }
@@ -139,6 +184,14 @@ export default function MarketDetailPage() {
       await claimWinnings(marketId);
     } catch (error) {
       console.error('Error claiming winnings:', error);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error('Failed to copy:', error);
     }
   };
 
@@ -460,6 +513,119 @@ export default function MarketDetailPage() {
             )}
           </div>
         </Card>
+      )}
+
+      {/* Transaction Status Modal */}
+      {showTxModal && (betTxHash || claimTxHash) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4 p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Transaction Status</h3>
+                <button
+                  onClick={() => setShowTxModal(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Transaction Status */}
+              <div className="space-y-3">
+                {/* Pending */}
+                {(isBetting || isClaiming) && (
+                  <div className="flex items-center gap-3 text-yellow-600 dark:text-yellow-400">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Waiting for wallet confirmation...</span>
+                  </div>
+                )}
+
+                {/* Confirming */}
+                {(isBetConfirming || isClaimConfirming) && (
+                  <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Transaction confirming on blockchain...</span>
+                  </div>
+                )}
+
+                {/* Success */}
+                {(isBetSuccess || isClaimSuccess) && (
+                  <div className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Transaction successful!</span>
+                  </div>
+                )}
+
+                {/* Transaction Hash */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Transaction Hash:
+                  </p>
+                  <div className="flex items-center gap-2 bg-muted p-3 rounded-lg">
+                    <code className="text-xs flex-1 overflow-x-auto">
+                      {betTxHash || claimTxHash}
+                    </code>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(betTxHash || claimTxHash || '')
+                      }
+                      className="p-1 hover:bg-background rounded"
+                      title="Copy transaction hash"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Explorer Link */}
+                {chainId &&
+                  getExplorerUrl(
+                    chainId,
+                    betTxHash || claimTxHash || ''
+                  ) && (
+                    <a
+                      href={
+                        getExplorerUrl(
+                          chainId,
+                          betTxHash || claimTxHash || ''
+                        ) || '#'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                      <span>View on Block Explorer</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+
+                {/* Localhost message */}
+                {chainId === 31337 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    No block explorer available for local network
+                  </p>
+                )}
+              </div>
+
+              {/* Close button for success */}
+              {(isBetSuccess || isClaimSuccess) && (
+                <Button
+                  onClick={() => {
+                    setShowTxModal(false);
+                    if (isBetSuccess) {
+                      setShowBetForm(false);
+                      setBetAmount('0.1');
+                      setSelectedPosition(null);
+                    }
+                  }}
+                  className="w-full"
+                >
+                  Close
+                </Button>
+              )}
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   );

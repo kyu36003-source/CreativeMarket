@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
@@ -15,7 +15,6 @@ import {
   TrendingDown,
   Clock,
   DollarSign,
-  Filter,
   Search,
   Loader2,
   CheckCircle,
@@ -37,69 +36,122 @@ const categories = [
 
 const statusFilters = ['All', 'Active', 'Resolved', 'Ending Soon'];
 
+interface MarketData {
+  id: number;
+  question: string;
+  description: string;
+  category: string;
+  totalPool: number;
+  yesAmount: number;
+  noAmount: number;
+  yesPercentage: number;
+  endTime: number;
+  resolved: boolean;
+  outcome: boolean;
+  aiOracleEnabled: boolean;
+}
+
 export default function MarketsPage() {
   const router = useRouter();
   const { data: marketCount } = useMarketCount();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [markets, setMarkets] = useState<MarketData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalMarkets = marketCount ? Number(marketCount) : 0;
+  // Fetch real markets from blockchain
+  const { data: market1Data } = useMarket(1);
+  const { data: market2Data } = useMarket(2);
+  const { data: market3Data } = useMarket(3);
 
-  // In production, fetch all markets from contract or indexer
-  // For now, show sample markets
-  const sampleMarkets = Array.from({ length: totalMarkets || 8 }, (_, i) => ({
-    id: i,
-    question: [
-      'Will Bitcoin reach $50,000 by end of January 2024?',
-      'Will Ethereum price be above $2,500 on January 1st?',
-      'Will BNB Chain process over 5M transactions this week?',
-      'Will Solana price exceed $100 by February 2024?',
-      'Will NFT trading volume increase this month?',
-      'Will any cryptocurrency flip Bitcoin in market cap?',
-      'Will a major exchange get hacked this quarter?',
-      'Will crypto regulations pass in the US this year?',
-    ][i % 8],
-    category: [
-      'Crypto',
-      'Crypto',
-      'Technology',
-      'Crypto',
-      'Finance',
-      'Crypto',
-      'Technology',
-      'Politics',
-    ][i % 8],
-    totalPool: Math.random() * 10 + 1,
-    yesPercentage: Math.random() * 100,
-    endTime: Date.now() + (Math.random() * 30 - 15) * 86400000,
-    resolved: i % 5 === 0,
-    outcome: i % 2 === 0,
-    aiOracleEnabled: i % 3 !== 0,
-  }));
+  useEffect(() => {
+    const convertMarketData = (marketId: number, data: unknown): MarketData | null => {
+      if (!data || !Array.isArray(data)) return null;
 
-  const filteredMarkets = sampleMarkets.filter(market => {
-    if (selectedCategory !== 'All' && market.category !== selectedCategory) {
-      return false;
+      const [
+        id,
+        question,
+        description,
+        category,
+        creator,
+        endTime,
+        totalYesAmount,
+        totalNoAmount,
+        resolved,
+        outcome,
+        resolvedAt,
+        aiOracleEnabled,
+      ] = data;
+
+      const yesAmount = Number(formatEther(totalYesAmount as bigint));
+      const noAmount = Number(formatEther(totalNoAmount as bigint));
+      const totalPool = yesAmount + noAmount;
+      const yesPercentage = totalPool > 0 ? (yesAmount / totalPool) * 100 : 50;
+
+      return {
+        id: marketId,
+        question: question as string,
+        description: description as string,
+        category: category as string,
+        totalPool,
+        yesAmount,
+        noAmount,
+        yesPercentage,
+        endTime: Number(endTime),
+        resolved: resolved as boolean,
+        outcome: outcome as boolean,
+        aiOracleEnabled: aiOracleEnabled as boolean,
+      };
+    };
+
+    const loadedMarkets: MarketData[] = [];
+
+    if (market1Data) {
+      const market = convertMarketData(1, market1Data);
+      if (market) loadedMarkets.push(market);
     }
-    if (selectedStatus === 'Active' && market.resolved) {
-      return false;
+
+    if (market2Data) {
+      const market = convertMarketData(2, market2Data);
+      if (market) loadedMarkets.push(market);
     }
-    if (selectedStatus === 'Resolved' && !market.resolved) {
-      return false;
+
+    if (market3Data) {
+      const market = convertMarketData(3, market3Data);
+      if (market) loadedMarkets.push(market);
     }
+
+    setMarkets(loadedMarkets);
+    setLoading(false);
+  }, [market1Data, market2Data, market3Data]);
+
+  const totalMarkets = markets.length;
+
+  const filteredMarkets = markets.filter(market => {
+    // Category filter
     if (
-      selectedStatus === 'Ending Soon' &&
-      (market.resolved || market.endTime > Date.now() + 86400000)
+      selectedCategory !== 'All' &&
+      market.category.toLowerCase() !== selectedCategory.toLowerCase()
     ) {
       return false;
     }
-    if (
-      searchQuery &&
-      !market.question.toLowerCase().includes(searchQuery.toLowerCase())
-    ) {
+
+    // Status filter
+    const now = Date.now();
+    const endTime = market.endTime * 1000;
+    const isActive = !market.resolved && endTime > now;
+    const isEndingSoon = isActive && endTime - now < 7 * 86400000; // 7 days
+
+    if (selectedStatus === 'Active' && !isActive) return false;
+    if (selectedStatus === 'Resolved' && !market.resolved) return false;
+    if (selectedStatus === 'Ending Soon' && !isEndingSoon) return false;
+
+    // Search filter
+    if (searchQuery && !market.question.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
+
     return true;
   });
 
@@ -122,20 +174,20 @@ export default function MarketsPage() {
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Active Markets</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.filter(m => !m.resolved).length}
+            {markets.filter((m: MarketData) => !m.resolved).length}
           </p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Volume</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.reduce((sum, m) => sum + m.totalPool, 0).toFixed(2)}{' '}
+            {markets.reduce((sum: number, m: MarketData) => sum + m.totalPool, 0).toFixed(2)}{' '}
             BNB
           </p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-muted-foreground mb-1">Resolved Today</p>
           <p className="text-2xl font-bold">
-            {sampleMarkets.filter(m => m.resolved).length}
+            {markets.filter((m: MarketData) => m.resolved).length}
           </p>
         </Card>
       </div>
@@ -193,10 +245,16 @@ export default function MarketsPage() {
 
       {/* Markets Grid */}
       <div className="space-y-4">
-        {filteredMarkets.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : filteredMarkets.length > 0 ? (
           filteredMarkets.map(market => {
-            const hasEnded = market.endTime < Date.now();
-            const endingSoon = market.endTime - Date.now() < 86400000; // 24 hours
+            const now = Date.now();
+            const endTime = market.endTime * 1000;
+            const hasEnded = endTime < now;
+            const endingSoon = endTime - now < 86400000 && endTime - now > 0; // 24 hours
 
             return (
               <Card
@@ -286,7 +344,7 @@ export default function MarketsPage() {
                           ? 'Resolved'
                           : hasEnded
                             ? 'Ended'
-                            : `${formatDistanceToNow(new Date(market.endTime), { addSuffix: true })}`}
+                            : `${formatDistanceToNow(new Date(endTime), { addSuffix: true })}`}
                       </span>
                     </div>
                   </div>

@@ -24,6 +24,26 @@
 import { http, createConfig, fallback } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';
+import type { Chain } from 'viem';
+
+// Define custom localhost chain with BSC Testnet Chain ID (97)
+const localhostBSC = {
+  id: 97,
+  name: 'Hardhat Local (BSC Testnet)',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'BNB',
+    symbol: 'BNB',
+  },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+    public: { http: ['http://127.0.0.1:8545'] },
+  },
+  blockExplorers: {
+    default: { name: 'Local', url: '' },
+  },
+  testnet: true,
+} as const satisfies Chain;
 
 // Multiple RPC endpoints for fallback (improves reliability)
 const BSC_MAINNET_RPCS = [
@@ -43,13 +63,15 @@ const BSC_TESTNET_RPCS = [
 
 // BNB Chain Configuration with fallback transports
 export const bnbChainConfig = createConfig({
-  chains: [bsc, bscTestnet],
+  chains: [localhostBSC, bsc],
   connectors: [
     injected({
       shimDisconnect: true,
     }),
   ],
   transports: {
+    // Localhost for development (Chain ID 97 - BSC Testnet)
+    [localhostBSC.id]: http('http://127.0.0.1:8545'),
     // Use fallback transport with multiple RPC endpoints for better reliability
     [bsc.id]: fallback(
       BSC_MAINNET_RPCS.map(url =>
@@ -68,24 +90,6 @@ export const bnbChainConfig = createConfig({
       ),
       {
         rank: true, // Automatically rank transports by latency
-      }
-    ),
-    [bscTestnet.id]: fallback(
-      BSC_TESTNET_RPCS.map(url =>
-        http(url, {
-          batch: {
-            wait: 100,
-          },
-          timeout: 10000,
-          retryCount: 3,
-          retryDelay: 1000,
-          fetchOptions: {
-            mode: 'cors',
-          },
-        })
-      ),
-      {
-        rank: true,
       }
     ),
   },

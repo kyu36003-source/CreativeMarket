@@ -13,11 +13,7 @@ import {
 import { RainbowKitButton } from '@/components/RainbowKitButton';
 import { MarketCard } from '@/components/MarketCard';
 import { PredictionModal } from '@/components/PredictionModal';
-import {
-  fetchMarkets,
-  fetchMarketCategories,
-  calculateMarketOdds,
-} from '@/lib/market-data';
+import { calculateMarketOdds } from '@/lib/market-data';
 import { Market, MarketCategoryInfo } from '@/types/market';
 import {
   TrendingUp,
@@ -25,51 +21,166 @@ import {
   Shield,
   Sparkles,
   Search,
-  Filter,
   Brain,
   Palette,
 } from 'lucide-react';
+import { useMarketCount, useMarket } from '@/hooks/useContracts';
+import { formatEther } from 'viem';
 
 export default function HomePage() {
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [markets, setMarkets] = useState<Market[]>([]);
-  const [categories, setCategories] = useState<MarketCategoryInfo[]>([]);
+  const [categories] = useState<MarketCategoryInfo[]>([
+    { id: 'all', name: 'All Markets', icon: '🎯', count: 0 },
+    { id: 'crypto', name: 'Crypto', icon: '₿', count: 0 },
+    { id: 'technology', name: 'Technology', icon: '💻', count: 0 },
+    { id: 'sports', name: 'Sports', icon: '⚽', count: 0 },
+    { id: 'entertainment', name: 'Entertainment', icon: '🎬', count: 0 },
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch categories on mount
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await fetchMarketCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error('Failed to load categories:', err);
-        setError('Failed to load market categories');
-      }
-    };
-    loadCategories();
-  }, []);
+  // Get market count from blockchain
+  const { data: marketCount, isLoading: isLoadingCount, isError: isErrorCount, error: errorCount } = useMarketCount();
+  
+  // Fetch markets 1, 2, and 3 directly
+  const { data: market1Data, isLoading: isLoading1, isError: isError1, error: error1 } = useMarket(1);
+  const { data: market2Data, isLoading: isLoading2, isError: isError2, error: error2 } = useMarket(2);
+  const { data: market3Data, isLoading: isLoading3, isError: isError3, error: error3 } = useMarket(3);
 
-  // Fetch markets when category or search changes
+  // Timeout fallback - stop loading after 10 seconds
   useEffect(() => {
-    const loadMarkets = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchMarkets(selectedCategory, searchQuery);
-        setMarkets(data);
-      } catch (err) {
-        console.error('Failed to load markets:', err);
-        setError('Failed to load markets. Please try again.');
-      } finally {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ Loading timeout - stopping loader');
         setLoading(false);
+        setError('Unable to load markets. Please check if Hardhat node is running and contracts are deployed.');
       }
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  // Convert blockchain data to Market format
+  useEffect(() => {
+    console.log('🔍 PAGE DEBUG - Hook data:', {
+      marketCount,
+      isLoadingCount,
+      isErrorCount,
+      market1Data,
+      isLoading1,
+      isError1,
+      market2Data,
+      isLoading2,
+      isError2,
+      market3Data,
+      isLoading3,
+      isError3,
+    });
+
+    // Check if any hooks have errors
+    if (isErrorCount || isError1 || isError2 || isError3) {
+      console.error('❌ Error loading from blockchain');
+      console.error('Error details:', {
+        countError: errorCount,
+        market1Error: error1,
+        market2Error: error2,
+        market3Error: error3,
+      });
+      setLoading(false);
+      setError('Error connecting to blockchain. Please ensure Hardhat node is running.');
+      return;
+    }
+
+    // If all hooks have finished loading (not loading anymore)
+    const allFinishedLoading = !isLoadingCount && !isLoading1 && !isLoading2 && !isLoading3;
+    
+    if (allFinishedLoading) {
+      console.log('✅ All hooks finished loading');
+    }
+
+    const convertToMarket = (marketId: number, data: unknown[]): Market | null => {
+      if (!data || data.length < 12) {
+        console.log(`⚠️ Market ${marketId} data invalid:`, { data, length: data?.length });
+        return null;
+      }
+
+      const [
+        id,
+        question,
+        description,
+        category,
+        creator,
+        endTime,
+        totalYesAmount,
+        totalNoAmount,
+        resolved,
+        outcome,
+        resolvedAt,
+        aiOracleEnabled,
+      ] = data as [bigint, string, string, string, string, bigint, bigint, bigint, boolean, boolean, bigint, boolean];
+
+      const totalYes = totalYesAmount as bigint;
+      const totalNo = totalNoAmount as bigint;
+      const { yesOdds, noOdds } = calculateMarketOdds(totalYes, totalNo);
+
+      return {
+        id: marketId.toString(),
+        question: question as string,
+        description: description as string,
+        category: category as string,
+        creator: creator as string,
+        endTime: Number(endTime),
+        totalYesAmount: totalYes,
+        totalNoAmount: totalNo,
+        resolved: resolved as boolean,
+        outcome: outcome as boolean,
+        resolvedAt: Number(resolvedAt),
+        aiOracleEnabled: aiOracleEnabled as boolean,
+        yesOdds,
+        noOdds,
+        totalVolume: totalYes + totalNo,
+        participantCount: Math.floor(Math.random() * 50) + 10, // Placeholder
+      };
     };
-    loadMarkets();
-  }, [selectedCategory, searchQuery]);
+
+    const loadedMarkets: Market[] = [];
+    
+    if (market1Data) {
+      const market = convertToMarket(1, market1Data as unknown[]);
+      if (market) loadedMarkets.push(market);
+    }
+    
+    if (market2Data) {
+      const market = convertToMarket(2, market2Data as unknown[]);
+      if (market) loadedMarkets.push(market);
+    }
+    
+    if (market3Data) {
+      const market = convertToMarket(3, market3Data as unknown[]);
+      if (market) loadedMarkets.push(market);
+    }
+
+    console.log('✅ Loaded markets:', loadedMarkets.length);
+
+    if (loadedMarkets.length > 0) {
+      setMarkets(loadedMarkets);
+      setLoading(false);
+      console.log('✅ Markets set, loading = false');
+    } else if (marketCount !== undefined) {
+      // If we have a market count but no data yet, wait a bit longer
+      // But if market count is 0 or hooks have loaded, stop loading
+      const count = Number(marketCount);
+      console.log('📊 Market count:', count);
+      if (count === 0 || (market1Data !== undefined && market2Data !== undefined && market3Data !== undefined)) {
+        setLoading(false);
+        setError('No markets found. Please ensure contracts are deployed.');
+        console.log('⚠️ No markets found');
+      }
+    }
+  }, [market1Data, market2Data, market3Data, marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isErrorCount, isError1, isError2, isError3]);
 
   const selectedMarket = markets.find(m => m.id === selectedMarketId);
   const filteredMarkets = markets.filter(market => {
@@ -82,26 +193,9 @@ export default function HomePage() {
   });
 
   const handlePredictionSubmit = async (position: boolean, amount: string) => {
-    console.log('Prediction submitted:', {
-      marketId: selectedMarketId,
-      position,
-      amount,
-    });
-    // TODO: Implement smart contract interaction
-    // Call contract method to place prediction
-    try {
-      // const tx = await placePrediction(selectedMarketId, position, amount);
-      // await tx.wait();
-      alert(
-        `Prediction placed! Position: ${position ? 'YES' : 'NO'}, Amount: ${amount} BNB`
-      );
-      setSelectedMarketId(null);
-      // Refresh markets after successful prediction
-      const data = await fetchMarkets(selectedCategory, searchQuery);
-      setMarkets(data);
-    } catch (err) {
-      console.error('Failed to place prediction:', err);
-      alert('Failed to place prediction. Please try again.');
+    // This will redirect to the market detail page where they can actually place the bet
+    if (selectedMarketId) {
+      window.location.href = `/markets/${selectedMarketId}`;
     }
   };
 
@@ -130,10 +224,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center max-w-4xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 px-4 py-2 rounded-full mb-6">
-            <Sparkles className="h-4 w-4 text-orange-600" />
-            <span className="text-sm font-semibold text-orange-800">
-              Seedify Hackathon 2025 • $400K Prize Pool
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-full mb-6">
+            <Sparkles className="h-4 w-4 text-purple-600" />
+            <span className="text-sm font-semibold text-purple-800">
+              Powered by BNB Chain
             </span>
           </div>
           <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
@@ -329,11 +423,10 @@ export default function HomePage() {
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
           <p className="mb-2">
-            Built for Seedify Prediction Markets Hackathon 2025 • Powered by BNB
-            Chain
+            Decentralized Prediction Markets • Powered by BNB Chain
           </p>
           <p className="text-xs">
-            🏆 YZi Labs Track: AI Oracles + Gasless UX + Liquidity Aggregation
+            AI Oracles • Gasless Transactions • On-Chain Reputation
           </p>
         </div>
       </footer>

@@ -6,17 +6,23 @@ export const CONTRACT_ADDRESSES = {
     AI_ORACLE: '0x0000000000000000000000000000000000000000', // Deploy address here
     GASLESS_RELAYER: '0x0000000000000000000000000000000000000000', // Deploy address here
   },
-  // BSC Testnet
+  // BSC Testnet (also used for local Hardhat with Chain ID 97)
   97: {
-    PREDICTION_MARKET: '0x0000000000000000000000000000000000000000', // Deploy address here
-    AI_ORACLE: '0x0000000000000000000000000000000000000000', // Deploy address here
-    GASLESS_RELAYER: '0x0000000000000000000000000000000000000000', // Deploy address here
+    PREDICTION_MARKET: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    AI_ORACLE: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    GASLESS_RELAYER: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
   },
-  // Local Hardhat Network (for development)
+  // Local Hardhat Network (for development) - Chain ID 31337
   31337: {
-    PREDICTION_MARKET: '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318',
-    AI_ORACLE: '0x610178dA211FEF7D417bC0e6FeD39F05609AD788',
-    GASLESS_RELAYER: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e',
+    PREDICTION_MARKET: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    AI_ORACLE: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    GASLESS_RELAYER: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+  },
+  // Local Hardhat Network (alternate) - Chain ID 1337
+  1337: {
+    PREDICTION_MARKET: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    AI_ORACLE: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    GASLESS_RELAYER: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
   },
 } as const;
 
@@ -24,8 +30,8 @@ export const getContractAddress = (
   chainId: number,
   contractName: keyof (typeof CONTRACT_ADDRESSES)[56]
 ) => {
-  if (chainId !== 56 && chainId !== 97 && chainId !== 31337) {
+  if (chainId !== 56 && chainId !== 97 && chainId !== 31337 && chainId !== 1337) {
     throw new Error(`Unsupported chain ID: ${chainId}`);
   }
-  return CONTRACT_ADDRESSES[chainId as 56 | 97 | 31337][contractName];
+  return CONTRACT_ADDRESSES[chainId as 56 | 97 | 31337 | 1337][contractName];
 };
