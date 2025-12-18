@@ -406,192 +406,235 @@ export default function MarketDetailPage() {
         </Card>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* YES Option */}
-        <Card
-          className={`p-6 cursor-pointer transition-all ${
-            selectedPosition === true && showBetForm
-              ? 'ring-2 ring-green-500 bg-green-500/5'
-              : 'hover:border-green-500/50'
-          } ${resolved && outcome ? 'border-green-500 bg-green-500/10' : ''}`}
-          onClick={() => {
-            if (!hasEnded && !resolved) {
-              setSelectedPosition(true);
-              setShowBetForm(true);
-            }
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-green-500" />
-              <h3 className="text-2xl font-bold">YES</h3>
-            </div>
-            {resolved && outcome && (
-              <CheckCircle className="w-6 h-6 text-green-500" />
-            )}
-          </div>
+      {/* Trading Interface - Polymarket Style */}
+      {!resolved && !hasEnded && (
+        <Card className="p-6 mb-6">
+          <h3 className="text-xl font-bold mb-6">Trade</h3>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* YES Side */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <h4 className="text-lg font-bold">YES</h4>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-green-500">{yesPercentage.toFixed(0)}¢</div>
+                  <div className="text-xs text-muted-foreground">{yesPercentage.toFixed(1)}% chance</div>
+                </div>
+              </div>
 
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-muted-foreground">
-                  Probability
-                </span>
-                <span className="text-sm font-medium">
-                  {yesPercentage.toFixed(1)}%
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-500 transition-all"
-                  style={{ width: `${yesPercentage}%` }}
-                />
-              </div>
-            </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Amount (BNB)</label>
+                  <input
+                    type="number"
+                    value={selectedPosition === true ? betAmount : '0.1'}
+                    onChange={e => {
+                      setBetAmount(e.target.value);
+                      setSelectedPosition(true);
+                    }}
+                    onFocus={() => setSelectedPosition(true)}
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.1"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-background"
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Total Bet</p>
-                <p className="font-medium">{yesAmount.toFixed(4)} BNB</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Your Bet</p>
-                <p className="font-medium">{userYesAmount.toFixed(4)} BNB</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* NO Option */}
-        <Card
-          className={`p-6 cursor-pointer transition-all ${
-            selectedPosition === false && showBetForm
-              ? 'ring-2 ring-red-500 bg-red-500/5'
-              : 'hover:border-red-500/50'
-          } ${resolved && !outcome ? 'border-red-500 bg-red-500/10' : ''}`}
-          onClick={() => {
-            if (!hasEnded && !resolved) {
-              setSelectedPosition(false);
-              setShowBetForm(true);
-            }
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <TrendingDown className="w-6 h-6 text-red-500" />
-              <h3 className="text-2xl font-bold">NO</h3>
-            </div>
-            {resolved && !outcome && (
-              <CheckCircle className="w-6 h-6 text-red-500" />
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-muted-foreground">
-                  Probability
-                </span>
-                <span className="text-sm font-medium">
-                  {noPercentage.toFixed(1)}%
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-red-500 transition-all"
-                  style={{ width: `${noPercentage}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Total Bet</p>
-                <p className="font-medium">{noAmount.toFixed(4)} BNB</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Your Bet</p>
-                <p className="font-medium">{userNoAmount.toFixed(4)} BNB</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Bet Form */}
-      {showBetForm && selectedPosition !== null && !hasEnded && !resolved && (
-        <Card className="p-6 mt-6">
-          <h3 className="text-lg font-semibold mb-4">
-            Place Bet on {selectedPosition ? 'YES' : 'NO'}
-          </h3>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Bet Amount (BNB)
-              </label>
-              <input
-                type="number"
-                value={betAmount}
-                onChange={e => setBetAmount(e.target.value)}
-                step="0.01"
-                min="0.01"
-                placeholder="0.1"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            <div className="p-4 bg-muted rounded-lg space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Potential Profit</span>
-                <span className="font-medium text-green-500">
-                  +{potentialWinnings} BNB
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Odds</span>
-                <span className="font-medium">{odds}x</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Platform Fee (2%)</span>
-                <span className="font-medium">
-                  {(Number(betAmount) * 0.02).toFixed(4)} BNB
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowBetForm(false);
-                  setSelectedPosition(null);
-                }}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handlePlaceBet}
-                disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
-                className="flex-1 gap-2"
-              >
-                {isBetting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Placing Bet...
-                  </>
-                ) : (
-                  `Bet ${betAmount} BNB`
+                {selectedPosition === true && (
+                  <div className="p-3 bg-green-500/10 rounded-lg space-y-1 text-sm border border-green-500/20">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Avg price</span>
+                      <span className="font-medium">{yesPercentage.toFixed(1)}¢</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Est. shares</span>
+                      <span className="font-medium">{(Number(betAmount) * 100).toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Potential return</span>
+                      <span className="font-medium text-green-500">+{potentialWinnings} BNB</span>
+                    </div>
+                  </div>
                 )}
-              </Button>
+
+                <Button
+                  onClick={() => {
+                    setSelectedPosition(true);
+                    handlePlaceBet();
+                  }}
+                  disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white"
+                  size="lg"
+                >
+                  {isBetting && selectedPosition === true ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Buying...
+                    </>
+                  ) : (
+                    `Buy YES`
+                  )}
+                </Button>
+              </div>
+
+              <div className="pt-3 border-t space-y-1 text-xs text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Total volume</span>
+                  <span className="font-medium">{yesAmount.toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Your position</span>
+                  <span className="font-medium">{userYesAmount.toFixed(4)} BNB</span>
+                </div>
+              </div>
             </div>
 
-            {!isConnected && (
+            {/* NO Side */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="w-5 h-5 text-red-500" />
+                  <h4 className="text-lg font-bold">NO</h4>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-red-500">{noPercentage.toFixed(0)}¢</div>
+                  <div className="text-xs text-muted-foreground">{noPercentage.toFixed(1)}% chance</div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Amount (BNB)</label>
+                  <input
+                    type="number"
+                    value={selectedPosition === false ? betAmount : '0.1'}
+                    onChange={e => {
+                      setBetAmount(e.target.value);
+                      setSelectedPosition(false);
+                    }}
+                    onFocus={() => setSelectedPosition(false)}
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.1"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background"
+                  />
+                </div>
+
+                {selectedPosition === false && (
+                  <div className="p-3 bg-red-500/10 rounded-lg space-y-1 text-sm border border-red-500/20">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Avg price</span>
+                      <span className="font-medium">{noPercentage.toFixed(1)}¢</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Est. shares</span>
+                      <span className="font-medium">{(Number(betAmount) * 100).toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Potential return</span>
+                      <span className="font-medium text-green-500">+{potentialWinnings} BNB</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  onClick={() => {
+                    setSelectedPosition(false);
+                    handlePlaceBet();
+                  }}
+                  disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white"
+                  size="lg"
+                >
+                  {isBetting && selectedPosition === false ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Buying...
+                    </>
+                  ) : (
+                    `Buy NO`
+                  )}
+                </Button>
+              </div>
+
+              <div className="pt-3 border-t space-y-1 text-xs text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Total volume</span>
+                  <span className="font-medium">{noAmount.toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Your position</span>
+                  <span className="font-medium">{userNoAmount.toFixed(4)} BNB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {!isConnected && (
+            <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                Please connect your wallet to place a bet
+                Connect your wallet to start trading
               </p>
-            )}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Market Ended - Show final odds */}
+      {(hasEnded || resolved) && (
+        <Card className="p-6 mb-6">
+          <h3 className="text-xl font-bold mb-4">Final Odds</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* YES Side */}
+            <div className={`p-4 rounded-lg border-2 ${resolved && outcome ? 'bg-green-500/10 border-green-500' : 'border-muted'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <h4 className="text-lg font-bold">YES</h4>
+                </div>
+                {resolved && outcome && (
+                  <CheckCircle className="w-6 h-6 text-green-500" />
+                )}
+              </div>
+              <div className="text-3xl font-bold text-green-500 mb-2">{yesPercentage.toFixed(0)}¢</div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total volume</span>
+                  <span className="font-medium">{yesAmount.toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Your position</span>
+                  <span className="font-medium">{userYesAmount.toFixed(4)} BNB</span>
+                </div>
+              </div>
+            </div>
+
+            {/* NO Side */}
+            <div className={`p-4 rounded-lg border-2 ${resolved && !outcome ? 'bg-red-500/10 border-red-500' : 'border-muted'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="w-5 h-5 text-red-500" />
+                  <h4 className="text-lg font-bold">NO</h4>
+                </div>
+                {resolved && !outcome && (
+                  <CheckCircle className="w-6 h-6 text-red-500" />
+                )}
+              </div>
+              <div className="text-3xl font-bold text-red-500 mb-2">{noPercentage.toFixed(0)}¢</div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total volume</span>
+                  <span className="font-medium">{noAmount.toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Your position</span>
+                  <span className="font-medium">{userNoAmount.toFixed(4)} BNB</span>
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       )}
