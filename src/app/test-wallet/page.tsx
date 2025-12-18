@@ -47,10 +47,10 @@ export default function TestWalletPage() {
           <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
             <h2 className="text-lg font-semibold mb-2">📝 Instructions:</h2>
             <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-              <li>Click the "Connect Wallet" button above</li>
+              <li>Click the &ldquo;Connect Wallet&rdquo; button above</li>
               <li>Select your wallet (MetaMask, WalletConnect, etc.)</li>
               <li>Approve the connection</li>
-              <li>Check if the connection status shows "Connected: Yes"</li>
+              <li>Check if the connection status shows &ldquo;Connected: Yes&rdquo;</li>
             </ol>
           </div>
         </div>

@@ -70,7 +70,7 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
               <div className="flex-1">
                 <p className="font-bold text-lg">Wrong Network Detected</p>
                 <p className="text-sm">
-                  You're connected to{' '}
+                  You&apos;re connected to{' '}
                   <span className="font-semibold">{getChainName(chainId)}</span>
                   . This dApp only works on{' '}
                   <span className="font-semibold">BNB Chain</span>.
@@ -108,7 +108,7 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
 
           {/* Help Text */}
           <div className="mt-2 text-xs text-black/80 border-t border-black/20 pt-2">
-            💡 <strong>Don't have BNB?</strong> Get free testnet BNB from the{' '}
+            💡 <strong>Don&apos;t have BNB?</strong> Get free testnet BNB from the{' '}
             <a
               href="https://www.bnbchain.org/en/testnet-faucet"
               target="_blank"

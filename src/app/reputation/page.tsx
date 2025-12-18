@@ -21,7 +21,6 @@ import {
   Target,
   Users,
   Award,
-  Star,
   Sparkles,
   Loader2,
   Copy,
@@ -63,14 +62,11 @@ export default function ReputationPage() {
     );
   }
 
-  const [totalTrades, winningTrades, totalVolume, roi] = reputationData || [
-    0,
-    0,
-    BigInt(0),
-    0,
-  ];
-  const successRate = successRateData || 0;
-  const tier = tierData || 0;
+  const [totalTrades, winningTrades, _totalVolume, roi] = reputationData 
+    ? Array.from(reputationData as readonly [bigint, bigint, bigint, bigint])
+    : [BigInt(0), BigInt(0), BigInt(0), BigInt(0)];
+  const successRate = typeof successRateData === 'number' ? successRateData : 0;
+  const tier = typeof tierData === 'number' ? tierData : 0;
 
   const tierNames = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
   const tierColors = [

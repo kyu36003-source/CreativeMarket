@@ -41,10 +41,6 @@ export function AIMarketAnalytics({
   const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    analyzeMarket();
-  }, [marketId]);
-
   const analyzeMarket = async () => {
     setLoading(true);
     try {
@@ -63,7 +59,7 @@ export function AIMarketAnalytics({
 
       // Determine if there's an opportunity
       const priceDiff = Math.abs(prediction.probability - marketProbability);
-      const hasOpportunity = priceDiff > 0.1; // 10% difference
+      const _hasOpportunity = priceDiff > 0.1; // 10% difference
 
       const analysis: MarketAnalysis = {
         probability: prediction.probability,
@@ -89,7 +85,7 @@ export function AIMarketAnalytics({
   const generateRecommendation = (
     aiProb: number,
     marketProb: number,
-    signal: string
+    _signal: string
   ): string => {
     const diff = aiProb - marketProb;
 
@@ -107,6 +103,11 @@ export function AIMarketAnalytics({
 
     return 'Market appears balanced. Wait for better entry point.';
   };
+
+  useEffect(() => {
+    analyzeMarket();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketId]);
 
   const generateKeyFactors = (market: typeof marketData): string[] => {
     const factors: string[] = [];

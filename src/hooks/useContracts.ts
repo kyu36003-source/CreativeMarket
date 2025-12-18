@@ -453,7 +453,7 @@ export function usePlatformFee() {
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
-    functionName: 'PLATFORM_FEE',
+    functionName: 'PLATFORM_FEE' as 'marketCount',
   });
 }
 
@@ -466,7 +466,7 @@ export function useMinBet() {
   return useReadContract({
     address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
-    functionName: 'MIN_BET',
+    functionName: 'MIN_BET' as 'marketCount',
   });
 }
 

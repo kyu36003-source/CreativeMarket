@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatBNB, calculateMarketOdds } from '@/lib/market-data';
 import { Clock, TrendingUp, Users } from 'lucide-react';
-import { format } from 'date-fns';
 
 interface MarketCardProps {
   market: Market;

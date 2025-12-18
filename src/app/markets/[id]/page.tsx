@@ -151,12 +151,12 @@ export default function MarketDetailPage() {
 
   // User position
   const userYesAmount = positionData
-    ? Number(formatEther((positionData as unknown[])[0] as bigint))
+    ? Number(formatEther((Array.from(positionData) as unknown[])[0] as bigint))
     : 0;
   const userNoAmount = positionData
-    ? Number(formatEther((positionData as unknown[])[1] as bigint))
+    ? Number(formatEther((Array.from(positionData) as unknown[])[1] as bigint))
     : 0;
-  const hasClaimed = positionData ? ((positionData as unknown[])[2] as boolean) : false;
+  const hasClaimed = positionData ? ((Array.from(positionData) as unknown[])[2] as boolean) : false;
   const hasPosition = userYesAmount > 0 || userNoAmount > 0;
 
   // Check if user can claim

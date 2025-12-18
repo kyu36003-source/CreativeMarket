@@ -288,7 +288,7 @@ export default function TraderProfilePage({ params }: TraderProfilePageProps) {
             <div className="text-center">
               <h3 className="text-2xl font-bold mb-2">Ready to Follow?</h3>
               <p className="mb-6 text-blue-100">
-                Auto-copy {trader.username || 'this trader'}'s predictions and
+                Auto-copy {trader.username || 'this trader'}&apos;s predictions and
                 start earning
               </p>
               <Button

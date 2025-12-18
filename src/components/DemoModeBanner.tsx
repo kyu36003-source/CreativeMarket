@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export function DemoModeBanner() {
   const [isStaticMode, setIsStaticMode] = useState(false);
@@ -34,8 +34,8 @@ export function DemoModeBanner() {
               🎯 Production Demo Mode
             </p>
             <p className="text-sm text-gray-700">
-              You're viewing live prediction markets with real AI-powered resolution. 
-              This demo showcases our platform's capabilities with curated markets from the Creative Economy.
+              You&apos;re viewing live prediction markets with real AI-powered resolution. 
+              This demo showcases our platform&apos;s capabilities with curated markets from the Creative Economy.
               {' '}
               <strong className="text-purple-700">
                 Connect your wallet to place real bets on BSC Testnet.
