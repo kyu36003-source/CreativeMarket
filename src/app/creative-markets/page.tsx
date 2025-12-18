@@ -32,7 +32,7 @@ import {
 export default function CreativeMarketsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
-  const [showAnalytics, setShowAnalytics] = useState(true);
+  const [_showAnalytics, _setShowAnalytics] = useState(true);
   const [markets, setMarkets] = useState<any[]>([]);
   const [poolStats, setPoolStats] = useState<any[]>([]);
 

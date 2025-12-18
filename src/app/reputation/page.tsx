@@ -19,7 +19,6 @@ import {
   Trophy,
   TrendingUp,
   Target,
-  DollarSign,
   Users,
   Award,
   Star,

@@ -53,7 +53,7 @@ interface MarketData {
 
 export default function MarketsPage() {
   const router = useRouter();
-  const { data: marketCount } = useMarketCount();
+  const { data: _marketCount } = useMarketCount();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,17 +70,17 @@ export default function MarketsPage() {
       if (!data || !Array.isArray(data)) return null;
 
       const [
-        id,
+        _id,
         question,
         description,
         category,
-        creator,
+        _creator,
         endTime,
         totalYesAmount,
         totalNoAmount,
         resolved,
         outcome,
-        resolvedAt,
+        _resolvedAt,
         aiOracleEnabled,
       ] = data;
 

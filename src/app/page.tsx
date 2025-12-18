@@ -26,7 +26,6 @@ import {
   Palette,
 } from 'lucide-react';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
-import { formatEther } from 'viem';
 import { STATIC_MARKETS } from '@/lib/static-markets';
 
 export default function HomePage() {
@@ -84,7 +83,7 @@ export default function HomePage() {
       }
 
       const [
-        id,
+        _id,
         question,
         description,
         category,
@@ -199,7 +198,7 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  const handlePredictionSubmit = async (position: boolean, amount: string) => {
+  const handlePredictionSubmit = async (_position: boolean, _amount: string) => {
     // This will redirect to the market detail page where they can actually place the bet
     if (selectedMarketId) {
       window.location.href = `/markets/${selectedMarketId}`;
