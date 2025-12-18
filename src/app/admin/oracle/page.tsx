@@ -15,7 +15,6 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  AlertCircle,
   TrendingUp,
   Database,
   Zap,
@@ -51,8 +50,8 @@ interface ServiceMetrics {
 }
 
 export default function OracleDashboard() {
-  const { address, isConnected } = useAccount();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { address: _address, isConnected } = useAccount();
+  const [_isAuthorized, setIsAuthorized] = useState(false);
   const [serviceStatus, setServiceStatus] = useState<
     'running' | 'stopped' | 'unknown'
   >('unknown');

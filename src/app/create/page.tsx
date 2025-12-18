@@ -34,7 +34,7 @@ const CATEGORIES = [
 
 export default function CreateMarketPage() {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address: _address, isConnected } = useAccount();
   const { createMarket, isPending, isConfirming, isSuccess, error } =
     useCreateMarket();
 
@@ -111,8 +111,8 @@ export default function CreateMarketPage() {
               maxLength={200}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Be specific and unambiguous. Good: "Will BTC close above $50k on
-              Nov 1?" Bad: "Will BTC moon?"
+              Be specific and unambiguous. Good: &ldquo;Will BTC close above $50k on
+              Nov 1?&rdquo; Bad: &ldquo;Will BTC moon?&rdquo;
             </p>
           </div>
 
@@ -310,7 +310,7 @@ export default function CreateMarketPage() {
         <h3 className="font-semibold mb-3">Tips for Creating Good Markets</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li>
-            ✅ <strong>Be Specific:</strong> "BTC above $50k" not "BTC moon"
+            ✅ <strong>Be Specific:</strong> &ldquo;BTC above $50k&rdquo; not &ldquo;BTC moon&rdquo;
           </li>
           <li>
             ✅ <strong>Set Clear Criteria:</strong> Specify exact date, price,
