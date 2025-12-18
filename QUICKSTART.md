@@ -1,119 +1,168 @@
-# 🎯 QUICK START GUIDE - Deploy in 30 Minutes
+# 🚀 PredictBNB Quick Start Guide - Get Running in 30 Minutes
+
+**PredictBNB** revolutionizes prediction markets with **30-minute AI resolution** (vs 48+ hours), **gasless trading via x402**, and **copy trading**. Built exclusively on **BNB Chain** for optimal economics.
 
 ## ✅ Prerequisites Checklist
 
 - [ ] Node.js v18+ installed
-- [ ] Testnet wallet with BNB
-- [ ] OpenAI API key
-- [ ] Pinata API key
+- [ ] Git installed
+- [ ] Testnet wallet (MetaMask/WalletConnect)
+- [ ] Testnet BNB (free from faucet)
+- [ ] Hugging Face API key (FREE) or OpenAI API key
 
 ---
 
-## 🚀 5-Step Deployment
+## 🚀 5-Step Quick Deploy
 
 ### **Step 1: Get Testnet BNB** (5 min)
 ```
-1. Visit: https://testnet.bnbchain.org/faucet-smart
-2. Enter your wallet address
-3. Verify and receive BNB
-4. Wait for confirmation
+1. Visit BNB Chain Faucet: https://www.bnbchain.org/en/testnet-faucet
+2. Connect your wallet
+3. Complete verification
+4. Receive 0.5 BNB (testnet)
+5. Verify in wallet (should see balance)
 ```
 
 ### **Step 2: Get API Keys** (5 min)
+
+**Option A: Hugging Face (FREE & Recommended)**
 ```
-OpenAI: https://platform.openai.com/api-keys
-Pinata: https://app.pinata.cloud/keys
+1. Visit: https://huggingface.co/settings/tokens
+2. Create new token with "Read" permissions
+3. Copy token (starts with hf_...)
+4. FREE tier: 1000 requests/day (enough for testing)
 ```
 
-### **Step 3: Configure & Setup** (5 min)
+**Option B: OpenAI (Paid)**
+```
+1. Visit: https://platform.openai.com/api-keys
+2. Create new secret key
+3. Copy key (starts with sk-...)
+4. Costs: ~$0.01 per AI resolution
+```
+
+### **Step 3: Clone & Configure** (5 min)
 ```bash
-# Clone/navigate to project
-cd someCreativity
+# Clone repository
+git clone https://github.com/kyu36003-source/CreativeMarket.git
+cd CreativeMarket
 
-# Create .env file
-cat > .env << EOF
-PRIVATE_KEY=your_private_key_here
-OPENAI_API_KEY=sk-your_key_here
-PINATA_API_KEY=your_pinata_key
-PINATA_SECRET_API_KEY=your_pinata_secret
-ORACLE_AGENT_ADDRESS=your_wallet_address
+# Install dependencies
+npm install
+cd contracts && npm install && cd ..
+
+# Create .env.local (frontend)
+cat > .env.local << EOF
 NEXT_PUBLIC_CHAIN_ID=97
 NEXT_PUBLIC_RPC_URL=https://data-seed-prebsc-1-s1.bnbchain.org:8545
+NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+NEXT_PUBLIC_AI_ORACLE_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+NEXT_PUBLIC_TRADER_REPUTATION_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+NEXT_PUBLIC_GASLESS_RELAYER_ADDRESS=0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 EOF
 
-# Run setup script
-./deploy-setup.sh
+# Create contracts/.env (blockchain)
+cat > contracts/.env << EOF
+PRIVATE_KEY=your_private_key_here
+BSC_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.bnbchain.org:8545
+HUGGINGFACE_API_KEY=hf_your_key_here
+OPENAI_API_KEY=sk_your_key_here
+ORACLE_AGENT_ADDRESS=your_wallet_address
+EOF
 ```
 
-### **Step 4: Deploy Contracts** (10 min)
+### **Step 4: Deploy Smart Contracts** (10 min)
 ```bash
 cd contracts
 
-# Deploy all contracts
+# Compile contracts
+npm run compile
+
+# Run tests (optional but recommended)
+npm test
+
+# Deploy to BNB Testnet
 npx hardhat run scripts/deploy.js --network bnbTestnet
 
-# Copy the output addresses like:
-# PredictionMarket: 0x...
-# AIOracle: 0x...
-# TraderReputation: 0x...
+# Output will show:
+# ✅ PredictionMarket deployed: 0x...
+# ✅ AIOracle deployed: 0x...
+# ✅ TraderReputation deployed: 0x...
+# ✅ GaslessRelayer deployed: 0x...
 
-# Update .env with addresses
-# Add these lines to .env:
-NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS=0x...
-NEXT_PUBLIC_AI_ORACLE_ADDRESS=0x...
-NEXT_PUBLIC_TRADER_REPUTATION_ADDRESS=0x...
+# Copy addresses and update .env.local in root directory
 
-# Authorize oracle agent
+# Authorize oracle to resolve markets
 npx hardhat run scripts/authorize-oracle.js --network bnbTestnet
 
 cd ..
 ```
 
-### **Step 5: Launch** (5 min)
+### **Step 5: Launch Application** (5 min)
 ```bash
-# Terminal 1: Start frontend
+# Start development server
 npm run dev
 
-# Terminal 2: Start oracle
-npm run oracle:start
+# Open browser to http://localhost:3000
 
-# Visit: http://localhost:3000
+# Test the platform:
+# 1. Connect wallet (MetaMask)
+# 2. Browse markets or create one
+# 3. Place a bet (gasless!)
+# 4. Wait for AI resolution (~30 min)
+# 5. Claim winnings (also gasless!)
 ```
 
 ---
 
-## 🧪 Test Flow (10 min)
+## 🧪 Complete Test Flow (15 min)
 
-### **1. Create Market**
+### **1. Create Your First Market**
 ```
-1. Go to http://localhost:3000
-2. Connect wallet (top right)
-3. Click "Create Market"
-4. Fill form:
-   - Question: "Will BTC reach $50K in 1 hour?"
-   - Category: Crypto
-   - End time: +1 hour
-   - Enable AI Oracle: YES
-5. Submit transaction
-6. Wait for confirmation
-```
-
-### **2. Place Bets**
-```
-1. Go to "Markets" page
-2. Click on your market
-3. Choose YES or NO
-4. Enter amount: 0.1 BNB
-5. Submit bet
-6. Check "Your Position" updates
+1. Visit http://localhost:3000
+2. Click "Connect Wallet" (top right)
+3. Select MetaMask/WalletConnect
+4. Switch to BNB Testnet (97) if needed
+5. Click "Create Market" button
+6. Fill market details:
+   - Question: "Will BTC reach $50K today?"
+   - Category: Cryptocurrency
+   - End time: +1 hour (or set custom)
+   - Initial liquidity: 0.1 BNB (optional)
+7. Confirm transaction
+8. Market created! Copy market ID
 ```
 
-### **3. Wait for Resolution**
+### **2. Place Gasless Bets**
 ```
-1. Wait for market end time (1 hour)
-2. Oracle service auto-detects
-3. Fetches data from CoinGecko/Binance
-4. GPT-4 analyzes and decides
+1. Navigate to Markets page
+2. Click on your market card
+3. See Polymarket-style interface:
+   - YES odds on left
+   - NO odds on right
+4. Choose position (YES or NO)
+5. Enter amount: 0.01 BNB (min)
+6. See preview: "Cost: X BNB, Potential Win: Y BNB"
+7. Click "Buy YES" or "Buy NO"
+8. Sign meta-transaction (FREE!)
+9. Relayer submits (you pay $0 gas)
+10. Position updated instantly
+```
+
+### **3. Watch AI Oracle Resolve**
+```
+1. Wait for market end time
+2. AI oracle triggers automatically
+3. Resolution process (30 minutes):
+   ├─ Fetch data (CoinGecko, Binance, etc.)
+   ├─ DeepSeek-V3 analyzes (reasoning)
+   ├─ Llama 3.3 70B analyzes (data)
+   ├─ Qwen 2.5 72B verifies (consensus)
+   ├─ 2/3 agreement required
+   └─ Evidence stored on IPFS
+4. Market resolves to YES or NO
+5. Winners can claim immediately
 5. Uploads evidence to IPFS
 6. Resolves on blockchain
 7. You'll see "Market Resolved" badge

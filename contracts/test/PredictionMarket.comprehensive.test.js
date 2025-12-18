@@ -57,12 +57,12 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const { predictionMarket } = await loadFixture(deployContractsFixture);
       const now = await time.latest();
       
-      await predictionMarket.createMarket("Market 1", now + 3600);      // 1 hour
-      await predictionMarket.createMarket("Market 2", now + 86400);     // 1 day
-      await predictionMarket.createMarket("Market 3", now + 604800);    // 1 week
-      await predictionMarket.createMarket("Market 4", now + 2592000);   // 30 days
+      await predictionMarket.createMarket("Market 1", "Test description", "Test", now + 3600, false);      // 1 hour
+      await predictionMarket.createMarket("Market 2", "Test description", "Test", now + 86400, false);     // 1 day
+      await predictionMarket.createMarket("Market 3", "Test description", "Test", now + 604800, false);    // 1 week
+      await predictionMarket.createMarket("Market 4", "Test description", "Test", now + 2592000, false);   // 30 days
       
-      const marketIds = await predictionMarket.getAllMarketIds();
+      const marketIds = await predictionMarket.getAllMarkets();
       expect(marketIds.length).to.equal(4);
     });
 
@@ -80,8 +80,8 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const pastDeadline = (await time.latest()) - 3600;
       
       await expect(
-        predictionMarket.createMarket("Test", pastDeadline)
-      ).to.be.revertedWith("Deadline must be in the future");
+        predictionMarket.createMarket("Test", "Test description", "Test", pastDeadline, false)
+      ).to.be.revertedWith("End time must be in the future");
     });
 
     it("Should reject market with current timestamp as deadline", async function () {
@@ -89,8 +89,8 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const now = await time.latest();
       
       await expect(
-        predictionMarket.createMarket("Test", now)
-      ).to.be.revertedWith("Deadline must be in the future");
+        predictionMarket.createMarket("Test", "Test description", "Test", now, false)
+      ).to.be.revertedWith("End time must be in the future");
     });
 
     it("Should create market with very long question", async function () {
@@ -117,33 +117,33 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should accept bets from multiple users on YES", async function () {
       const { predictionMarket, user1, user2, user3 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, true, { value: ethers.parseEther("2.0") });
       await predictionMarket.connect(user3).buyPosition(1, true, { value: ethers.parseEther("3.0") });
       
-      const market = await predictionMarket.getMarket(1);
+      const market = await predictionMarket.markets(1);
       expect(market.totalYes).to.equal(ethers.parseEther("6.0"));
     });
 
     it("Should accept bets from multiple users on NO", async function () {
       const { predictionMarket, user1, user2, user3 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("0.5") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.5") });
       await predictionMarket.connect(user3).buyPosition(1, false, { value: ethers.parseEther("2.5") });
       
-      const market = await predictionMarket.getMarket(1);
+      const market = await predictionMarket.markets(1);
       expect(market.totalNo).to.equal(ethers.parseEther("4.5"));
     });
 
     it("Should accept mixed bets (YES and NO) from same user", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("0.5") });
@@ -158,7 +158,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should handle very small bets (dust amounts)", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("0.000000001") });
       
@@ -169,19 +169,19 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should handle maximum possible bet", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       const maxBet = ethers.parseEther("1000"); // 1000 ETH
       await predictionMarket.connect(user1).buyPosition(1, true, { value: maxBet });
       
-      const market = await predictionMarket.getMarket(1);
+      const market = await predictionMarket.markets(1);
       expect(market.totalYes).to.equal(maxBet);
     });
 
     it("Should reject zero value bets", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await expect(
         predictionMarket.connect(user1).buyPosition(1, true, { value: 0 })
@@ -191,7 +191,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should reject bets after deadline", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 3600;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline + 1);
       
@@ -211,7 +211,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should accumulate multiple bets from same user", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("2.0") });
@@ -226,9 +226,9 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate 50/50 odds with no bets", async function () {
       const { predictionMarket } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
-      const [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      const [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(5000); // 50.00%
       expect(noOdds).to.equal(5000);  // 50.00%
     });
@@ -236,11 +236,11 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate correct odds with only YES bets", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("10.0") });
       
-      const [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      const [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(10000); // 100.00%
       expect(noOdds).to.equal(0);      // 0.00%
     });
@@ -248,11 +248,11 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate correct odds with only NO bets", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("10.0") });
       
-      const [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      const [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(0);      // 0.00%
       expect(noOdds).to.equal(10000);   // 100.00%
     });
@@ -260,12 +260,12 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate odds with 80/20 split", async function () {
       const { predictionMarket, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("8.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("2.0") });
       
-      const [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      const [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(8000); // 80.00%
       expect(noOdds).to.equal(2000);  // 20.00%
     });
@@ -273,12 +273,12 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate odds with very small amounts", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("0.0001") });
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("0.0001") });
       
-      const [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      const [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(5000); // 50.00%
       expect(noOdds).to.equal(5000);  // 50.00%
     });
@@ -286,25 +286,25 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should update odds dynamically as bets come in", async function () {
       const { predictionMarket, user1, user2, user3 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       // Initial: 50/50
-      let [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      let [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(5000);
       
       // After first bet: 100/0
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
-      [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(10000);
       
       // After second bet: 50/50
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
-      [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(5000);
       
       // After third bet: 75/25
       await predictionMarket.connect(user3).buyPosition(1, true, { value: ethers.parseEther("2.0") });
-      [yesOdds, noOdds] = await predictionMarket.getOdds(1);
+      [yesOdds, noOdds] = await predictionMarket.getMarketOdds(1);
       expect(yesOdds).to.equal(7500);
     });
   });
@@ -313,7 +313,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should resolve market to YES by authorized oracle", async function () {
       const { predictionMarket, oracle, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       
       await time.increaseTo(deadline + 1);
@@ -325,7 +325,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should resolve market to NO by authorized oracle", async function () {
       const { predictionMarket, oracle, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("1.0") });
       
       await time.increaseTo(deadline + 1);
@@ -337,7 +337,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent unauthorized oracle from resolving", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline + 1);
       await expect(
@@ -348,7 +348,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent resolution before deadline", async function () {
       const { predictionMarket, oracle } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await expect(
         predictionMarket.connect(oracle).resolveMarket(1, true)
@@ -358,7 +358,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent double resolution", async function () {
       const { predictionMarket, oracle } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline + 1);
       await predictionMarket.connect(oracle).resolveMarket(1, true);
@@ -371,7 +371,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent betting after resolution", async function () {
       const { predictionMarket, oracle, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline + 1);
       await predictionMarket.connect(oracle).resolveMarket(1, true);
@@ -384,7 +384,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should resolve market exactly at deadline", async function () {
       const { predictionMarket, oracle } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline);
       await expect(predictionMarket.connect(oracle).resolveMarket(1, true))
@@ -396,7 +396,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should distribute winnings correctly to single YES winner", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("5.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("5.0") });
@@ -419,7 +419,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should distribute winnings correctly to multiple YES winners", async function () {
       const { predictionMarket, oracle, user1, user2, user3, user4 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       // YES bets: 6 ETH total
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("2.0") });
@@ -447,7 +447,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should distribute winnings correctly to NO winners", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("7.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("3.0") });
@@ -470,7 +470,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent losers from claiming", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -486,7 +486,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should prevent double claiming", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -498,13 +498,13 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       
       await expect(
         predictionMarket.connect(user1).claimWinnings(1)
-      ).to.be.revertedWith("Winnings already claimed");
+      ).to.be.revertedWith("Already claimed");
     });
 
     it("Should prevent claiming before resolution", async function () {
       const { predictionMarket, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -517,7 +517,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should handle case with no losing side bets", async function () {
       const { predictionMarket, oracle, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("5.0") });
       
@@ -543,7 +543,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const now = await time.latest();
       
       // Market 1
-      await predictionMarket.createMarket("Market 1", now + 86400);
+      await predictionMarket.createMarket("Market 1", "Test description", "Test", now + 86400, false);
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("10.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("10.0") });
       await time.increaseTo(now + 86401);
@@ -551,7 +551,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       await predictionMarket.connect(user1).claimWinnings(1);
       
       // Market 2
-      await predictionMarket.createMarket("Market 2", now + 172800);
+      await predictionMarket.createMarket("Market 2", "Test description", "Test", now + 172800, false);
       await predictionMarket.connect(user1).buyPosition(2, true, { value: ethers.parseEther("5.0") });
       await predictionMarket.connect(user2).buyPosition(2, false, { value: ethers.parseEther("5.0") });
       await time.increaseTo(now + 172801);
@@ -566,7 +566,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should allow owner to withdraw platform fees", async function () {
       const { predictionMarket, oracle, owner, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("50.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("50.0") });
@@ -602,7 +602,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should calculate correct fee percentage (2%)", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       const losingBet = ethers.parseEther("100.0");
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
@@ -635,12 +635,12 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       }
       
       // Verify all markets exist
-      const marketIds = await predictionMarket.getAllMarketIds();
+      const marketIds = await predictionMarket.getAllMarkets();
       expect(marketIds.length).to.equal(10);
       
       // Verify each market has correct totals
       for (let i = 1; i <= 10; i++) {
-        const market = await predictionMarket.getMarket(i);
+        const market = await predictionMarket.markets(i);
         expect(market.totalYes).to.equal(ethers.parseEther(`${i}.0`));
         expect(market.totalNo).to.equal(ethers.parseEther(`${i * 0.5}`));
       }
@@ -649,7 +649,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should handle 8 users on single market", async function () {
       const { predictionMarket, user1, user2, user3, user4, user5, user6, user7, user8 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       const users = [user1, user2, user3, user4, user5, user6, user7, user8];
       
@@ -661,7 +661,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       }
       
       // Verify total amounts
-      const market = await predictionMarket.getMarket(1);
+      const market = await predictionMarket.markets(1);
       const expectedYes = ethers.parseEther("16.0"); // 1+3+5+7
       const expectedNo = ethers.parseEther("20.0");  // 2+4+6+8
       
@@ -674,9 +674,9 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should authorize multiple oracles", async function () {
       const { predictionMarket, owner, user1, user2, user3 } = await loadFixture(deployContractsFixture);
       
-      await predictionMarket.connect(owner).authorizeOracle(user1.address);
-      await predictionMarket.connect(owner).authorizeOracle(user2.address);
-      await predictionMarket.connect(owner).authorizeOracle(user3.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, true);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user2.address, true);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user3.address, true);
       
       expect(await predictionMarket.authorizedOracles(user1.address)).to.be.true;
       expect(await predictionMarket.authorizedOracles(user2.address)).to.be.true;
@@ -685,11 +685,11 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
 
     it("Should allow any authorized oracle to resolve", async function () {
       const { predictionMarket, owner, user1, user2 } = await loadFixture(deployContractsFixture);
-      await predictionMarket.connect(owner).authorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, true);
       
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Market 1", deadline);
-      await predictionMarket.createMarket("Market 2", deadline);
+      await predictionMarket.createMarket("Market 1", "Test description", "Test", deadline, false);
+      await predictionMarket.createMarket("Market 2", "Test description", "Test", deadline, false);
       
       await time.increaseTo(deadline + 1);
       
@@ -703,21 +703,21 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should deauthorize oracle", async function () {
       const { predictionMarket, owner, user1 } = await loadFixture(deployContractsFixture);
       
-      await predictionMarket.connect(owner).authorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, true);
       expect(await predictionMarket.authorizedOracles(user1.address)).to.be.true;
       
-      await predictionMarket.connect(owner).deauthorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, false);
       expect(await predictionMarket.authorizedOracles(user1.address)).to.be.false;
     });
 
     it("Should prevent deauthorized oracle from resolving", async function () {
       const { predictionMarket, owner, user1 } = await loadFixture(deployContractsFixture);
-      await predictionMarket.connect(owner).authorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, true);
       
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
-      await predictionMarket.connect(owner).deauthorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, false);
       await time.increaseTo(deadline + 1);
       
       await expect(
@@ -729,16 +729,16 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const { predictionMarket, user1, user2 } = await loadFixture(deployContractsFixture);
       
       await expect(
-        predictionMarket.connect(user1).authorizeOracle(user2.address)
+        predictionMarket.connect(user1).setAuthorizedOracle(user2.address, true)
       ).to.be.revertedWithCustomError(predictionMarket, "OwnableUnauthorizedAccount");
     });
 
     it("Should prevent non-owner from deauthorizing oracle", async function () {
       const { predictionMarket, owner, user1, user2 } = await loadFixture(deployContractsFixture);
-      await predictionMarket.connect(owner).authorizeOracle(user1.address);
+      await predictionMarket.connect(owner).setAuthorizedOracle(user1.address, true);
       
       await expect(
-        predictionMarket.connect(user2).deauthorizeOracle(user1.address)
+        predictionMarket.connect(user2).setAuthorizedOracle(user1.address, false)
       ).to.be.revertedWithCustomError(predictionMarket, "OwnableUnauthorizedAccount");
     });
   });
@@ -749,7 +749,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const deadline = (await time.latest()) + 86400;
       
       // Create Market
-      const tx1 = await predictionMarket.createMarket("Gas Test Market", deadline);
+      const tx1 = await predictionMarket.createMarket("Gas Test Market", "Test description", "Test", deadline, false);
       const receipt1 = await tx1.wait();
       console.log(`      Gas for createMarket: ${receipt1.gasUsed.toString()}`);
       
@@ -775,7 +775,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       console.log(`      Gas for claimWinnings: ${receipt5.gasUsed.toString()}`);
       
       // Get Odds
-      const tx6 = await predictionMarket.getOdds(1);
+      const tx6 = await predictionMarket.getMarketOdds(1);
       console.log(`      Gas for getOdds: minimal (view function)`);
       
       expect(receipt1.gasUsed).to.be.lessThan(250000);
@@ -788,7 +788,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should measure gas for batch operations", async function () {
       const { predictionMarket, user1, user2, user3 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Batch Test", deadline);
+      await predictionMarket.createMarket("Batch Test", "Test description", "Test", deadline, false);
       
       const tx1 = await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       const receipt1 = await tx1.wait();
@@ -812,7 +812,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should allow AIOracle to resolve markets", async function () {
       const { predictionMarket, aiOracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("AI Test Market", deadline);
+      await predictionMarket.createMarket("AI Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -836,14 +836,14 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       const { predictionMarket } = await loadFixture(deployContractsFixture);
       const farFuture = (await time.latest()) + (365 * 24 * 60 * 60 * 10); // 10 years
       
-      await expect(predictionMarket.createMarket("Far Future Market", farFuture))
+      await expect(predictionMarket.createMarket("Far Future Market", "Test description", "Test", farFuture, false))
         .to.emit(predictionMarket, "MarketCreated");
     });
 
     it("Should prevent reentrancy attacks on claimWinnings", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Test Market", deadline);
+      await predictionMarket.createMarket("Test Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -855,21 +855,21 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       await predictionMarket.connect(user1).claimWinnings(1);
       await expect(
         predictionMarket.connect(user1).claimWinnings(1)
-      ).to.be.revertedWith("Winnings already claimed");
+      ).to.be.revertedWith("Already claimed");
     });
 
     it("Should handle zero address checks", async function () {
       const { predictionMarket, owner } = await loadFixture(deployContractsFixture);
       
       await expect(
-        predictionMarket.connect(owner).authorizeOracle(ethers.ZeroAddress)
+        predictionMarket.connect(owner).setAuthorizedOracle(ethers.ZeroAddress, true)
       ).to.be.revertedWith("Invalid oracle address");
     });
 
     it("Should handle overflow scenarios", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Overflow Test", deadline);
+      await predictionMarket.createMarket("Overflow Test", "Test description", "Test", deadline, false);
       
       // Try extremely large bet (should work with sufficient balance)
       const hugeBet = ethers.parseEther("9000"); // 9000 ETH (user has 10000)
@@ -881,7 +881,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should correctly handle market with single tiny bet", async function () {
       const { predictionMarket, oracle, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Tiny Bet Market", deadline);
+      await predictionMarket.createMarket("Tiny Bet Market", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("0.000001") });
       
@@ -897,40 +897,40 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should get market details correctly", async function () {
       const { predictionMarket } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("View Test Market", deadline);
+      await predictionMarket.createMarket("View Test Market", "Test description", "Test", deadline, false);
       
-      const market = await predictionMarket.getMarket(1);
+      const market = await predictionMarket.markets(1);
       expect(market.question).to.equal("View Test Market");
-      expect(market.deadline).to.equal(deadline);
-      expect(market.totalYes).to.equal(0);
-      expect(market.totalNo).to.equal(0);
+      expect(market.endTime).to.equal(deadline);
+      expect(market.totalYesAmount).to.equal(0);
+      expect(market.totalNoAmount).to.equal(0);
       expect(market.resolved).to.be.false;
     });
 
     it("Should get user position correctly", async function () {
       const { predictionMarket, user1 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Position Test", deadline);
+      await predictionMarket.createMarket("Position Test", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("3.5") });
       await predictionMarket.connect(user1).buyPosition(1, false, { value: ethers.parseEther("1.5") });
       
-      const yesPosition = await predictionMarket.getUserPosition(1, user1.address, true);
-      const noPosition = await predictionMarket.getUserPosition(1, user1.address, false);
+      const [yesAmount, noAmount, claimed] = await predictionMarket.getUserPosition(1, user1.address);
       
-      expect(yesPosition).to.equal(ethers.parseEther("3.5"));
-      expect(noPosition).to.equal(ethers.parseEther("1.5"));
+      expect(yesAmount).to.equal(ethers.parseEther("3.5"));
+      expect(noAmount).to.equal(ethers.parseEther("1.5"));
+      expect(claimed).to.be.false;
     });
 
     it("Should get all market IDs", async function () {
       const { predictionMarket } = await loadFixture(deployContractsFixture);
       const now = await time.latest();
       
-      await predictionMarket.createMarket("Market 1", now + 3600);
-      await predictionMarket.createMarket("Market 2", now + 7200);
-      await predictionMarket.createMarket("Market 3", now + 10800);
+      await predictionMarket.createMarket("Market 1", "Test description", "Test", now + 3600, false);
+      await predictionMarket.createMarket("Market 2", "Test description", "Test", now + 7200, false);
+      await predictionMarket.createMarket("Market 3", "Test description", "Test", now + 10800, false);
       
-      const marketIds = await predictionMarket.getAllMarketIds();
+      const marketIds = await predictionMarket.getAllMarkets();
       expect(marketIds.length).to.equal(3);
       expect(marketIds[0]).to.equal(1);
       expect(marketIds[1]).to.equal(2);
@@ -940,7 +940,7 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
     it("Should check if user has claimed", async function () {
       const { predictionMarket, oracle, user1, user2 } = await loadFixture(deployContractsFixture);
       const deadline = (await time.latest()) + 86400;
-      await predictionMarket.createMarket("Claim Test", deadline);
+      await predictionMarket.createMarket("Claim Test", "Test description", "Test", deadline, false);
       
       await predictionMarket.connect(user1).buyPosition(1, true, { value: ethers.parseEther("1.0") });
       await predictionMarket.connect(user2).buyPosition(1, false, { value: ethers.parseEther("1.0") });
@@ -948,13 +948,19 @@ describe("PredictionMarket - Comprehensive Test Suite", function () {
       await time.increaseTo(deadline + 1);
       await predictionMarket.connect(oracle).resolveMarket(1, true);
       
-      let hasClaimed = await predictionMarket.hasClaimed(1, user1.address);
-      expect(hasClaimed).to.be.false;
+      let position = await predictionMarket.positions(1, user1.address);
+      expect(position.claimed).to.be.false;
       
       await predictionMarket.connect(user1).claimWinnings(1);
       
-      hasClaimed = await predictionMarket.hasClaimed(1, user1.address);
-      expect(hasClaimed).to.be.true;
+      position = await predictionMarket.positions(1, user1.address);
+      expect(position.claimed).to.be.true;
     });
   });
 });
+
+
+
+
+
+
