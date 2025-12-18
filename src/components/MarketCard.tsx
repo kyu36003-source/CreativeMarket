@@ -38,11 +38,14 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
             </h3>
           </div>
           {market.imageUrl && (
-            <img
-              src={market.imageUrl}
-              alt=""
-              className="w-12 h-12 rounded-lg object-cover"
-            />
+            <div className="w-12 h-12 rounded-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={market.imageUrl}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
         </div>
       </CardHeader>
