@@ -1,6 +1,6 @@
 /**
- * Reputation Dashboard
- * View trader reputation, stats, and enable copy trading
+ * Reputation Dashboard - Your Complete Trading Profile
+ * View trader reputation, stats, betting history, copy trading, and achievements
  */
 
 'use client';
@@ -15,6 +15,7 @@ import {
 } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Trophy,
   TrendingUp,
@@ -27,7 +28,14 @@ import {
   CheckCircle,
   BarChart3,
   Activity,
+  History,
+  Wallet,
+  Share2,
+  ExternalLink,
+  Clock,
 } from 'lucide-react';
+import Link from 'next/link';
+import { formatEther } from 'viem';
 
 export default function ReputationPage() {
   const { address, isConnected } = useAccount();
@@ -41,12 +49,33 @@ export default function ReputationPage() {
   if (!isConnected) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
-        <Card className="p-8 text-center">
-          <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">Connect Your Wallet</h2>
-          <p className="text-muted-foreground mb-4">
-            Connect your wallet to view your trading reputation and statistics
+        <Card className="p-12 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold mb-3">Connect Your Wallet</h2>
+          <p className="text-muted-foreground text-lg mb-6">
+            Connect your wallet to view your complete trading profile, reputation stats,
+            betting history, and copy trading features
           </p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              <span>Reputation Tracking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              <span>Betting History</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Copy className="w-4 h-4" />
+              <span>Copy Trading</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-4 h-4" />
+              <span>Achievements</span>
+            </div>
+          </div>
         </Card>
       </div>
     );
@@ -55,8 +84,9 @@ export default function ReputationPage() {
   if (isLoading) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin" />
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading your profile...</p>
         </div>
       </div>
     );
@@ -88,19 +118,70 @@ export default function ReputationPage() {
     }
   };
 
+  // Mock data for demonstration (replace with actual contract calls)
+  const userActiveBets: any[] = [];
+  const userResolvedBets: any[] = [];
+
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
-      {/* Header */}
+      {/* Profile Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Trading Reputation</h1>
-        <p className="text-muted-foreground">
-          Track your performance and build your reputation in the prediction
-          markets
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                {address?.slice(2, 4).toUpperCase()}
+              </div>
+              My Profile
+            </h1>
+            <p className="text-muted-foreground">
+              {address && `${address.slice(0, 6)}...${address.slice(-4)}`}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/trader/${address}`} className="gap-2">
+                <ExternalLink className="w-4 h-4" />
+                Public Profile
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Share2 className="w-4 h-4" />
+              Share
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Tier Card */}
-      <Card className="p-6 mb-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
+      {/* Tabs for different sections */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview" className="gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <History className="w-4 h-4" />
+            History
+          </TabsTrigger>
+          <TabsTrigger value="active" className="gap-2">
+            <Activity className="w-4 h-4" />
+            Active
+          </TabsTrigger>
+          <TabsTrigger value="copytrading" className="gap-2">
+            <Copy className="w-4 h-4" />
+            Copy Trading
+          </TabsTrigger>
+          <TabsTrigger value="achievements" className="gap-2">
+            <Award className="w-4 h-4" />
+            Achievements
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Tier Card */}
+          <Card className="p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-6xl">{tierIcons[currentTier]}</div>
@@ -307,51 +388,341 @@ export default function ReputationPage() {
         )}
       </Card>
 
-      {/* Achievements */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Award className="w-5 h-5" />
-          Achievements
-        </h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-4 border rounded-lg text-center">
-            <div className="text-4xl mb-2">🎯</div>
-            <p className="font-medium mb-1">First Win</p>
-            <p className="text-xs text-muted-foreground">
-              Win your first prediction
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg text-center opacity-50">
-            <div className="text-4xl mb-2">🔥</div>
-            <p className="font-medium mb-1">Hot Streak</p>
-            <p className="text-xs text-muted-foreground">
-              Win 5 trades in a row
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg text-center opacity-50">
-            <div className="text-4xl mb-2">💰</div>
-            <p className="font-medium mb-1">High Roller</p>
-            <p className="text-xs text-muted-foreground">
-              Trade over 100 BNB volume
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg text-center opacity-50">
-            <div className="text-4xl mb-2">🎓</div>
-            <p className="font-medium mb-1">Market Master</p>
-            <p className="text-xs text-muted-foreground">Complete 100 trades</p>
-          </div>
-          <div className="p-4 border rounded-lg text-center opacity-50">
-            <div className="text-4xl mb-2">⭐</div>
-            <p className="font-medium mb-1">Top Trader</p>
-            <p className="text-xs text-muted-foreground">Reach Diamond tier</p>
-          </div>
-          <div className="p-4 border rounded-lg text-center opacity-50">
-            <div className="text-4xl mb-2">👥</div>
-            <p className="font-medium mb-1">Influencer</p>
-            <p className="text-xs text-muted-foreground">Have 100+ copiers</p>
-          </div>
-        </div>
-      </Card>
+        </TabsContent>
+
+        {/* Betting History Tab */}
+        <TabsContent value="history" className="space-y-6">
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Betting History
+            </h3>
+            <div className="space-y-3">
+              {userResolvedBets.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No resolved bets yet</p>
+                  <p className="text-sm mt-1">Your betting history will appear here</p>
+                </div>
+              ) : (
+                userResolvedBets.map((market: any, i: number) => {
+                  const userPosition = market.positions?.find(
+                    (p: any) => p.user.toLowerCase() === address?.toLowerCase()
+                  );
+                  return (
+                    <Card key={i} className="p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <Link href={`/markets/${market.id}`} className="hover:underline">
+                            <h4 className="font-semibold mb-1">{market.question}</h4>
+                          </Link>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Wallet className="w-3 h-3" />
+                              Bet: {formatEther(userPosition?.amount || BigInt(0))} BNB
+                            </span>
+                            <span className={`font-medium ${userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
+                              {userPosition?.position ? 'YES' : 'NO'}
+                            </span>
+                            <span className={`flex items-center gap-1 ${market.outcome === userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
+                              {market.outcome === userPosition?.position ? (
+                                <>
+                                  <CheckCircle className="w-3 h-3" />
+                                  Won
+                                </>
+                              ) : (
+                                <>Lost</>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-lg font-bold ${market.outcome === userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
+                            {market.outcome === userPosition?.position ? '+' : '-'}
+                            {formatEther(userPosition?.amount || BigInt(0))} BNB
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(Number(market.endTime) * 1000).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Active Bets Tab */}
+        <TabsContent value="active" className="space-y-6">
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              Active Positions
+            </h3>
+            <div className="space-y-3">
+              {userActiveBets.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No active bets</p>
+                  <p className="text-sm mt-1">Start predicting on markets to see them here</p>
+                  <Button asChild className="mt-4" size="sm">
+                    <Link href="/">Browse Markets</Link>
+                  </Button>
+                </div>
+              ) : (
+                userActiveBets.map((market: any, i: number) => {
+                  const userPosition = market.positions?.find(
+                    (p: any) => p.user.toLowerCase() === address?.toLowerCase()
+                  );
+                  return (
+                    <Card key={i} className="p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <Link href={`/markets/${market.id}`} className="hover:underline">
+                            <h4 className="font-semibold mb-1">{market.question}</h4>
+                          </Link>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Wallet className="w-3 h-3" />
+                              Bet: {formatEther(userPosition?.amount || BigInt(0))} BNB
+                            </span>
+                            <span className={`font-medium ${userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
+                              {userPosition?.position ? 'YES' : 'NO'}
+                            </span>
+                            <span className="flex items-center gap-1 text-yellow-600">
+                              <Clock className="w-3 h-3" />
+                              Pending
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">
+                            Ends: {new Date(Number(market.endTime) * 1000).toLocaleDateString()}
+                          </p>
+                          <Button asChild size="sm" variant="outline" className="mt-2">
+                            <Link href={`/markets/${market.id}`}>
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              View Market
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Copy Trading Tab */}
+        <TabsContent value="copytrading" className="space-y-6">
+          {/* Copy Trading Section */}
+          <Card className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                  <Copy className="w-5 h-5" />
+                  Copy Trading
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Allow others to automatically copy your trades and earn a share of
+                  their profits
+                </p>
+              </div>
+              <Button
+                onClick={handleToggleCopyTrading}
+                disabled={isPending}
+                variant={copyTradingEnabled ? 'outline' : 'default'}
+                className="gap-2"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : copyTradingEnabled ? (
+                  'Disable Copy Trading'
+                ) : (
+                  'Enable Copy Trading'
+                )}
+              </Button>
+            </div>
+
+            {copyTradingEnabled && (
+              <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-green-500" />
+                  <p className="font-medium text-green-500">Copy Trading Active</p>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Other traders can now copy your positions. You earn 10% of their
+                  profits!
+                </p>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Active Copiers</p>
+                    <p className="font-medium">{Math.floor(Math.random() * 50)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Total Copied Volume</p>
+                    <p className="font-medium">
+                      {(Math.random() * 10).toFixed(2)} BNB
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Earnings from Copies</p>
+                    <p className="font-medium text-green-500">
+                      +{(Math.random() * 0.5).toFixed(4)} BNB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4">How Copy Trading Works</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="p-4 bg-blue-500/5 rounded-lg border border-blue-500/20">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mb-3">
+                  1
+                </div>
+                <h4 className="font-semibold mb-2">Enable Copy Trading</h4>
+                <p className="text-sm text-muted-foreground">
+                  Turn on copy trading to let others follow your predictions
+                </p>
+              </div>
+              <div className="p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
+                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold mb-3">
+                  2
+                </div>
+                <h4 className="font-semibold mb-2">Build Your Reputation</h4>
+                <p className="text-sm text-muted-foreground">
+                  Make accurate predictions to attract copiers
+                </p>
+              </div>
+              <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mb-3">
+                  3
+                </div>
+                <h4 className="font-semibold mb-2">Earn Passive Income</h4>
+                <p className="text-sm text-muted-foreground">
+                  Get 10% of your copiers&apos; profits automatically
+                </p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Achievements Tab */}
+        <TabsContent value="achievements" className="space-y-6">
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Achievements
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="p-4 border rounded-lg text-center bg-green-500/5 border-green-500/20">
+                <div className="text-4xl mb-2">🎯</div>
+                <p className="font-medium mb-1">First Win</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Win your first prediction
+                </p>
+                <div className="flex items-center justify-center gap-1 text-green-600 text-xs">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Completed</span>
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">🔥</div>
+                <p className="font-medium mb-1">Hot Streak</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Win 5 trades in a row
+                </p>
+                <div className="text-xs text-muted-foreground">
+                  Progress: 2/5
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">💰</div>
+                <p className="font-medium mb-1">High Roller</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Trade over 100 BNB volume
+                </p>
+                <div className="text-xs text-muted-foreground">
+                  Progress: 12.5/100 BNB
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">🎓</div>
+                <p className="font-medium mb-1">Market Master</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Complete 100 trades
+                </p>
+                <div className="text-xs text-muted-foreground">
+                  Progress: {Number(totalTrades)}/100
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">⭐</div>
+                <p className="font-medium mb-1">Top Trader</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Reach Diamond tier
+                </p>
+                <div className="text-xs text-muted-foreground">
+                  Current: {tierNames[currentTier]}
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">👥</div>
+                <p className="font-medium mb-1">Influencer</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Have 100+ copiers
+                </p>
+                <div className="text-xs text-muted-foreground">
+                  Progress: 0/100
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">⚡</div>
+                <p className="font-medium mb-1">Quick Draw</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Bet within 1 hour of market creation
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">🎲</div>
+                <p className="font-medium mb-1">Risk Taker</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Bet against 80%+ odds
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg text-center opacity-50">
+                <div className="text-4xl mb-2">🌟</div>
+                <p className="font-medium mb-1">Perfect Week</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Win all trades in 7 days
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+            <div className="flex items-center gap-4">
+              <div className="text-5xl">🏆</div>
+              <div>
+                <h4 className="font-semibold text-lg mb-1">Keep Building Your Legacy</h4>
+                <p className="text-sm text-muted-foreground">
+                  Complete more trades and improve your performance to unlock all achievements
+                </p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

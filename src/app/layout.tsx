@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Web3Provider } from '@/components/providers/Web3Provider';
+import { Navigation } from '@/components/Navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -63,6 +64,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Web3Provider>
           <div className="relative flex min-h-screen flex-col">
+            <Navigation />
             <main className="flex-1">{children}</main>
           </div>
         </Web3Provider>

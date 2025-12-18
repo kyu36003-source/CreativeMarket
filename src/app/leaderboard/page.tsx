@@ -8,8 +8,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Leaderboard } from '@/components/copy-trading/Leaderboard';
-import { useTopTraders } from '@/hooks/use-copy-trading';
+import { useTopTraders, useFollowTrader, useFollowedTraders } from '@/hooks/use-copy-trading';
 import { WalletConnect } from '@/components/WalletConnect';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, Calendar } from 'lucide-react';
 
@@ -17,6 +18,7 @@ type TimePeriod = '24h' | '7d' | '30d' | 'all';
 type Category = 'all' | 'crypto' | 'sports' | 'politics' | 'entertainment';
 
 export default function LeaderboardPage() {
+  const { isConnected } = useAccount();
   const [period, setPeriod] = useState<TimePeriod>('7d');
   const [category, setCategory] = useState<Category>('all');
 
@@ -25,6 +27,37 @@ export default function LeaderboardPage() {
     category: category === 'all' ? undefined : category,
     limit: 50,
   });
+  
+  const { mutate: followTrader } = useFollowTrader();
+  const { data: followedTraders } = useFollowedTraders();
+  
+  const handleFollowTrader = (traderId: string) => {
+    if (!isConnected) {
+      alert('Connect your wallet to follow traders');
+      return;
+    }
+    
+    followTrader(
+      { 
+        traderId, 
+        settings: { 
+          traderId,
+          enabled: true, 
+          allocation: 100,
+          maxPerTrade: 0.1
+        } 
+      },
+      {
+        onSuccess: () => {
+          console.log('Successfully following trader!');
+        },
+        onError: (error) => {
+          console.error('Failed to follow trader:', error);
+          alert('Failed to follow trader. Check console for details.');
+        },
+      }
+    );
+  };
 
   const periods: { value: TimePeriod; label: string }[] = [
     { value: '24h', label: '24 Hours' },
@@ -170,7 +203,8 @@ export default function LeaderboardPage() {
             <Leaderboard
               traders={traders || []}
               loading={isLoading}
-              onFollowTrader={() => {}}
+              onFollowTrader={handleFollowTrader}
+              followedTraders={new Set(Array.isArray(followedTraders) ? followedTraders.map(t => t.traderId) : [])}
             />
           </div>
         </div>
