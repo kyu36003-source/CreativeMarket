@@ -166,11 +166,12 @@ export default function MarketDetailPage() {
     !hasClaimed &&
     ((outcome && userYesAmount > 0) || (!outcome && userNoAmount > 0));
 
-  const handlePlaceBet = async () => {
-    if (!isConnected || selectedPosition === null) return;
+  const handlePlaceBet = async (position: boolean) => {
+    if (!isConnected) return;
 
     try {
-      await placeBet(marketId, selectedPosition, betAmount);
+      setSelectedPosition(position);
+      await placeBet(marketId, position, betAmount);
       // Transaction modal will show automatically via useEffect
     } catch (_error) {
       // Error handled by wagmi
@@ -461,10 +462,7 @@ export default function MarketDetailPage() {
                 )}
 
                 <Button
-                  onClick={() => {
-                    setSelectedPosition(true);
-                    handlePlaceBet();
-                  }}
+                  onClick={() => handlePlaceBet(true)}
                   disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                   size="lg"
@@ -541,10 +539,7 @@ export default function MarketDetailPage() {
                 )}
 
                 <Button
-                  onClick={() => {
-                    setSelectedPosition(false);
-                    handlePlaceBet();
-                  }}
+                  onClick={() => handlePlaceBet(false)}
                   disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                   size="lg"
