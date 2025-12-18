@@ -52,9 +52,12 @@ const nextConfig = {
       };
     }
 
-    // Ignore optional dependencies
+    // Ignore optional dependencies and pino-pretty
     config.externals.push({
       '@react-native-async-storage/async-storage': 'commonjs @react-native-async-storage/async-storage',
+      'pino-pretty': 'commonjs pino-pretty',
+      'lokijs': 'commonjs lokijs',
+      'encoding': 'commonjs encoding',
     });
 
     return config;
