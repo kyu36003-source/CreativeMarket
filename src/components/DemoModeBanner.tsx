@@ -28,8 +28,8 @@ export function DemoModeBanner() {
       <p className="flex items-center gap-2">
         <Sparkles className="h-3 w-3 text-blue-500" />
         <span>
-          <strong>Demo environment:</strong> Market data reflects real-world DeFi and creative economy trends. 
-          Connect wallet to interact on BSC Testnet.
+          <strong>Demo environment:</strong> Markets reflect real creative industry events and DeFi trends. 
+          Connect wallet to trade on BSC Testnet.
         </span>
       </p>
     </div>
