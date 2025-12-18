@@ -5,8 +5,6 @@
  * Solves: Niche market opportunity + subjective predictions
  */
 
-import type { CreativeWork } from './ai-oracle';
-
 export type CreativeMarketType =
   | 'design-contest'
   | 'music-release'

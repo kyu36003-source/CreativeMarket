@@ -15,7 +15,6 @@ import {
 } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import {
-  CONTRACT_ADDRESSES,
   getContractAddress,
 } from '../lib/contracts/addresses';
 import {
@@ -57,7 +56,7 @@ export function useMarket(marketId: number) {
       const market = getStaticMarket(marketId);
       if (market) {
         // Convert StaticMarketData to array format matching contract response
-        const marketArray = [
+        const _marketArray = [
           market.id,
           market.question,
           market.description,
@@ -160,6 +159,7 @@ export function usePosition(marketId: number) {
  * Create a new market
  */
 export function useCreateMarket() {
+  const chainId = useChainId();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -172,7 +172,6 @@ export function useCreateMarket() {
     endTime: Date;
     aiOracleEnabled: boolean;
   }) => {
-    const chainId = useChainId();
 
     return writeContract({
       address: getContractAddress(

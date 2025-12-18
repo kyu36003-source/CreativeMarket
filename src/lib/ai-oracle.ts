@@ -192,7 +192,7 @@ Be objective and thorough in your analysis.`;
   /**
    * Parse OpenAI's response
    */
-  private parseOpenAIResponse(data: any, work: CreativeWork): AIJudgment {
+  private parseOpenAIResponse(data: any, _work: CreativeWork): AIJudgment {
     const content = data.choices[0]?.message?.content;
     if (!content) {
       throw new Error('No content in OpenAI response');

@@ -5,7 +5,7 @@
  * Users don't need crypto or gas fees - we sponsor their transactions
  */
 
-import { encodeFunctionData, type Address } from 'viem';
+import { type Address } from 'viem';
 
 export interface GaslessTransactionRequest {
   userAddress: Address;
@@ -56,7 +56,7 @@ export class GaslessService {
   /**
    * Check user eligibility for gasless transactions
    */
-  private async checkEligibility(userAddress: Address): Promise<{
+  private async checkEligibility(_userAddress: Address): Promise<{
     eligible: boolean;
     reason: string;
     limitRemaining: number;
@@ -125,7 +125,7 @@ export class GaslessService {
    * Estimate gas for transaction
    */
   private async estimateGas(
-    request: GaslessTransactionRequest
+    _request: GaslessTransactionRequest
   ): Promise<bigint> {
     // Mock gas estimation
     // In production: use viem's estimateGas
@@ -135,7 +135,7 @@ export class GaslessService {
   /**
    * Mock transaction for demo
    */
-  private mockTransaction(request: GaslessTransactionRequest): string {
+  private mockTransaction(_request: GaslessTransactionRequest): string {
     // Generate fake tx hash
     const randomBytes = new Uint8Array(32);
     if (typeof window !== 'undefined') {
@@ -163,7 +163,7 @@ export class GaslessService {
   /**
    * Get user's gasless transaction stats
    */
-  async getUserGaslessStats(userAddress: Address): Promise<{
+  async getUserGaslessStats(_userAddress: Address): Promise<{
     totalTransactions: number;
     totalGasSaved: string;
     remainingFreeTxs: number;

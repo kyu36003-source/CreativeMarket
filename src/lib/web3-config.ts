@@ -24,7 +24,6 @@
 import { http, createConfig, fallback } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';
-import type { Chain } from 'viem';
 
 // Multiple RPC endpoints for fallback (improves reliability)
 const BSC_MAINNET_RPCS = [

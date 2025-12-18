@@ -82,7 +82,7 @@ export class Web3ErrorBoundary extends Component<Props, State> {
             </h2>
 
             <p className="mb-4 text-center text-sm text-gray-600">
-              We're having trouble connecting to the blockchain network. This
+              We&apos;re having trouble connecting to the blockchain network. This
               could be due to:
             </p>
 

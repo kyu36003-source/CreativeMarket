@@ -32,7 +32,6 @@ const DEMO_CREATORS = {
 // Calculate end times (realistic dates)
 const now = Math.floor(Date.now() / 1000);
 const DAY = 86400;
-const WEEK = DAY * 7;
 
 export const STATIC_MARKETS: StaticMarketData[] = [
   {

@@ -137,7 +137,7 @@ export class LiquidityAggregator {
   async findBestPrice(
     marketType: CreativeMarketType,
     amount: number,
-    side: 'yes' | 'no'
+    _side: 'yes' | 'no'
   ): Promise<{
     price: number;
     priceImpact: number;
@@ -178,7 +178,7 @@ export class LiquidityAggregator {
   async addLiquidity(
     marketType: CreativeMarketType,
     amount: string,
-    userAddress: string
+    _userAddress: string
   ): Promise<{
     success: boolean;
     lpTokens: string;
