@@ -157,7 +157,7 @@ class OracleService {
     // Listen for MarketCreated events (to track new markets)
     this.marketContract.on(
       'MarketCreated',
-      async (marketId, question, endTime, creator) => {
+      async (marketId, question, endTime) => {
         console.log(`📢 New Market Created: #${marketId}`);
         console.log(`   Question: ${question}`);
         console.log(
@@ -169,7 +169,7 @@ class OracleService {
     // Listen for ResolutionRequested events
     this.oracleContract.on(
       'ResolutionRequested',
-      async (requestId, marketId, dataSource) => {
+      async (requestId, marketId) => {
         console.log(
           `\n🔔 Resolution Requested: Request #${requestId}, Market #${marketId}`
         );

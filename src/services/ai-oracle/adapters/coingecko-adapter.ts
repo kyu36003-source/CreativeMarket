@@ -3,7 +3,7 @@
  * Fetches cryptocurrency price and market data from CoinGecko API
  */
 
-import { BaseAdapter, AdapterConfig } from './base-adapter';
+import { BaseAdapter } from './base-adapter';
 import {
   ResolutionQuery,
   SourceData,
@@ -20,17 +20,6 @@ interface CoinGeckoPrice {
     usd_24h_vol?: number;
     usd_market_cap?: number;
   };
-}
-
-interface CoinGeckoMarketData {
-  id: string;
-  symbol: string;
-  name: string;
-  current_price: number;
-  market_cap: number;
-  total_volume: number;
-  price_change_percentage_24h: number;
-  last_updated: string;
 }
 
 interface CoinGeckoHistoricalData {

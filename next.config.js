@@ -3,6 +3,14 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  eslint: {
+    // Only fail on errors, not warnings during production builds
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    // Only fail on errors, not warnings
+    ignoreBuildErrors: false,
+  },
   images: {
     domains: ['localhost'],
     remotePatterns: [

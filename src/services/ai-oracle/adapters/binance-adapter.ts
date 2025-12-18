@@ -3,7 +3,7 @@
  * Fetches real-time cryptocurrency data from Binance API
  */
 
-import { BaseAdapter, AdapterConfig } from './base-adapter';
+import { BaseAdapter } from './base-adapter';
 import {
   ResolutionQuery,
   SourceData,
@@ -12,11 +12,6 @@ import {
   OracleError,
   ErrorCode,
 } from '../types';
-
-interface BinanceTickerPrice {
-  symbol: string;
-  price: string;
-}
 
 interface Binance24hrStats {
   symbol: string;

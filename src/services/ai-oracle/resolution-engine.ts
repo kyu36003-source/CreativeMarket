@@ -8,7 +8,6 @@ import {
   Market,
   ResolutionRequest,
   ResolutionResult,
-  ResolutionStatus,
   SourceData,
   EvidencePackage,
   OracleError,
