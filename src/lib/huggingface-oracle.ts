@@ -345,7 +345,7 @@ ${market.description}
       });
 
       const content = response.choices[0]?.message?.content?.toLowerCase() || '';
-      const isWorking = content.includes('working') || content.includes('yes');
+      const _isWorking = content.includes('working') || content.includes('yes');
       
       return true;
     } catch (_error) {
