@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Zap, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Zap, Info, Loader2 } from 'lucide-react';
 import { AIAnalysis } from '@/types/market';
 
 interface PredictionModalProps {
@@ -19,6 +19,7 @@ interface PredictionModalProps {
   noOdds: number;
   onClose: () => void;
   onSubmit: (position: boolean, amount: string) => void;
+  isSubmitting?: boolean;
 }
 
 export function PredictionModal({
@@ -28,6 +29,7 @@ export function PredictionModal({
   noOdds,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: PredictionModalProps) {
   const [position, setPosition] = useState<boolean | null>(null);
   const [amount, setAmount] = useState('0.1');
@@ -278,10 +280,17 @@ export function PredictionModal({
             </Button>
             <Button
               className="flex-1"
-              disabled={position === null || !amount || parseFloat(amount) <= 0}
+              disabled={position === null || !amount || parseFloat(amount) <= 0 || isSubmitting}
               onClick={() => onSubmit(position!, amount)}
             >
-              Confirm Prediction
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                'Confirm Prediction'
+              )}
             </Button>
           </div>
         </CardContent>

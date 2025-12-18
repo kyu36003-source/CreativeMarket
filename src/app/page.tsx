@@ -24,10 +24,12 @@ import {
   Search,
   Brain,
 } from 'lucide-react';
-import { useMarketCount, useMarket } from '@/hooks/useContracts';
+import { useMarketCount, useMarket, usePlaceBet } from '@/hooks/useContracts';
+import { useRouter } from 'next/navigation';
 import { STATIC_MARKETS } from '@/lib/static-markets';
 
 export default function HomePage() {
+  const router = useRouter();
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +48,9 @@ export default function HomePage() {
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Betting hook
+  const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
 
   // Get market count from blockchain (with static fallback)
   const { data: marketCount, isLoading: isLoadingCount } = useMarketCount();
@@ -202,12 +207,30 @@ export default function HomePage() {
     return markets.filter(m => m.category === categoryId).length;
   };
 
-  const handlePredictionSubmit = async (_position: boolean, _amount: string) => {
-    // This will redirect to the market detail page where they can actually place the bet
-    if (selectedMarketId) {
-      window.location.href = `/markets/${selectedMarketId}`;
+  const handlePredictionSubmit = async (position: boolean, amount: string) => {
+    if (!selectedMarketId) return;
+    
+    try {
+      await placeBet(parseInt(selectedMarketId), position, amount);
+      // Close modal after successful transaction
+      setSelectedMarketId(null);
+      // Navigate to market detail page to see the result
+      router.push(`/markets/${selectedMarketId}`);
+    } catch (error) {
+      console.error('Failed to place bet:', error);
+      // Keep modal open so user can retry
     }
   };
+
+  // Close modal and redirect to market when transaction succeeds
+  useEffect(() => {
+    if (isSuccess && selectedMarketId) {
+      setTimeout(() => {
+        setSelectedMarketId(null);
+        router.push(`/markets/${selectedMarketId}`);
+      }, 2000);
+    }
+  }, [isSuccess, selectedMarketId, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -492,6 +515,7 @@ export default function HomePage() {
           }
           onClose={() => setSelectedMarketId(null)}
           onSubmit={handlePredictionSubmit}
+          isSubmitting={isBetting}
         />
       )}
     </div>
