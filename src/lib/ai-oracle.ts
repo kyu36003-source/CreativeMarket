@@ -65,16 +65,14 @@ export class AIOracle {
   async judgeCreativeWork(work: CreativeWork): Promise<AIJudgment> {
     // Mode 1: OpenAI GPT-4 (Premium)
     if (this.apiKey && typeof window === 'undefined') {
-      console.log('🌟 Using OpenAI GPT-4 for judgment (PREMIUM MODE)');
       try {
         return await this.judgeWithOpenAI(work);
-      } catch (error) {
-        console.warn('OpenAI failed, falling back to Hugging Face:', error);
+      } catch (_error) {
+        // Fallback to Hugging Face
       }
     }
 
     // Mode 2: Hugging Face (FREE Real AI) - Default
-    console.log('🤗 Using Hugging Face AI for judgment (FREE REAL AI MODE)');
     return await this.judgeWithHuggingFace(work);
   }
 

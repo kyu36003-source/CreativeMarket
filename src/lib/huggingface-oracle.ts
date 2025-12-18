@@ -68,10 +68,6 @@ export class HuggingFaceOracle {
     // IMPORTANT: For public models, we MUST provide an API key or empty string
     // Get free key at: https://huggingface.co/settings/tokens
     this.client = new HfInference(this.config.apiKey || '');
-
-    console.log('🤗 Hugging Face AI Oracle initialized (FREE)');
-    console.log(`Primary model: ${this.config.model}`);
-    console.log(`API key: ${this.config.apiKey ? 'Provided (faster) ✅' : 'NOT PROVIDED - Get free key at https://huggingface.co/settings/tokens'}`);
   }
 
   /**
@@ -91,16 +87,13 @@ export class HuggingFaceOracle {
       // Try primary model
       const analysis = await this.tryModel(this.config.model, prompt);
       if (analysis) {
-        console.log(`✅ Analysis completed with ${this.config.model}`);
         return analysis;
       }
 
       // Try fallback models
       for (const model of this.config.fallbackModels) {
-        console.log(`⚠️ Trying fallback model: ${model}`);
         const fallbackAnalysis = await this.tryModel(model, prompt);
         if (fallbackAnalysis) {
-          console.log(`✅ Analysis completed with fallback ${model}`);
           return fallbackAnalysis;
         }
       }
@@ -255,10 +248,7 @@ ${market.description}
         analyzerVersion: 'huggingface-oracle-v1.0.0',
         model,
       };
-    } catch (error) {
-      console.error('Failed to parse AI response:', error);
-      console.log('Raw content:', content);
-
+    } catch (_error) {
       // Fallback: Basic sentiment analysis from raw response
       const isPositive = this.analyzeTextSentiment(content);
       const confidence = 0.6; // Moderate confidence for fallback
@@ -343,8 +333,6 @@ ${market.description}
    */
   async testConnection(): Promise<boolean> {
     try {
-      console.log('Testing Hugging Face connection...');
-      
       const response = await this.client.chatCompletion({
         model: this.config.model,
         messages: [
@@ -359,10 +347,8 @@ ${market.description}
       const content = response.choices[0]?.message?.content?.toLowerCase() || '';
       const isWorking = content.includes('working') || content.includes('yes');
       
-      console.log(`✅ Hugging Face ${this.config.model}: ${isWorking ? 'WORKING' : 'RESPONDING'}`);
       return true;
-    } catch (error) {
-      console.error('❌ Hugging Face connection test failed:', error);
+    } catch (_error) {
       return false;
     }
   }

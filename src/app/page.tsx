@@ -63,7 +63,6 @@ export default function HomePage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log('⏰ Loading timeout - using static data');
         setLoading(false);
       }
     }, 3000); // 3 seconds
@@ -83,7 +82,6 @@ export default function HomePage() {
 
     const convertToMarket = (marketId: number, data: unknown[]): Market | null => {
       if (!data || data.length < 12) {
-        console.log(`⚠️ Market ${marketId} data invalid:`, { data, length: data?.length });
         return null;
       }
 
@@ -145,13 +143,10 @@ export default function HomePage() {
       }
     }
 
-    console.log('✅ Loaded markets from blockchain:', loadedMarkets.length);
-
     if (loadedMarkets.length > 0) {
       setMarkets(loadedMarkets);
       setLoading(false);
       setError(null);
-      console.log('✅ Markets set from blockchain data');
     } else if (allFinishedLoading || marketCount !== undefined) {
       // All hooks loaded but no data - this is expected in production demo mode
       // The hooks will have returned static data automatically
@@ -185,7 +180,6 @@ export default function HomePage() {
         });
         
         setMarkets(staticMarkets);
-        console.log('✅ Using static markets:', staticMarkets.length);
       }
     }
   }, [
