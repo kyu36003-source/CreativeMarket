@@ -75,8 +75,8 @@ export function AIMarketAnalytics({
       };
 
       setAnalysis(analysis);
-    } catch (error) {
-      console.error('Error analyzing market:', error);
+    } catch (_error) {
+      // Analysis failed
     } finally {
       setLoading(false);
     }

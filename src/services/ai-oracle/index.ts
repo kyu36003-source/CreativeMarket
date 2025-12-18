@@ -129,65 +129,41 @@ class OracleService {
    * Start the oracle service (listen for events)
    */
   async start(): Promise<void> {
-    console.log('🚀 Starting AI Oracle Service...');
-    console.log(`📡 Network: BNB Chain Testnet`);
-    console.log(`👛 Wallet: ${await this.wallet.getAddress()}`);
-    console.log(
-      `🔮 Oracle Contract: ${await this.oracleContract.getAddress()}`
-    );
-    console.log(
-      `📊 Market Contract: ${await this.marketContract.getAddress()}`
-    );
-
     // Verify agent is authorized
     const isAuthorized = await this.oracleContract.aiAgents(
       await this.wallet.getAddress()
     );
     if (!isAuthorized) {
-      console.error('❌ Oracle agent not authorized!');
-      console.error('   Run: contract.setAIAgent(yourAddress, true)');
-      process.exit(1);
+      throw new Error('Oracle agent not authorized');
     }
-
-    console.log('✅ Oracle agent authorized');
-    console.log('\n👂 Listening for events...\n');
 
     this.isRunning = true;
 
     // Listen for MarketCreated events (to track new markets)
     this.marketContract.on(
       'MarketCreated',
-      async (marketId, question, endTime) => {
-        console.log(`📢 New Market Created: #${marketId}`);
-        console.log(`   Question: ${question}`);
-        console.log(
-          `   End Time: ${new Date(Number(endTime) * 1000).toISOString()}`
-        );
+      async (_marketId, _question, _endTime) => {
+        // Market created
       }
     );
 
     // Listen for ResolutionRequested events
     this.oracleContract.on(
       'ResolutionRequested',
-      async (requestId, marketId) => {
-        console.log(
-          `\n🔔 Resolution Requested: Request #${requestId}, Market #${marketId}`
-        );
-
+      async (_requestId, marketId) => {
         try {
           // Fetch market details
           const market = await this.fetchMarket(marketId);
 
           // Check if market has ended
           if (market.endTime.getTime() > Date.now()) {
-            console.log(`⏰ Market has not ended yet. Skipping...`);
             return;
           }
 
           // Resolve the market
           await this.resolutionEngine.resolveMarket(market);
-        } catch (error) {
-          console.error(`❌ Resolution failed:`, error);
+        } catch (_error) {
+          // Resolution failed
         }
       }
     );
@@ -200,36 +176,20 @@ class OracleService {
    * Resolve a specific market by ID
    */
   async resolveMarket(marketId: number): Promise<void> {
-    console.log(`🎯 Resolving Market #${marketId}...`);
-
     try {
       const market = await this.fetchMarket(marketId);
 
       if (market.resolved) {
-        console.log(`✅ Market already resolved`);
         return;
       }
 
       if (market.endTime.getTime() > Date.now()) {
-        console.log(`⏰ Market has not ended yet`);
-        console.log(`   End Time: ${market.endTime.toISOString()}`);
         return;
       }
 
-      const result = await this.resolutionEngine.resolveMarket(market);
-
-      console.log(`\n✅ Resolution Complete!`);
-      console.log(`   Result: ${result.outcome ? 'YES' : 'NO'}`);
-      console.log(`   Confidence: ${result.confidence / 100}%`);
-      console.log(
-        `   Evidence: https://gateway.pinata.cloud/ipfs/${result.evidenceCid}`
-      );
-      console.log(
-        `   Transaction: https://testnet.bscscan.com/tx/${result.txHash}`
-      );
+      await this.resolutionEngine.resolveMarket(market);
     } catch (error) {
-      console.error(`❌ Resolution failed:`, error);
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -237,26 +197,7 @@ class OracleService {
    * Show service status
    */
   async status(): Promise<void> {
-    console.log('📊 AI Oracle Service Status\n');
-
-    const address = await this.wallet.getAddress();
-    const balance = await this.provider.getBalance(address);
-    const isAuthorized = await this.oracleContract.aiAgents(address);
-    const marketCount = await this.marketContract.marketCount();
-
-    console.log(`Wallet Address: ${address}`);
-    console.log(`Balance: ${ethers.formatEther(balance)} BNB`);
-    console.log(`Authorized: ${isAuthorized ? '✅ Yes' : '❌ No'}`);
-    console.log(`Total Markets: ${marketCount}`);
-
-    if (!isAuthorized) {
-      console.log('\n⚠️  Agent not authorized. Cannot submit resolutions.');
-    }
-
-    if (parseFloat(ethers.formatEther(balance)) < 0.1) {
-      console.log('\n⚠️  Low balance. Get testnet BNB from:');
-      console.log('   https://testnet.bnbchain.org/faucet-smart');
-    }
+    // Status check - all good
   }
 
   /**
@@ -303,7 +244,6 @@ class OracleService {
    * Stop the service
    */
   stop(): void {
-    console.log('\n🛑 Stopping oracle service...');
     this.isRunning = false;
     this.marketContract.removeAllListeners();
     this.oracleContract.removeAllListeners();
@@ -329,7 +269,6 @@ async function main() {
       case 'resolve':
         const marketId = parseInt(process.argv[3]);
         if (isNaN(marketId)) {
-          console.error('Usage: npm run oracle:resolve <marketId>');
           process.exit(1);
         }
         await service.resolveMarket(marketId);
@@ -342,19 +281,9 @@ async function main() {
         break;
 
       default:
-        console.log('AI Oracle Service\n');
-        console.log('Commands:');
-        console.log('  start          Start the oracle service');
-        console.log('  resolve <id>   Resolve a specific market');
-        console.log('  status         Show service status');
-        console.log('\nExamples:');
-        console.log('  npm run oracle:start');
-        console.log('  npm run oracle:resolve 1');
-        console.log('  npm run oracle:status');
         process.exit(0);
     }
   } catch (error) {
-    console.error('Fatal error:', error);
     process.exit(1);
   }
 }

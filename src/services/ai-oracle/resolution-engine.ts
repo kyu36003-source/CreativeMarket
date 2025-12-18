@@ -43,7 +43,6 @@ export class ResolutionEngine {
 
     try {
       // Step 1: Fetch data from multiple sources
-      console.log(`[Resolution] Fetching data for market ${market.id}...`);
       const sourceData = await this.fetchData(market);
 
       if (sourceData.length === 0) {
@@ -55,7 +54,7 @@ export class ResolutionEngine {
       }
 
       // Step 2: Run AI analysis
-      console.log(`[Resolution] Running AI analysis...`);
+
       const aiAnalysis = await this.config.aiAnalyzer.analyze({
         market,
         sourceData,
@@ -74,7 +73,6 @@ export class ResolutionEngine {
       }
 
       // Step 3: Compile evidence package
-      console.log(`[Resolution] Compiling evidence package...`);
       const evidence: EvidencePackage = {
         version: '1.0',
         marketId: market.id,
@@ -104,14 +102,10 @@ export class ResolutionEngine {
       };
 
       // Step 4: Upload evidence to IPFS
-      console.log(`[Resolution] Uploading evidence to IPFS...`);
       const ipfsResult = await this.config.evidenceStorage.upload(evidence);
       evidence.metadata.ipfsCid = ipfsResult.cid;
 
-      console.log(`[Resolution] Evidence uploaded: ${ipfsResult.url}`);
-
       // Step 5: Submit resolution to blockchain
-      console.log(`[Resolution] Submitting to blockchain...`);
       const txResult = await this.submitToBlockchain(
         market.id,
         aiAnalysis.outcome,
@@ -128,14 +122,6 @@ export class ResolutionEngine {
 
       const duration = Date.now() - startTime;
 
-      console.log(`[Resolution] ✅ Market ${market.id} resolved successfully!`);
-      console.log(`  Outcome: ${aiAnalysis.outcome ? 'YES' : 'NO'}`);
-      console.log(`  Confidence: ${aiAnalysis.confidence / 100}%`);
-      console.log(`  Evidence: ${ipfsResult.url}`);
-      console.log(`  Transaction: ${txResult.hash}`);
-      console.log(`  Duration: ${(duration / 1000).toFixed(2)}s`);
-      console.log(`  Cost: $${totalCostUSD.toFixed(4)}`);
-
       return {
         outcome: aiAnalysis.outcome,
         confidence: aiAnalysis.confidence,
@@ -146,10 +132,6 @@ export class ResolutionEngine {
         duration,
       };
     } catch (error) {
-      console.error(
-        `[Resolution] ❌ Failed to resolve market ${market.id}:`,
-        error
-      );
       throw error;
     }
   }
@@ -188,10 +170,7 @@ export class ResolutionEngine {
       if (result.status === 'fulfilled') {
         sourceData.push(result.value);
       } else {
-        console.warn(
-          `[Resolution] Data source ${applicableAdapters[i].name} failed:`,
-          result.reason
-        );
+        // Data source failed, continue with others
       }
     }
 
@@ -234,9 +213,6 @@ export class ResolutionEngine {
           gasLimit: 500000, // Estimated gas limit
         }
       );
-
-      console.log(`[Resolution] Transaction submitted: ${tx.hash}`);
-      console.log(`[Resolution] Waiting for confirmation...`);
 
       const receipt = await tx.wait();
 

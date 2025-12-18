@@ -83,8 +83,8 @@ export default function ReputationPage() {
     try {
       await enableCopyTrading();
       setCopyTradingEnabled(!copyTradingEnabled);
-    } catch (error) {
-      console.error('Error toggling copy trading:', error);
+    } catch (_error) {
+      // Error handled by wagmi
     }
   };
 

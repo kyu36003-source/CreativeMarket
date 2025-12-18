@@ -18,7 +18,6 @@ export function useWeb3Connection() {
   useEffect(() => {
     // Handle connection interruptions
     const handleOnline = () => {
-      console.log('Network back online, attempting to reconnect...');
       setConnectionError(null);
       if (isDisconnected && retryCount < 3) {
         reconnect();
@@ -27,7 +26,6 @@ export function useWeb3Connection() {
     };
 
     const handleOffline = () => {
-      console.log('Network offline');
       setConnectionError(
         'Network connection lost. Please check your internet connection.'
       );
@@ -57,8 +55,7 @@ export function useWeb3Connection() {
     setIsReconnecting(true);
     try {
       await reconnect();
-    } catch (error) {
-      console.error('Reconnection failed:', error);
+    } catch (_error) {
       setConnectionError('Failed to reconnect. Please try again.');
     } finally {
       setIsReconnecting(false);

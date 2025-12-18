@@ -45,8 +45,8 @@ export function PredictionModal({
           if (!response.ok) throw new Error('Failed to fetch AI analysis');
           const data = await response.json();
           setAiAnalysis(data);
-        } catch (error) {
-          console.error('Error fetching AI analysis:', error);
+        } catch (_error) {
+          // Failed to fetch analysis
         } finally {
           setLoadingAnalysis(false);
         }

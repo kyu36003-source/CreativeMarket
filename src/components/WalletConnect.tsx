@@ -36,16 +36,9 @@ export function WalletConnect() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Log connectors for debugging
+  // Connectors are ready for use
   useEffect(() => {
-    console.log(
-      'Available connectors:',
-      connectors.map(c => ({
-        id: c.id,
-        name: c.name,
-        ready: c.ready,
-      }))
-    );
+    // Connectors loaded
   }, [connectors]);
 
   const formatAddress = (addr: string) => {
@@ -151,15 +144,9 @@ export function WalletConnect() {
                   key={connector.id}
                   onClick={async () => {
                     try {
-                      console.log(
-                        'Attempting to connect with:',
-                        connector.id,
-                        connector.name
-                      );
                       setShowConnectors(false);
                       await connect({ connector });
-                    } catch (error) {
-                      console.error('Connection error:', error);
+                    } catch (_error) {
                       setShowConnectors(true); // Reopen to show error
                     }
                   }}

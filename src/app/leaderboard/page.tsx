@@ -170,7 +170,7 @@ export default function LeaderboardPage() {
             <Leaderboard
               traders={traders || []}
               loading={isLoading}
-              onFollowTrader={id => console.log('Follow trader:', id)}
+              onFollowTrader={() => {}}
             />
           </div>
         </div>

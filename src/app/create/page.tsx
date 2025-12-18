@@ -73,8 +73,8 @@ export default function CreateMarketPage() {
       if (isSuccess) {
         router.push('/markets');
       }
-    } catch (err) {
-      console.error('Error creating market:', err);
+    } catch (_err) {
+      // Error handled by hook
     }
   };
 

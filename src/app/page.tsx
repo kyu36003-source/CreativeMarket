@@ -78,7 +78,7 @@ export default function HomePage() {
                                 !isLoading3 && !isLoading4 && !isLoading5 && !isLoading6;
     
     if (allFinishedLoading) {
-      console.log('✅ All hooks finished loading');
+      // Hooks loading complete
     }
 
     const convertToMarket = (marketId: number, data: unknown[]): Market | null => {

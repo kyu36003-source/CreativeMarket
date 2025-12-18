@@ -172,8 +172,8 @@ export default function MarketDetailPage() {
     try {
       await placeBet(marketId, selectedPosition, betAmount);
       // Transaction modal will show automatically via useEffect
-    } catch (error) {
-      console.error('Error placing bet:', error);
+    } catch (_error) {
+      // Error handled by wagmi
     }
   };
 
@@ -182,16 +182,16 @@ export default function MarketDetailPage() {
 
     try {
       await claimWinnings(marketId);
-    } catch (error) {
-      console.error('Error claiming winnings:', error);
+    } catch (_error) {
+      // Error handled by wagmi
     }
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-    } catch (error) {
-      console.error('Failed to copy:', error);
+    } catch (_error) {
+      // Silently fail if clipboard not available
     }
   };
 
@@ -271,6 +271,87 @@ export default function MarketDetailPage() {
           </div>
         </div>
       </Card>
+
+      {/* AI Oracle Rules */}
+      {aiOracleEnabled && (
+        <Card className="p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">🤖</span>
+            <h3 className="text-lg font-semibold">AI Oracle Rules & Resolution</h3>
+          </div>
+          
+          <div className="space-y-4 text-sm">
+            <div>
+              <h4 className="font-semibold text-green-600 dark:text-green-400 mb-2">✅ Fairness Guarantees</h4>
+              <ul className="space-y-1 text-muted-foreground ml-4">
+                <li>• <strong>Multi-Source Verification:</strong> Data cross-checked from 3+ independent sources</li>
+                <li>• <strong>80% Confidence Threshold:</strong> Only high-certainty outcomes auto-resolve</li>
+                <li>• <strong>Transparent Evidence:</strong> Complete reasoning stored immutably on IPFS</li>
+                <li>• <strong>Bias Detection:</strong> AI checks for data inconsistencies before resolving</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">⚡ Resolution Process</h4>
+              <ul className="space-y-1 text-muted-foreground ml-4">
+                <li>• <strong>Step 1:</strong> Fetch real-time data from official sources</li>
+                <li>• <strong>Step 2:</strong> GPT-4 analyzes evidence with category-specific rules</li>
+                <li>• <strong>Step 3:</strong> Evidence package uploaded to IPFS</li>
+                <li>• <strong>Step 4:</strong> Smart contract resolves market on-chain</li>
+                <li>• <strong>Time:</strong> ~30 seconds average resolution</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">🎯 {category} Market Rules</h4>
+              <ul className="space-y-1 text-muted-foreground ml-4">
+                {category === 'NFT' && (
+                  <>
+                    <li>• Verify on-chain contract addresses and mint events</li>
+                    <li>• Check OpenSea, Blur, and X2Y2 for collection data</li>
+                    <li>• Use floor prices and trading volume as supporting evidence</li>
+                  </>
+                )}
+                {category === 'Music' && (
+                  <>
+                    <li>• Use official Spotify/Apple Music chart data</li>
+                    <li>• Verify Billboard rankings and streaming counts</li>
+                    <li>• Check artist/label official announcements</li>
+                  </>
+                )}
+                {category === 'Fashion' && (
+                  <>
+                    <li>• Verify from official brand press releases</li>
+                    <li>• Check product availability on brand websites</li>
+                    <li>• Review coverage from Vogue, WWD, and Highsnobiety</li>
+                  </>
+                )}
+                {category === 'DeFi' && (
+                  <>
+                    <li>• Use DEX aggregator data (CoinGecko, DeFiLlama)</li>
+                    <li>• Check multiple DEXs for price consensus</li>
+                    <li>• Verify TVL from blockchain explorers</li>
+                  </>
+                )}
+                {!['NFT', 'Music', 'Fashion', 'DeFi'].includes(category) && (
+                  <>
+                    <li>• Cross-verify data from multiple reputable sources</li>
+                    <li>• Require official announcements or on-chain proof</li>
+                    <li>• Consider time zones and exact event timing</li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            <div className="pt-3 border-t">
+              <p className="text-xs text-muted-foreground">
+                💡 <strong>Fast Payouts:</strong> Winners can claim immediately after resolution.
+                Disputes can be filed within 24 hours if new evidence emerges.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Resolution Display */}
       {resolved && (

@@ -54,8 +54,8 @@ export function NetworkGuard({ children }: { children: React.ReactNode }) {
   const handleSwitchNetwork = async (targetChainId: number) => {
     try {
       await switchChain({ chainId: targetChainId });
-    } catch (error) {
-      console.error('Failed to switch network:', error);
+    } catch (_error) {
+      // Network switch failed or user rejected
     }
   };
 
