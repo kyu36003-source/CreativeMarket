@@ -35,10 +35,15 @@ export default function HomePage() {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [categories] = useState<MarketCategoryInfo[]>([
     { id: 'all', name: 'All Markets', icon: '🎯', count: 0 },
-    { id: 'crypto', name: 'Crypto', icon: '₿', count: 0 },
-    { id: 'technology', name: 'Technology', icon: '💻', count: 0 },
-    { id: 'sports', name: 'Sports', icon: '⚽', count: 0 },
-    { id: 'entertainment', name: 'Entertainment', icon: '🎬', count: 0 },
+    { id: 'NFT', name: 'NFT', icon: '🖼️', count: 0 },
+    { id: 'Music', name: 'Music', icon: '🎵', count: 0 },
+    { id: 'Fashion', name: 'Fashion', icon: '👗', count: 0 },
+    { id: 'Art', name: 'Art', icon: '🎨', count: 0 },
+    { id: 'Film', name: 'Film', icon: '🎬', count: 0 },
+    { id: 'Writing', name: 'Writing', icon: '✍️', count: 0 },
+    { id: 'Social', name: 'Social', icon: '🌐', count: 0 },
+    { id: 'DeFi', name: 'DeFi', icon: '💎', count: 0 },
+    { id: 'Creative', name: 'Creative', icon: '✨', count: 0 },
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -198,6 +203,12 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
+  // Calculate category counts
+  const getCategoryCount = (categoryId: string) => {
+    if (categoryId === 'all') return markets.length;
+    return markets.filter(m => m.category === categoryId).length;
+  };
+
   const handlePredictionSubmit = async (_position: boolean, _amount: string) => {
     // This will redirect to the market detail page where they can actually place the bet
     if (selectedMarketId) {
@@ -240,14 +251,14 @@ export default function HomePage() {
             </span>
           </div>
           <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            AI-Powered Prediction Markets on{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              BNB Chain
+            Predict the Future of{' '}
+            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Creative Economy
             </span>
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Predict the future of creative work. Trade predictions with AI
-            assistance and gasless transactions.
+            NFT launches • Music drops • Fashion releases • Brand campaigns. 
+            Bet on creator milestones with AI-powered resolution.
           </p>
 
           {/* New: Creative Markets CTA */}
@@ -358,31 +369,52 @@ export default function HomePage() {
 
         {/* Market Categories */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold mb-4">Browse Markets</h3>
-          <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-2">
+          <h3 className="text-2xl font-bold mb-4">Browse Creative Markets</h3>
+          <p className="text-gray-600 mb-6">Predict outcomes tied to real events, launches, and creator milestones</p>
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+              className={`px-5 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all shadow-sm flex items-center gap-2 ${
                 selectedCategory === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              All Markets
+              <span className="text-lg">🎯</span>
+              <span>All Markets</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                selectedCategory === 'all' 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-gray-100 text-gray-600'
+              }`}>
+                {getCategoryCount('all')}
+              </span>
             </button>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
-                  selectedCategory === cat.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {cat.icon} {cat.name}
-              </button>
-            ))}
+            {categories.filter(cat => cat.id !== 'all').map(cat => {
+              const count = getCategoryCount(cat.id);
+              if (count === 0) return null; // Hide empty categories
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all shadow-sm flex items-center gap-2 ${
+                    selectedCategory === cat.id
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  <span className="text-lg">{cat.icon}</span>
+                  <span>{cat.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    selectedCategory === cat.id 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Search */}
@@ -393,10 +425,28 @@ export default function HomePage() {
               placeholder="Search markets..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
         </div>
+
+        {/* Results Count */}
+        {!loading && !error && (
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              {filteredMarkets.length === 0 ? (
+                <>No markets found {searchQuery && `for "${searchQuery}"`}</>
+              ) : (
+                <>
+                  Showing <span className="font-semibold text-purple-600">{filteredMarkets.length}</span> 
+                  {selectedCategory !== 'all' && ` ${selectedCategory}`} 
+                  {filteredMarkets.length === 1 ? ' market' : ' markets'}
+                  {searchQuery && ` matching "${searchQuery}"`}
+                </>
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Markets Grid */}
         {loading ? (
