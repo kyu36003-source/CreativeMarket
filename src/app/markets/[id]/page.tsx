@@ -75,10 +75,10 @@ export default function MarketDetailPage() {
   const [selectedPosition, setSelectedPosition] = useState<boolean | null>(
     null
   );
-  const [showBetForm, setShowBetForm] = useState(false);
+  const [_showBetForm, _setShowBetForm] = useState(false);
   const [showTxModal, setShowTxModal] = useState(false);
 
-  const { potentialWinnings, odds } = useCalculateWinnings(
+  const { potentialWinnings, odds: _odds } = useCalculateWinnings(
     marketId,
     selectedPosition ?? true,
     betAmount
@@ -95,7 +95,7 @@ export default function MarketDetailPage() {
   useEffect(() => {
     if (isBetSuccess) {
       setTimeout(() => {
-        setShowBetForm(false);
+        _setShowBetForm(false);
         setBetAmount('0.1');
         setSelectedPosition(null);
       }, 3000); // Keep modal open for 3 seconds to show success
@@ -737,7 +737,7 @@ export default function MarketDetailPage() {
                   onClick={() => {
                     setShowTxModal(false);
                     if (isBetSuccess) {
-                      setShowBetForm(false);
+                      _setShowBetForm(false);
                       setBetAmount('0.1');
                       setSelectedPosition(null);
                     }
