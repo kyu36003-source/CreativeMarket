@@ -13,6 +13,7 @@ import {
 import { RainbowKitButton } from '@/components/RainbowKitButton';
 import { MarketCard } from '@/components/MarketCard';
 import { PredictionModal } from '@/components/PredictionModal';
+import { DemoModeBanner } from '@/components/DemoModeBanner';
 import { calculateMarketOdds } from '@/lib/market-data';
 import { Market, MarketCategoryInfo } from '@/types/market';
 import {
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { formatEther } from 'viem';
+import { STATIC_MARKETS } from '@/lib/static-markets';
 
 export default function HomePage() {
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
@@ -42,60 +44,34 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get market count from blockchain
-  const { data: marketCount, isLoading: isLoadingCount, isError: isErrorCount, error: errorCount } = useMarketCount();
+  // Get market count from blockchain (with static fallback)
+  const { data: marketCount, isLoading: isLoadingCount } = useMarketCount();
   
-  // Fetch markets 1, 2, and 3 directly
-  const { data: market1Data, isLoading: isLoading1, isError: isError1, error: error1 } = useMarket(1);
-  const { data: market2Data, isLoading: isLoading2, isError: isError2, error: error2 } = useMarket(2);
-  const { data: market3Data, isLoading: isLoading3, isError: isError3, error: error3 } = useMarket(3);
+  // Fetch markets 1-6 directly (with static fallback)
+  const { data: market1Data, isLoading: isLoading1 } = useMarket(1);
+  const { data: market2Data, isLoading: isLoading2 } = useMarket(2);
+  const { data: market3Data, isLoading: isLoading3 } = useMarket(3);
+  const { data: market4Data, isLoading: isLoading4 } = useMarket(4);
+  const { data: market5Data, isLoading: isLoading5 } = useMarket(5);
+  const { data: market6Data, isLoading: isLoading6 } = useMarket(6);
 
-  // Timeout fallback - stop loading after 10 seconds
+  // Timeout fallback - stop loading after 3 seconds (faster UX)
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log('⏰ Loading timeout - stopping loader');
+        console.log('⏰ Loading timeout - using static data');
         setLoading(false);
-        setError('Unable to load markets. Please check if Hardhat node is running and contracts are deployed.');
       }
-    }, 10000); // 10 seconds
+    }, 3000); // 3 seconds
 
     return () => clearTimeout(timeout);
   }, [loading]);
 
   // Convert blockchain data to Market format
   useEffect(() => {
-    console.log('🔍 PAGE DEBUG - Hook data:', {
-      marketCount,
-      isLoadingCount,
-      isErrorCount,
-      market1Data,
-      isLoading1,
-      isError1,
-      market2Data,
-      isLoading2,
-      isError2,
-      market3Data,
-      isLoading3,
-      isError3,
-    });
-
-    // Check if any hooks have errors
-    if (isErrorCount || isError1 || isError2 || isError3) {
-      console.error('❌ Error loading from blockchain');
-      console.error('Error details:', {
-        countError: errorCount,
-        market1Error: error1,
-        market2Error: error2,
-        market3Error: error3,
-      });
-      setLoading(false);
-      setError('Error connecting to blockchain. Please ensure Hardhat node is running.');
-      return;
-    }
-
     // If all hooks have finished loading (not loading anymore)
-    const allFinishedLoading = !isLoadingCount && !isLoading1 && !isLoading2 && !isLoading3;
+    const allFinishedLoading = !isLoadingCount && !isLoading1 && !isLoading2 && 
+                                !isLoading3 && !isLoading4 && !isLoading5 && !isLoading6;
     
     if (allFinishedLoading) {
       console.log('✅ All hooks finished loading');
@@ -148,39 +124,70 @@ export default function HomePage() {
 
     const loadedMarkets: Market[] = [];
     
-    if (market1Data) {
-      const market = convertToMarket(1, market1Data as unknown[]);
-      if (market) loadedMarkets.push(market);
-    }
-    
-    if (market2Data) {
-      const market = convertToMarket(2, market2Data as unknown[]);
-      if (market) loadedMarkets.push(market);
-    }
-    
-    if (market3Data) {
-      const market = convertToMarket(3, market3Data as unknown[]);
-      if (market) loadedMarkets.push(market);
+    // Try to load from blockchain data
+    const marketDataArray = [
+      { id: 1, data: market1Data },
+      { id: 2, data: market2Data },
+      { id: 3, data: market3Data },
+      { id: 4, data: market4Data },
+      { id: 5, data: market5Data },
+      { id: 6, data: market6Data },
+    ];
+
+    for (const { id, data } of marketDataArray) {
+      if (data) {
+        const market = convertToMarket(id, data as unknown[]);
+        if (market) loadedMarkets.push(market);
+      }
     }
 
-    console.log('✅ Loaded markets:', loadedMarkets.length);
+    console.log('✅ Loaded markets from blockchain:', loadedMarkets.length);
 
     if (loadedMarkets.length > 0) {
       setMarkets(loadedMarkets);
       setLoading(false);
-      console.log('✅ Markets set, loading = false');
-    } else if (marketCount !== undefined) {
-      // If we have a market count but no data yet, wait a bit longer
-      // But if market count is 0 or hooks have loaded, stop loading
-      const count = Number(marketCount);
-      console.log('📊 Market count:', count);
-      if (count === 0 || (market1Data !== undefined && market2Data !== undefined && market3Data !== undefined)) {
-        setLoading(false);
-        setError('No markets found. Please ensure contracts are deployed.');
-        console.log('⚠️ No markets found');
+      setError(null);
+      console.log('✅ Markets set from blockchain data');
+    } else if (allFinishedLoading || marketCount !== undefined) {
+      // All hooks loaded but no data - this is expected in production demo mode
+      // The hooks will have returned static data automatically
+      setLoading(false);
+      
+      // Convert static markets for display if no blockchain data
+      if (loadedMarkets.length === 0) {
+        const staticMarkets = STATIC_MARKETS.map(sm => {
+          const totalYes = sm.totalYesAmount;
+          const totalNo = sm.totalNoAmount;
+          const { yesOdds, noOdds } = calculateMarketOdds(totalYes, totalNo);
+          
+          return {
+            id: sm.id.toString(),
+            question: sm.question,
+            description: sm.description,
+            category: sm.category,
+            creator: sm.creator,
+            endTime: Number(sm.endTime),
+            totalYesAmount: sm.totalYesAmount,
+            totalNoAmount: sm.totalNoAmount,
+            resolved: sm.resolved,
+            outcome: sm.outcome,
+            resolvedAt: Number(sm.resolvedAt),
+            aiOracleEnabled: sm.aiOracleEnabled,
+            yesOdds,
+            noOdds,
+            totalVolume: totalYes + totalNo,
+            participantCount: Math.floor(Math.random() * 50) + 15,
+          };
+        });
+        
+        setMarkets(staticMarkets);
+        console.log('✅ Using static markets:', staticMarkets.length);
       }
     }
-  }, [market1Data, market2Data, market3Data, marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isErrorCount, isError1, isError2, isError3]);
+  }, [
+    market1Data, market2Data, market3Data, market4Data, market5Data, market6Data,
+    marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isLoading4, isLoading5, isLoading6
+  ]);
 
   const selectedMarket = markets.find(m => m.id === selectedMarketId);
   const filteredMarkets = markets.filter(market => {
@@ -223,6 +230,9 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 md:py-20">
+        {/* Demo Mode Banner */}
+        <DemoModeBanner />
+        
         <div className="text-center max-w-4xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-full mb-6">
             <Sparkles className="h-4 w-4 text-purple-600" />

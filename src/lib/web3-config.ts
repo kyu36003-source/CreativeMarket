@@ -26,25 +26,6 @@ import { bsc, bscTestnet } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';
 import type { Chain } from 'viem';
 
-// Define custom localhost chain with BSC Testnet Chain ID (97)
-const localhostBSC = {
-  id: 97,
-  name: 'Hardhat Local (BSC Testnet)',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'BNB',
-    symbol: 'BNB',
-  },
-  rpcUrls: {
-    default: { http: ['http://127.0.0.1:8545'] },
-    public: { http: ['http://127.0.0.1:8545'] },
-  },
-  blockExplorers: {
-    default: { name: 'Local', url: '' },
-  },
-  testnet: true,
-} as const satisfies Chain;
-
 // Multiple RPC endpoints for fallback (improves reliability)
 const BSC_MAINNET_RPCS = [
   process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/',
@@ -59,46 +40,61 @@ const BSC_TESTNET_RPCS = [
     'https://data-seed-prebsc-1-s1.binance.org:8545/',
   'https://data-seed-prebsc-2-s1.binance.org:8545/',
   'https://bsc-testnet.publicnode.com',
+  'https://bsc-testnet-rpc.publicnode.com',
 ];
 
 // BNB Chain Configuration with fallback transports
+// Production ready - uses BSC Testnet with static data fallback
 export const bnbChainConfig = createConfig({
-  chains: [localhostBSC, bsc],
+  chains: [bscTestnet, bsc],
   connectors: [
     injected({
       shimDisconnect: true,
     }),
   ],
   transports: {
-    // Localhost for development (Chain ID 97 - BSC Testnet)
-    [localhostBSC.id]: http('http://127.0.0.1:8545'),
-    // Use fallback transport with multiple RPC endpoints for better reliability
-    [bsc.id]: fallback(
-      BSC_MAINNET_RPCS.map(url =>
+    // BSC Testnet (Chain ID 97) - Primary network for demo
+    [bscTestnet.id]: fallback(
+      BSC_TESTNET_RPCS.map(url =>
         http(url, {
           batch: {
-            wait: 100, // Batch requests to reduce connection count
+            wait: 100,
           },
-          timeout: 10000, // 10 second timeout
-          retryCount: 3,
-          retryDelay: 1000, // 1 second between retries
-          // Force HTTP polling instead of WebSocket
+          timeout: 10000,
+          retryCount: 2, // Reduced retries for faster fallback to static data
+          retryDelay: 500,
           fetchOptions: {
             mode: 'cors',
           },
         })
       ),
       {
-        rank: true, // Automatically rank transports by latency
+        rank: true,
+      }
+    ),
+    // BSC Mainnet (Chain ID 56) - For future production use
+    [bsc.id]: fallback(
+      BSC_MAINNET_RPCS.map(url =>
+        http(url, {
+          batch: {
+            wait: 100,
+          },
+          timeout: 10000,
+          retryCount: 3,
+          retryDelay: 1000,
+          fetchOptions: {
+            mode: 'cors',
+          },
+        })
+      ),
+      {
+        rank: true,
       }
     ),
   },
-  // Automatically reconnect on mount
   ssr: true,
-  // Additional stability options
   multiInjectedProviderDiscovery: true,
-  // Polling interval for block updates (prevents WebSocket usage)
-  pollingInterval: 4000, // Poll every 4 seconds instead of using WebSocket
+  pollingInterval: 4000,
 });
 
 // Chain IDs for easy reference
