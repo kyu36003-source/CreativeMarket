@@ -23,7 +23,6 @@ import {
   Sparkles,
   Search,
   Brain,
-  Palette,
 } from 'lucide-react';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { STATIC_MARKETS } from '@/lib/static-markets';
@@ -255,18 +254,8 @@ export default function HomePage() {
             Bet on creator milestones with AI-powered resolution.
           </p>
 
-          {/* New: Creative Markets CTA */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link href="/creative-markets">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2"
-              >
-                <Palette className="h-5 w-5" />
-                Explore Creative Markets
-                <Sparkles className="h-4 w-4" />
-              </Button>
-            </Link>
             <Link href="/leaderboard">
               <Button size="lg" variant="outline" className="gap-2">
                 <TrendingUp className="h-5 w-5" />
