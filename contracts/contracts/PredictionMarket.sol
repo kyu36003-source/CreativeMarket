@@ -128,30 +128,55 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         payable 
         nonReentrant 
     {
+        _buyPositionInternal(_marketId, _position, msg.sender, msg.value);
+    }
+    
+    /**
+     * @dev Buy position for user (called by x402 facilitator for gasless betting)
+     */
+    function buyPositionForUser(
+        uint256 _marketId,
+        bool _position,
+        address user
+    ) external payable nonReentrant {
+        // Only authorized x402 contracts can call this
+        require(authorizedOracles[msg.sender], "Not authorized");
+        _buyPositionInternal(_marketId, _position, user, msg.value);
+    }
+    
+    /**
+     * @dev Internal function to buy position (supports both regular and gasless)
+     */
+    function _buyPositionInternal(
+        uint256 _marketId,
+        bool _position,
+        address user,
+        uint256 amount
+    ) internal {
         Market storage market = markets[_marketId];
         require(market.id != 0, "Market does not exist");
         require(!market.resolved, "Market already resolved");
         require(block.timestamp < market.endTime, "Market has ended");
-        require(msg.value >= MIN_BET, "Bet amount too low");
+        require(amount >= MIN_BET, "Bet amount too low");
 
-        Position storage userPosition = positions[_marketId][msg.sender];
+        Position storage userPosition = positions[_marketId][user];
 
         if (_position) {
-            userPosition.yesAmount += msg.value;
-            market.totalYesAmount += msg.value;
+            userPosition.yesAmount += amount;
+            market.totalYesAmount += amount;
         } else {
-            userPosition.noAmount += msg.value;
-            market.totalNoAmount += msg.value;
+            userPosition.noAmount += amount;
+            market.totalNoAmount += amount;
         }
 
-        emit PositionTaken(_marketId, msg.sender, _position, msg.value);
+        emit PositionTaken(_marketId, user, _position, amount);
         
         // Record bet in reputation contract
         if (address(reputationContract) != address(0)) {
-            reputationContract.recordBet(msg.sender, _marketId, msg.value, _position);
+            reputationContract.recordBet(user, _marketId, amount, _position);
             
             // Check for copy traders and execute copy trades
-            _executeCopyTrades(_marketId, msg.sender, _position, msg.value);
+            _executeCopyTrades(_marketId, user, _position, amount);
         }
     }
     

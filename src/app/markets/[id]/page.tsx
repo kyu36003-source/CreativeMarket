@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAccount } from 'wagmi';
 import { formatEther } from 'viem';
 import {
@@ -16,6 +17,7 @@ import {
   useClaimWinnings,
   useCalculateWinnings,
 } from '@/hooks/useContracts';
+import { useX402Bet, useCanUseX402, useGasSponsorship } from '@/hooks/useX402Bet';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -77,6 +79,7 @@ export default function MarketDetailPage() {
   );
   const [_showBetForm, _setShowBetForm] = useState(false);
   const [showTxModal, setShowTxModal] = useState(false);
+  const [useGasless, setUseGasless] = useState(true); // Default to gasless
 
   const { potentialWinnings, odds: _odds } = useCalculateWinnings(
     marketId,
@@ -84,23 +87,43 @@ export default function MarketDetailPage() {
     betAmount
   );
 
+  // x402 Protocol - Revolutionary gasless betting
+  const {
+    placeBetGasless,
+    isPending: isGaslessPending,
+    error: gaslessError,
+  } = useX402Bet();
+  
+  const { canUse: canUseGasless, reason: gaslessReason } = useCanUseX402();
+  const { sponsoredAmount, fetchSponsorship } = useGasSponsorship();
+  
+  const [gaslessTxHash, setGaslessTxHash] = useState<string | null>(null);
+  const [isGaslessSuccess, setIsGaslessSuccess] = useState(false);
+
   // Show transaction modal when transaction is initiated
   useEffect(() => {
-    if (betTxHash || claimTxHash) {
+    if (betTxHash || claimTxHash || gaslessTxHash) {
       setShowTxModal(true);
     }
-  }, [betTxHash, claimTxHash]);
+  }, [betTxHash, claimTxHash, gaslessTxHash]);
+  
+  // Fetch gas sponsorship on mount
+  useEffect(() => {
+    if (isConnected) {
+      fetchSponsorship();
+    }
+  }, [isConnected, fetchSponsorship]);
 
   // Close modal and reset form when transaction succeeds
   useEffect(() => {
-    if (isBetSuccess) {
+    if (isBetSuccess || isGaslessSuccess) {
       setTimeout(() => {
         _setShowBetForm(false);
         setBetAmount('0.1');
         setSelectedPosition(null);
       }, 3000); // Keep modal open for 3 seconds to show success
     }
-  }, [isBetSuccess]);
+  }, [isBetSuccess, isGaslessSuccess]);
 
   if (loadingMarket) {
     return (
@@ -171,10 +194,25 @@ export default function MarketDetailPage() {
 
     try {
       setSelectedPosition(position);
-      await placeBet(marketId, position, betAmount);
+      
+      // Use x402 protocol for gasless if available and enabled
+      if (useGasless && canUseGasless) {
+        console.log('🚀 Using x402 Protocol - Revolutionary Gasless Betting');
+        const amount = BigInt(Math.floor(parseFloat(betAmount) * 1e18));
+        const result = await placeBetGasless(marketId, position, amount);
+        
+        if (result.success) {
+          setGaslessTxHash(result.transactionHash || null);
+          setIsGaslessSuccess(true);
+          await fetchSponsorship(); // Update sponsorship amount
+        }
+      } else {
+        console.log('⛽ Using regular transaction (paying gas)');
+        await placeBet(marketId, position, betAmount);
+      }
       // Transaction modal will show automatically via useEffect
     } catch (_error) {
-      // Error handled by wagmi
+      // Error handled by wagmi or x402 hook
     }
   };
 
@@ -272,6 +310,73 @@ export default function MarketDetailPage() {
           </div>
         </div>
       </Card>
+
+      {/* Platform Features Banner */}
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
+        {/* x402 Protocol Gasless Trading */}
+        <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">🚀</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-semibold text-green-900">x402 Protocol</h4>
+                {canUseGasless && (
+                  <button
+                    onClick={() => setUseGasless(!useGasless)}
+                    className={`px-2 py-1 text-xs rounded ${
+                      useGasless
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {useGasless ? 'ON' : 'OFF'}
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-green-700">
+                {canUseGasless
+                  ? `✓ Active • ${sponsoredAmount ? (Number(sponsoredAmount) / 1e18).toFixed(4) : '0'} BNB sponsored`
+                  : `${gaslessReason || 'Connect wallet'}`}
+              </p>
+              {gaslessError && (
+                <p className="text-xs text-red-600 mt-1">⚠️ {gaslessError}</p>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Copy Trading */}
+        <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">📊</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-blue-900 mb-1">Copy Trading</h4>
+              <p className="text-xs text-blue-700">
+                Follow top performers • <Link href="/leaderboard" className="underline hover:text-blue-900">View leaderboard</Link>
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* On-Chain Reputation */}
+        <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">🏆</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-purple-900 mb-1">On-Chain Reputation</h4>
+              <p className="text-xs text-purple-700">
+                Accuracy scores stored immutably • <Link href="/reputation" className="underline hover:text-purple-900">View yours</Link>
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       {/* AI Oracle Rules */}
       {aiOracleEnabled && (
@@ -463,17 +568,20 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(true)}
-                  disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
+                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < 0.01}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                   size="lg"
                 >
-                  {isBetting && selectedPosition === true ? (
+                  {((isBetting || isGaslessPending) && selectedPosition === true) ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Buying...
+                      {useGasless && canUseGasless ? '🆓 Gasless...' : 'Buying...'}
                     </>
                   ) : (
-                    `Buy YES`
+                    <>
+                      {useGasless && canUseGasless && '🆓 '}
+                      Buy YES
+                    </>
                   )}
                 </Button>
               </div>
@@ -540,17 +648,20 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(false)}
-                  disabled={!isConnected || isBetting || Number(betAmount) < 0.01}
+                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < 0.01}
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                   size="lg"
                 >
-                  {isBetting && selectedPosition === false ? (
+                  {((isBetting || isGaslessPending) && selectedPosition === false) ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Buying...
+                      {useGasless && canUseGasless ? '🆓 Gasless...' : 'Buying...'}
                     </>
                   ) : (
-                    `Buy NO`
+                    <>
+                      {useGasless && canUseGasless && '🆓 '}
+                      Buy NO
+                    </>
                   )}
                 </Button>
               </div>

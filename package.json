@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "PredictBNB revolutionizes prediction markets with 30-minute AI oracle resolution (vs 48+ hours), gasless trading via x402 protocol, and copy trading. Built exclusively on BNB Chain for $0.10 gas economics.",
+  "description": "PredictBNB revolutionizes prediction markets with 30-minute AI oracle resolution (vs 48+ hours), gasless trading via EIP-4337 Account Abstraction, and copy trading. Built exclusively on BNB Chain for $0.10 gas economics.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

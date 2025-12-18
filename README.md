@@ -1,7 +1,7 @@
 # PredictBNB 🚀
 
 > **AI-powered prediction markets with instant resolution on BNB Chain**  
-> First prediction market with 30-minute AI resolution, gasless trading via x402, and social copy trading.
+> First prediction market with 30-minute AI resolution, gasless trading via EIP-4337 Account Abstraction, and social copy trading.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
@@ -18,11 +18,12 @@
 - **Automated**: No manual intervention required
 - **Instant Payouts**: Winners claim immediately after resolution
 
-### 🆓 Gasless Trading via x402
+### 🚀 Gasless Trading via x402 Protocol
 - **Zero Gas Fees**: Users trade without paying transaction costs
-- **Meta-Transactions**: x402 protocol handles gas subsidization
-- **Seamless UX**: Feel like Web2, powered by Web3
-- **Economically Viable**: BNB Chain's $0.10 fees make sponsorship sustainable
+- **x402 Protocol**: Open-source HTTP 402 payment standard (Coinbase)
+- **EIP-3009**: Native gasless token transfers via signature
+- **Facilitator Model**: Backend sponsors gas for seamless UX
+- **Revolutionary**: Same protocol used by Coinbase & Google
 
 ### 📊 Copy Trading (Industry First!)
 - **Follow Top Traders**: Automatically copy successful strategies
