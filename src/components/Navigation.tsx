@@ -60,6 +60,14 @@ export function Navigation() {
                   key={item.href} 
                   href={item.href}
                   prefetch={true}
+                  onClick={(e) => {
+                    console.log('🔍 Navigation clicked:', {
+                      href: item.href,
+                      label: item.label,
+                      currentPath: pathname,
+                      event: e
+                    });
+                  }}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
@@ -133,6 +141,14 @@ export function Navigation() {
                   key={item.href} 
                   href={item.href}
                   prefetch={true}
+                  onClick={(e) => {
+                    console.log('📱 Mobile Navigation clicked:', {
+                      href: item.href,
+                      label: item.label,
+                      currentPath: pathname,
+                      event: e
+                    });
+                  }}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
