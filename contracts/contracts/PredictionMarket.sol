@@ -36,6 +36,7 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
     uint256 public marketCount;
     uint256 public constant PLATFORM_FEE = 200; // 2% fee (in basis points)
     uint256 public constant MIN_BET = 0.01 ether;
+    uint256 public constant MIN_REPUTATION_TO_CREATE = 50; // Minimum reputation score to create markets
     
     TraderReputation public reputationContract;
     
@@ -97,6 +98,12 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
     ) external returns (uint256) {
         require(_endTime > block.timestamp, "End time must be in the future");
         require(bytes(_question).length > 0, "Question cannot be empty");
+        
+        // Check reputation requirement
+        if (address(reputationContract) != address(0)) {
+            uint256 reputation = reputationContract.getReputationScore(msg.sender);
+            require(reputation >= MIN_REPUTATION_TO_CREATE, "Insufficient reputation to create markets. Place predictions to earn reputation.");
+        }
 
         marketCount++;
         uint256 marketId = marketCount;

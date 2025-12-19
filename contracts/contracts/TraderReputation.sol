@@ -158,17 +158,28 @@ contract TraderReputation is ReentrancyGuard, Ownable {
         bool position
     ) external {
         TraderStats storage stats = traderStats[trader];
+        uint256 oldScore = stats.reputationScore;
         
         stats.totalBets++;
         stats.totalVolume += amount;
         stats.lastActivityTime = block.timestamp;
         
-        // Initialize reputation if first bet
+        // Initialize reputation if first bet, otherwise add points for participation
         if (stats.totalBets == 1) {
             stats.reputationScore = 100; // Starting score
+        } else {
+            // Award 10 reputation points for each bet placed
+            stats.reputationScore += 10;
+            // Cap at 1000
+            if (stats.reputationScore > 1000) {
+                stats.reputationScore = 1000;
+            }
         }
         
         emit BetPlaced(trader, marketId, amount, position);
+        if (stats.reputationScore != oldScore) {
+            emit ReputationUpdated(trader, stats.reputationScore, oldScore);
+        }
     }
     
     /**
@@ -185,11 +196,19 @@ contract TraderReputation is ReentrancyGuard, Ownable {
         uint256 profit
     ) external {
         TraderStats storage stats = traderStats[trader];
+        uint256 oldScore = stats.reputationScore;
         
         if (won) {
             stats.totalWins++;
             stats.totalProfit += profit;
             stats.currentStreak++;
+            
+            // Award additional 20 reputation points for winning
+            stats.reputationScore += 20;
+            // Cap at 1000
+            if (stats.reputationScore > 1000) {
+                stats.reputationScore = 1000;
+            }
             
             // Update best streak
             if (stats.currentStreak > stats.bestStreak) {
@@ -199,10 +218,6 @@ contract TraderReputation is ReentrancyGuard, Ownable {
             stats.totalLosses++;
             stats.currentStreak = 0; // Reset streak on loss
         }
-        
-        // Update reputation score
-        uint256 oldScore = stats.reputationScore;
-        stats.reputationScore = calculateReputationScore(trader);
         
         emit ReputationUpdated(trader, stats.reputationScore, oldScore);
         emit BetSettled(trader, marketId, won, profit);
@@ -545,6 +560,13 @@ contract TraderReputation is ReentrancyGuard, Ownable {
     // ============================================================================
     // Admin Functions
     // ============================================================================
+    
+    /**
+     * @notice Get trader reputation score
+     */
+    function getReputationScore(address trader) external view returns (uint256) {
+        return traderStats[trader].reputationScore;
+    }
     
     /**
      * @notice Manually verify a trader

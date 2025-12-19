@@ -410,6 +410,50 @@ export function useTraderTier(traderAddress?: string) {
 }
 
 /**
+ * Get trader reputation score
+ */
+export function useReputationScore(traderAddress?: string) {
+  const chainId = useChainId();
+  const effectiveChainId = chainId || 97;
+  const { address } = useAccount();
+  const targetAddress = traderAddress || address;
+
+  // First get the reputation contract address from PredictionMarket
+  const { data: reputationContractAddress } = useReadContract({
+    address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
+    abi: PREDICTION_MARKET_ABI,
+    functionName: 'reputationContract' as 'marketCount',
+    chainId: effectiveChainId,
+  });
+
+  return useReadContract({
+    address: (reputationContractAddress as unknown) as `0x${string}`,
+    abi: TRADER_REPUTATION_ABI,
+    functionName: 'getReputationScore',
+    args: targetAddress ? [targetAddress as `0x${string}`] : undefined,
+    chainId: effectiveChainId,
+    query: {
+      enabled: !!targetAddress && !!reputationContractAddress,
+    },
+  });
+}
+
+/**
+ * Get minimum reputation required to create markets
+ */
+export function useMinReputationToCreate() {
+  const chainId = useChainId();
+  const effectiveChainId = chainId || 97;
+
+  return useReadContract({
+    address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
+    abi: PREDICTION_MARKET_ABI,
+    functionName: 'MIN_REPUTATION_TO_CREATE' as 'marketCount',
+    chainId: effectiveChainId,
+  });
+}
+
+/**
  * Enable copy trading
  */
 export function useEnableCopyTrading() {

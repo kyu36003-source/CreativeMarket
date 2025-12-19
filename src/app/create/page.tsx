@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
-import { useCreateMarket } from '@/hooks/useContracts';
+import { useCreateMarket, useReputationScore, useMinReputationToCreate } from '@/hooks/useContracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -23,6 +23,8 @@ import {
   AlertCircle,
   Lightbulb,
   Shield,
+  TrendingUp,
+  Award,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -38,9 +40,17 @@ const CATEGORIES = [
 
 export default function CreateMarketPage() {
   const router = useRouter();
-  const { address: _address, isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const { createMarket, isPending, isConfirming, isSuccess, error } =
     useCreateMarket();
+
+  // Reputation hooks
+  const { data: reputationScore } = useReputationScore(address);
+  const { data: minReputationRequired } = useMinReputationToCreate();
+  
+  const currentReputation = reputationScore ? Number(reputationScore) : 0;
+  const minReputation = minReputationRequired ? Number(minReputationRequired) : 50;
+  const hasEnoughReputation = currentReputation >= minReputation;
 
   const [question, setQuestion] = useState('');
   const [description, setDescription] = useState('');
@@ -177,6 +187,79 @@ export default function CreateMarketPage() {
           automatically by our AI Oracle or manually.
         </p>
       </div>
+
+      {/* Reputation Status Card */}
+      {isConnected && (
+        <Card className={`p-6 mb-6 ${hasEnoughReputation ? 'bg-green-500/10 border-green-500/20' : 'bg-yellow-500/10 border-yellow-500/20'}`}>
+          <div className="flex items-start gap-4">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${hasEnoughReputation ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
+              <Award className={`w-6 h-6 ${hasEnoughReputation ? 'text-green-500' : 'text-yellow-500'}`} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  {hasEnoughReputation ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      Eligible to Create Markets
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      Build Reputation to Create Markets
+                    </>
+                  )}
+                </h3>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Your Reputation: <span className="font-bold">{currentReputation}</span></span>
+                    <span>Required: <span className="font-bold">{minReputation}</span></span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${hasEnoughReputation ? 'bg-green-500' : 'bg-yellow-500'}`}
+                      style={{ width: `${Math.min((currentReputation / minReputation) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                
+                {!hasEnoughReputation && (
+                  <div className="p-3 bg-background/50 rounded-lg">
+                    <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4" />
+                      How to Earn Reputation:
+                    </p>
+                    <ul className="text-sm text-muted-foreground space-y-1 ml-6">
+                      <li>• Place predictions on any market: <span className="font-semibold text-foreground">+10 points</span></li>
+                      <li>• Win a prediction: <span className="font-semibold text-green-500">+20 bonus points</span></li>
+                      <li>• Need {minReputation - currentReputation} more points to create markets</li>
+                    </ul>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={() => router.push('/markets')}
+                    >
+                      Browse Markets to Start Earning
+                    </Button>
+                  </div>
+                )}
+                
+                {hasEnoughReputation && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    You have enough reputation to create markets. Continue building reputation for higher priority visibility!
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -468,7 +551,7 @@ export default function CreateMarketPage() {
             </Button>
             <Button
               type="submit"
-              disabled={!isConnected || isPending || isConfirming || aiReviewStatus !== 'reviewed' || aiApprovalScore < 50}
+              disabled={!isConnected || !hasEnoughReputation || isPending || isConfirming || aiReviewStatus !== 'reviewed' || aiApprovalScore < 50}
               className="flex-1 gap-2"
             >
               {isPending || isConfirming ? (
@@ -476,19 +559,20 @@ export default function CreateMarketPage() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   {isPending ? 'Confirm in Wallet...' : 'Creating Market...'}
                 </>
+              ) : !hasEnoughReputation ? (
+                <>
+                  <Award className="w-4 h-4" />
+                  Insufficient Reputation ({currentReputation}/{minReputation})
+                </>
+              ) : aiReviewStatus === 'reviewed' && aiApprovalScore >= 50 ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Create Market (Approved)
+                </>
               ) : (
                 <>
-                  {aiReviewStatus === 'reviewed' && aiApprovalScore >= 50 ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      Create Market (Approved)
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-4 h-4" />
-                      Review Required
-                    </>
-                  )}
+                  <AlertCircle className="w-4 h-4" />
+                  Review Required
                 </>
               )}
             </Button>
