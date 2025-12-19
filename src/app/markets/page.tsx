@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -257,10 +258,9 @@ export default function MarketsPage() {
             const endingSoon = endTime - now < 86400000 && endTime - now > 0; // 24 hours
 
             return (
+              <Link key={market.id} href={`/markets/${market.id}`} className="block">
               <Card
-                key={market.id}
                 className="p-6 cursor-pointer hover:border-primary/50 transition-colors"
-                onClick={() => router.push(`/markets/${market.id}` as any)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -351,6 +351,7 @@ export default function MarketsPage() {
                   <Button size="sm">View Market</Button>
                 </div>
               </Card>
+              </Link>
             );
           })
         ) : (

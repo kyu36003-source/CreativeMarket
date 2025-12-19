@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Market } from '@/types/market';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,8 +19,9 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
   const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-      <CardHeader className="pb-3">
+    <Link href={`/markets/${market.id}`} className="block">
+      <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+        <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -92,7 +94,14 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
 
         {/* Action Button */}
         {!market.resolved && onPredict && (
-          <Button className="w-full" onClick={() => onPredict(market.id)}>
+          <Button 
+            className="w-full" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onPredict(market.id);
+            }}
+          >
             Make Prediction
           </Button>
         )}
@@ -109,5 +118,6 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
         )}
       </CardContent>
     </Card>
+    </Link>
   );
 }
