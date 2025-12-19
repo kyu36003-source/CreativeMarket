@@ -57,20 +57,22 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href as any} className="inline-flex">
-                  <Button
-                    variant={isActive ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                    {item.badge && (
-                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-yellow-500 text-black rounded-full font-bold">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Button>
+                <Link 
+                  key={item.href} 
+                  href={item.href as any}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  } ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                  {item.badge && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-yellow-500 text-black rounded-full font-bold">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -127,15 +129,17 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href as any} className="inline-flex">
-                  <Button
-                    variant={isActive ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Button>
+                <Link 
+                  key={item.href} 
+                  href={item.href as any}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
+                    isActive 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  } ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
                 </Link>
               );
             })}
