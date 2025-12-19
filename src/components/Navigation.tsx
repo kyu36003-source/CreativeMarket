@@ -32,7 +32,7 @@ export function Navigation() {
   const navItems: NavItem[] = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/markets' as const, label: 'Markets', icon: TrendingUp },
-    { href: '/create' as const, label: 'Create Market', icon: PlusCircle, highlight: true },
+    { href: '/create/new' as any, label: 'Create Market', icon: PlusCircle, highlight: true },
     { href: '/leaderboard' as const, label: 'Leaderboard', icon: Trophy },
     { href: '/reputation' as const, label: 'Profile', icon: User },
   ];
