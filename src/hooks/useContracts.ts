@@ -548,3 +548,107 @@ export function useCalculateWinnings(
     payout: payout.toFixed(4),
   };
 }
+
+// ============================================================================
+// Copy Trading Hooks
+// ============================================================================
+
+/**
+ * Follow a trader to copy their trades
+ */
+export function useFollowTrader() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+  const chainId = useChainId();
+
+  const followTrader = async (
+    traderAddress: string,
+    maxAmountPerTrade: string,
+    copyPercentage: number
+  ) => {
+    return writeContract({
+      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      abi: TRADER_REPUTATION_ABI,
+      functionName: 'followTrader',
+      args: [
+        traderAddress as `0x${string}`,
+        parseEther(maxAmountPerTrade),
+        BigInt(copyPercentage),
+      ],
+    });
+  };
+
+  return {
+    followTrader,
+    hash,
+    isPending,
+    isConfirming,
+    isSuccess,
+    error,
+  };
+}
+
+/**
+ * Unfollow a trader to stop copying their trades
+ */
+export function useUnfollowTrader() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+  const chainId = useChainId();
+
+  const unfollowTrader = async (traderAddress: string) => {
+    return writeContract({
+      address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+      abi: TRADER_REPUTATION_ABI,
+      functionName: 'unfollowTrader',
+      args: [traderAddress as `0x${string}`],
+    });
+  };
+
+  return {
+    unfollowTrader,
+    hash,
+    isPending,
+    isConfirming,
+    isSuccess,
+    error,
+  };
+}
+
+/**
+ * Get followers of a trader
+ */
+export function useTraderFollowers(traderAddress?: string) {
+  const chainId = useChainId();
+
+  return useReadContract({
+    address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+    abi: TRADER_REPUTATION_ABI,
+    functionName: 'getFollowers',
+    args: traderAddress ? [traderAddress as `0x${string}`] : undefined,
+    query: {
+      enabled: !!traderAddress,
+    },
+  });
+}
+
+/**
+ * Get traders that a user is following
+ */
+export function useFollowingList(followerAddress?: string) {
+  const chainId = useChainId();
+
+  return useReadContract({
+    address: getContractAddress(chainId, 'PREDICTION_MARKET') as `0x${string}`,
+    abi: TRADER_REPUTATION_ABI,
+    functionName: 'getFollowing',
+    args: followerAddress ? [followerAddress as `0x${string}`] : undefined,
+    query: {
+      enabled: !!followerAddress,
+    },
+  });
+}

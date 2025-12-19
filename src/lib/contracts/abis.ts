@@ -124,11 +124,20 @@ export const TRADER_REPUTATION_ABI = [
   'function enableCopyTrading() external',
   'function disableCopyTrading() external',
 
+  // Copy Trading Functions
+  'function followTrader(address trader, uint256 maxAmountPerTrade, uint256 copyPercentage) external',
+  'function unfollowTrader(address trader) external',
+  'function getFollowers(address trader) external view returns (address[] memory)',
+  'function getFollowing(address follower) external view returns (address[] memory)',
+  'function getTraderFollowerCount(address trader) external view returns (uint256)',
+
   // Events
   'event TradeRecorded(address indexed trader, uint256 amount, bool isYes)',
   'event TradeOutcomeRecorded(address indexed trader, uint256 indexed marketId, bool won, uint256 payout, int256 netProfit)',
   'event CopyTradingEnabled(address indexed trader)',
   'event CopyTradingDisabled(address indexed trader)',
+  'event TraderFollowed(address indexed follower, address indexed trader, uint256 maxAmountPerTrade, uint256 copyPercentage)',
+  'event TraderUnfollowed(address indexed follower, address indexed trader)',
 ] as const;
 
 export const GASLESS_RELAYER_ABI = [

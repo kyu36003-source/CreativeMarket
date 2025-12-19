@@ -205,6 +205,212 @@ contract X402Betting is ReentrancyGuard, Ownable {
     }
     
     /**
+     * @dev Claim winnings gaslessly (EIP-712 signature)
+     * @notice User signs claim authorization, facilitator executes and pays gas
+     */
+    function claimWinningsWithAuthorization(
+        uint256 marketId,
+        address from,
+        uint256 deadline,
+        bytes32 nonce,
+        bytes memory signature
+    ) external nonReentrant {
+        require(msg.sender == facilitator || msg.sender == owner(), "Only facilitator");
+        require(!usedNonces[nonce], "Nonce already used");
+        require(block.timestamp <= deadline, "Authorization expired");
+        
+        usedNonces[nonce] = true;
+        
+        // Verify EIP-712 signature
+        bytes32 messageHash = keccak256(abi.encode(
+            keccak256("ClaimWinnings(uint256 marketId,address from,uint256 deadline,bytes32 nonce)"),
+            marketId,
+            from,
+            deadline,
+            nonce
+        ));
+        
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+        address signer = recoverSigner(ethSignedHash, signature);
+        require(signer == from, "Invalid signature");
+        
+        // Execute claim (msg.sender is facilitator, but claim is for 'from' address)
+        // Note: PredictionMarket needs to be modified to accept claimFor(user)
+        // For now, we'll send BNB back to user after claiming
+        uint256 balanceBefore = address(this).balance;
+        
+        // Since we can't directly claim for user, user must call this themselves
+        // This is a limitation - we'll add claimFor() to PredictionMarket in next deployment
+        // For now, deduct facilitator fee from winnings and forward
+        
+        uint256 winnings = predictionMarket.calculateWinnings(marketId, from);
+        require(winnings > 0, "No winnings to claim");
+        
+        uint256 feeAmount = (winnings * facilitatorFee) / 10000;
+        uint256 payout = winnings - feeAmount;
+        
+        // Track gas sponsorship
+        uint256 gasUsed = tx.gasprice * gasleft();
+        gasAllowances[from] += gasUsed;
+        
+        emit GasSponsored(from, gasUsed, gasAllowances[from]);
+        
+        // Note: Actual claim needs PredictionMarket.claimFor() function
+        // This is a placeholder for the pattern
+    }
+    
+    /**
+     * @dev Follow trader gaslessly (EIP-712 signature)
+     */
+    function followTraderWithAuthorization(
+        address trader,
+        uint256 maxAmountPerTrade,
+        uint256 copyPercentage,
+        address from,
+        uint256 deadline,
+        bytes32 nonce,
+        bytes memory signature
+    ) external nonReentrant {
+        require(msg.sender == facilitator || msg.sender == owner(), "Only facilitator");
+        require(!usedNonces[nonce], "Nonce already used");
+        require(block.timestamp <= deadline, "Authorization expired");
+        
+        usedNonces[nonce] = true;
+        
+        // Verify signature
+        bytes32 messageHash = keccak256(abi.encode(
+            keccak256("FollowTrader(address trader,uint256 maxAmountPerTrade,uint256 copyPercentage,address from,uint256 deadline,bytes32 nonce)"),
+            trader,
+            maxAmountPerTrade,
+            copyPercentage,
+            from,
+            deadline,
+            nonce
+        ));
+        
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+        address signer = recoverSigner(ethSignedHash, signature);
+        require(signer == from, "Invalid signature");
+        
+        // Track gas sponsorship
+        uint256 gasUsed = tx.gasprice * gasleft();
+        gasAllowances[from] += gasUsed;
+        
+        emit GasSponsored(from, gasUsed, gasAllowances[from]);
+        
+        // Note: Needs TraderReputation.followFor() function
+    }
+    
+    /**
+     * @dev Unfollow trader gaslessly
+     */
+    function unfollowTraderWithAuthorization(
+        address trader,
+        address from,
+        uint256 deadline,
+        bytes32 nonce,
+        bytes memory signature
+    ) external nonReentrant {
+        require(msg.sender == facilitator || msg.sender == owner(), "Only facilitator");
+        require(!usedNonces[nonce], "Nonce already used");
+        require(block.timestamp <= deadline, "Authorization expired");
+        
+        usedNonces[nonce] = true;
+        
+        // Verify signature
+        bytes32 messageHash = keccak256(abi.encode(
+            keccak256("UnfollowTrader(address trader,address from,uint256 deadline,bytes32 nonce)"),
+            trader,
+            from,
+            deadline,
+            nonce
+        ));
+        
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+        address signer = recoverSigner(ethSignedHash, signature);
+        require(signer == from, "Invalid signature");
+        
+        // Track gas sponsorship
+        uint256 gasUsed = tx.gasprice * gasleft();
+        gasAllowances[from] += gasUsed;
+        
+        emit GasSponsored(from, gasUsed, gasAllowances[from]);
+        
+        // Note: Needs TraderReputation.unfollowFor() function
+    }
+    
+    /**
+     * @dev Create market gaslessly (EIP-712 signature)
+     */
+    function createMarketWithAuthorization(
+        string memory question,
+        string memory description,
+        string memory category,
+        uint256 endTime,
+        bool aiOracleEnabled,
+        address from,
+        uint256 deadline,
+        bytes32 nonce,
+        bytes memory signature
+    ) external nonReentrant {
+        require(msg.sender == facilitator || msg.sender == owner(), "Only facilitator");
+        require(!usedNonces[nonce], "Nonce already used");
+        require(block.timestamp <= deadline, "Authorization expired");
+        
+        usedNonces[nonce] = true;
+        
+        // Verify signature
+        bytes32 messageHash = keccak256(abi.encode(
+            keccak256("CreateMarket(string question,string description,string category,uint256 endTime,bool aiOracleEnabled,address from,uint256 deadline,bytes32 nonce)"),
+            keccak256(bytes(question)),
+            keccak256(bytes(description)),
+            keccak256(bytes(category)),
+            endTime,
+            aiOracleEnabled,
+            from,
+            deadline,
+            nonce
+        ));
+        
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+        address signer = recoverSigner(ethSignedHash, signature);
+        require(signer == from, "Invalid signature");
+        
+        // Track gas sponsorship
+        uint256 gasUsed = tx.gasprice * gasleft();
+        gasAllowances[from] += gasUsed;
+        
+        emit GasSponsored(from, gasUsed, gasAllowances[from]);
+        
+        // Note: Needs PredictionMarket.createMarketFor() function
+    }
+    
+    /**
+     * @dev Recover signer from signature
+     */
+    function recoverSigner(bytes32 ethSignedHash, bytes memory signature) internal pure returns (address) {
+        require(signature.length == 65, "Invalid signature length");
+        
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+        
+        assembly {
+            r := mload(add(signature, 32))
+            s := mload(add(signature, 64))
+            v := byte(0, mload(add(signature, 96)))
+        }
+        
+        if (v < 27) {
+            v += 27;
+        }
+        
+        require(v == 27 || v == 28, "Invalid signature 'v' value");
+        
+        return ecrecover(ethSignedHash, v, r, s);
+    }
+    
+    /**
      * @dev Receive BNB to fund gasless operations
      * @notice Facilitator funds this contract with BNB for bet execution
      */
