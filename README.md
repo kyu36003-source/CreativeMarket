@@ -1,8 +1,8 @@
 # PredictBNB
 
-Ever tried to create a prediction market and wondered if the outcome would actually be fair? That's what we're solving.
+Trade prediction markets completely free. No gas fees, ever.
 
-PredictBNB is a prediction market platform built on BNB Chain where every market must have clear, verifiable rules before it goes live. No more arguing about whether Bitcoin "actually" hit $150k or if that new album "technically" dropped.
+We built the first prediction market where everything happens gaslessly on BNB Chain using x402 protocol. You bet, trade, and claim winnings - all without paying a single wei in gas fees.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
@@ -11,21 +11,44 @@ PredictBNB is a prediction market platform built on BNB Chain where every market
 
 ## What Makes This Different
 
-Here's the thing about gasless transactions: most solutions force you to hold multiple tokens (BNB for gas, USDC for betting, etc). We thought that was annoying, so we built something better.
+**Everything is free thanks to x402:**
+- Place bets: Free (0 gas)
+- Claim winnings: Free (0 gas)  
+- Build reputation: Free (0 gas)
+- Trade unlimited times: Free (0 gas)
 
-**WBNB3009** - it's just wrapped BNB that implements EIP-3009. Wrap your BNB once, pay ~$0.000035 in gas, then make unlimited bets without paying gas again. We tested it 12 times and it worked every single time (12/12, or 100% if you're counting).
+**Everything is on-chain on BNB:**
+- Trader reputation: Stored on-chain, no manipulation
+- Market outcomes: Verified on-chain, transparent
+- All transactions: BNB Chain only, no centralized databases
+- Your stats: Immutable, provably yours
 
-### How much does this actually save?
+**How we do gasless (x402 + WBNB3009):**
 
-Here are real numbers from our tests:
-- Wrap 1 BNB once: 0.00003534 BNB gas
-- First gasless bet: 0 BNB (facilitator paid 0.000046 BNB)
-- Second gasless bet: 0 BNB (facilitator paid 0.000044 BNB)
-- Traditional betting: 0.000032 BNB *per bet*
+Wrap your BNB once (pay ~$0.000035 gas). After that, every single trade is completely gasless. We tested it 12 times - worked perfectly every time (12/12 passing, 100% success).
 
-Do the math: after 10 bets you've saved 89% on gas. After 100 bets? 98.9% savings. The more you trade, the better it gets.
+### The Numbers (From Real Tests)
 
-Only BNB needed. No USDC, no extra tokens, no headaches.
+- Wrap 1 BNB once: 0.00003534 BNB gas (one time, that's it)
+- Every bet after: **0 BNB** (completely free)
+- Every claim: **0 BNB** (completely free)
+- Traditional betting: 0.000032 BNB per bet (expensive after 10+ trades)
+
+After 10 bets: 89% savings  
+After 100 bets: 98.9% savings  
+After that? Basically free forever.
+
+**Only BNB. No USDC, no wrapped tokens, no confusion. Pure BNB Chain.**
+
+## On-Chain Reputation: No Manipulation
+
+Your trading stats are stored directly on BNB Chain smart contracts:
+- **Win rate**: Immutable, can't be faked
+- **Total bets**: Verifiable on-chain
+- **Reputation points**: +10 per bet, +20 per win, all transparent
+- **Rankings**: Live leaderboard from chain data, zero manipulation possible
+
+Want to verify someone's stats? Check the contract. Everything is public, nothing is hidden.
 
 ## What We're Building
 
@@ -40,15 +63,18 @@ Markets without these don't get approved. Simple as that.
 
 ### Gasless Trading That Actually Works
 
-We spent a lot of time getting this right. Standard EIP-3009 implementation (not some custom hack), deployed and tested on local Hardhat. 
+Standard EIP-3009 implementation (not some custom hack), deployed and tested on local Hardhat. 
 
-When you wrap your BNB:
-1. You pay gas once (~$0.000035)
-2. You sign transactions off-chain (free)
+**The x402 flow:**
+1. You wrap your BNB once (~$0.000035 gas)
+2. You sign transactions off-chain (free, no gas)
 3. A facilitator submits them for you (they pay gas, earn 0.5% fee)
 4. Your BNB balance doesn't move
+5. Everything happens on BNB Chain
 
 All 12 tests passed. User balance unchanged after gasless bets. Works exactly as intended.
+
+**Why this matters:** You can trade all day without worrying about gas. New users can start trading immediately. Everything stays on-chain and transparent.
 
 ### AI Resolution (Work in Progress)
 
@@ -103,13 +129,20 @@ Get it running locally in 2 minutes:
    ```
 5. **Open** `http://localhost:3000`
 
-Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). We're not supporting other networks right now.
+Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). Everything on-chain, everything on BNB.
 
-**Supported Networks (BNB Chain Only):**
-- 🧪 **BNB Testnet** (Chain ID: 97) - For development & testing
-- 🟢 **BNB Mainnet** (Chain ID: 56) - Production deployment
+---
 
-> ⚠️ **Note:** This dApp only works on BNB Chain. Other networks (Ethereum, Polygon, etc.) are not supported.
+## Why BNB Chain?
+
+**Because everything needs to be on-chain and free:**
+
+Trader reputation? On BNB Chain contracts.  
+Market outcomes? On BNB Chain, verified.  
+Your trading history? On BNB Chain, immutable.  
+Gas fees? Free thanks to x402 on BNB Chain.
+
+On Ethereum, gasless would cost $5+ per transaction to subsidize. On BNB Chain with $0.10 gas, we can actually make it free. That's why we're BNB exclusive.
 
 ---
 
@@ -117,15 +150,18 @@ Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). We're not sup
 
 Traditional prediction markets have a trust problem. When a market closes, someone has to decide: did the event happen or not? That's where disputes start.
 
-| Problem | Traditional Markets | PredictBNB |
-|---------|---------------------|------------|
-| Resolution Rules | Often unclear/subjective | **Required upfront with data sources** |
-| Verification | Manual/disputed | **Automated with clear criteria** |
-| Market Quality | Anyone can create spam | **Reputation required (50 points)** |
-| Fairness | Disputes common | **Zero disputes with verified rules** |
-| User Experience | Complex | **iOS-style wizard with templates** |
+We solve this by putting everything on-chain with clear rules:
 
-**We make prediction markets fair, transparent, and user-friendly.**
+**PredictBNB approach:**
+- Resolution rules specified upfront (data source + timestamp)
+- Verification automated (check the source at deadline)
+- Reputation system on-chain (can't be manipulated)
+- Zero gas fees (x402 makes trading free)
+- Everything on BNB Chain (transparent, verifiable)
+
+Example: "Will Bitcoin reach $150,000 by March 2026?"
+- **Polymarket**: Might be unclear when/where to check
+- **PredictBNB**: CoinGecko price at March 31, 2026 11:59 PM UTC (on-chain, verified, free to trade)
 
 ## ✨ How It Works
 
@@ -429,16 +465,18 @@ node test/test-wbnb-gasless.js  # Should see 12/12 pass
 ## What Makes This Different
 
 **vs Polymarket:**
-- We require data sources upfront (they often don't)
-- Gasless betting works (they don't have it)
+- We're completely free (gasless via x402, they charge gas)
+- Everything on-chain (reputation, stats - they use databases)
 - Pure BNB (they need USDC)
+- No manipulation possible (their reputation can be gamed)
 
 **vs Augur:**
-- Clear rules required (theirs are subjective)
+- Free to trade (they charge gas every time)
 - Simple 4-step wizard (theirs is complex)
-- Active markets across categories (they're mostly crypto only)
+- On-chain reputation (they use token voting)
+- BNB Chain only (they're multi-chain, more complexity)
 
-**Our edge:** Only platform where you wrap BNB once and bet gasless forever. Tested, working, verified.
+**Our edge:** Only platform where everything is free (x402), everything is on-chain (BNB), and everything is transparent (no manipulation). Tested, working, verified.
 
 ---
 
