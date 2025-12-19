@@ -13,8 +13,8 @@
 
 ## Core Tech
 
-**x402 Protocol (Meta-Transactions):**
-- User signs off-chain → Facilitator executes on-chain → User pays 0 gas
+**x402 Protocol (Gasless On-Chain):**
+- User authorizes via x402 → Executed on-chain → User pays 0 gas, all records on BNB Chain
 - Economics: $0.10 BNB gas + 0.5% fee = profitable at scale
 - Impossible on Ethereum: $5-20 gas kills facilitator economics
 
@@ -87,10 +87,10 @@ Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). Everything on
 
 ## How It Works
 
-**Create Market:** Category → Template → Rules (data source + UTC deadline) → Submit  
-**Place Bet:** Connect wallet → Sign (0 gas) → Facilitator executes  
-**Resolution:** Check data source at deadline → 2/3 LLM agreement → Contract resolves  
-**Claim:** Winners claim directly (0 gas)
+**Create Market:** Category → Template → Rules (data source + UTC deadline) → Submitted on-chain  
+**Place Bet:** Connect wallet → x402 gasless (0 gas) → Executed on-chain  
+**Resolution:** Check data source at deadline → 2/3 LLM agreement → On-chain resolution  
+**Claim:** Winners claim on-chain (0 gas)
 
 ---
 
