@@ -377,9 +377,12 @@ export default function CreateMarketWizard() {
           <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold mb-3">Create Your Market</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Connect your wallet to start creating prediction markets
+          <h2 className="text-2xl font-bold mb-3">Create Your Prediction Market</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-2">
+            Connect wallet to create predictions with AI-verified rules
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Set clear resolution criteria, get AI approval, launch your market
           </p>
         </Card>
       </div>
@@ -394,9 +397,12 @@ export default function CreateMarketWizard() {
           <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold mb-3 text-center">Build Your Reputation</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">
-            You need {minReputation} reputation to create markets
+          <h2 className="text-2xl font-bold mb-3 text-center">Build Your Reputation First</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-2 text-center">
+            You need {minReputation} reputation to create markets with rules
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
+            This ensures quality predictions with clear resolution criteria
           </p>
           
           <div className="space-y-4 mb-6">
@@ -478,11 +484,18 @@ export default function CreateMarketWizard() {
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
-                Create Your Prediction
+              <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 px-4 py-2 rounded-full mb-4">
+                <CheckCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm font-semibold text-purple-800 dark:text-purple-300">AI-Verified Rules Required</span>
+              </div>
+              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Create Your Prediction Market
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-lg">
-                Crypto, DeFi, Music, Movies & More
+              <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
+                Choose category, set clear rules, get AI verification
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                All predictions require verifiable resolution criteria with specific data sources and deadlines
               </p>
             </div>
 

@@ -23,6 +23,7 @@ import {
   Sparkles,
   Search,
   Brain,
+  CheckCircle,
 } from 'lucide-react';
 import { useMarketCount, useMarket, usePlaceBet } from '@/hooks/useContracts';
 import { useRouter } from 'next/navigation';
@@ -267,50 +268,58 @@ export default function HomePage() {
             </span>
           </div>
           <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            Predict the Future of{' '}
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Creative Economy
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Create Your Prediction
             </span>
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            NFT launches • Music drops • Fashion releases • Brand campaigns. 
-            Bet on creator milestones with AI-powered resolution.
+          <p className="text-xl text-gray-600 mb-4">
+            Crypto • DeFi • NFTs • Music • Movies & More
+          </p>
+          <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
+            Set your rules, get AI verification, and let traders predict the outcome.
+            Every prediction includes clear resolution criteria for fair results.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link href="/leaderboard">
-              <Button size="lg" variant="outline" className="gap-2">
+            <Link href="/create/new">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-lg px-8 py-6 h-auto gap-3">
+                <Sparkles className="h-6 w-6" />
+                Create Prediction Market
+              </Button>
+            </Link>
+            <Link href="/markets">
+              <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 h-auto">
                 <TrendingUp className="h-5 w-5" />
-                View Leaderboard
+                Browse Markets
               </Button>
             </Link>
           </div>
 
           {/* Feature Highlights */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
-            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-purple-100">
-              <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">AI Oracle</h3>
+            <div className="p-6 bg-white/80 backdrop-blur rounded-xl border-2 border-purple-200 hover:border-purple-400 transition-all shadow-lg">
+              <CheckCircle className="h-10 w-10 text-purple-600 mx-auto mb-3" />
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">Clear Rules Required</h3>
               <p className="text-sm text-gray-600">
-                Subjective judging in minutes, not days
+                Every prediction must have verifiable resolution criteria reviewed by AI
               </p>
             </div>
-            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-green-100">
-              <Zap className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">
+            <div className="p-6 bg-white/80 backdrop-blur rounded-xl border-2 border-green-200 hover:border-green-400 transition-all shadow-lg">
+              <Brain className="h-10 w-10 text-green-600 mx-auto mb-3" />
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">
+                AI Verification
+              </h3>
+              <p className="text-sm text-gray-600">
+                AI oracle checks data sources and ensures fair resolution in minutes
+              </p>
+            </div>
+            <div className="p-6 bg-white/80 backdrop-blur rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all shadow-lg">
+              <Zap className="h-10 w-10 text-blue-600 mx-auto mb-3" />
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">
                 Gasless Trading
               </h3>
-              <p className="text-sm text-gray-600">
-                No crypto knowledge needed
-              </p>
-            </div>
-            <div className="p-4 bg-white/60 backdrop-blur rounded-lg border border-blue-100">
-              <Shield className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">
-                Pooled Liquidity
-              </h3>
-              <p className="text-sm text-gray-600">45% better pricing</p>
+              <p className="text-sm text-gray-600">No gas fees, no complexity - just predict and earn</p>
             </div>
           </div>
         </div>
@@ -375,8 +384,8 @@ export default function HomePage() {
 
         {/* Market Categories */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold mb-4">Browse Creative Markets</h3>
-          <p className="text-gray-600 mb-6">Predict outcomes tied to real events, launches, and creator milestones</p>
+          <h3 className="text-3xl font-bold mb-4">Active Prediction Markets</h3>
+          <p className="text-gray-600 mb-6 text-lg">All markets include AI-verified resolution rules with clear data sources and deadlines</p>
           <div className="flex flex-wrap items-center gap-3 mb-6">
             <button
               onClick={() => setSelectedCategory('all')}

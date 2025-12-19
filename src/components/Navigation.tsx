@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 type NavItem = {
-  href: '/' | '/markets' | '/create' | '/leaderboard' | '/reputation';
+  href: string;
   label: string;
   icon: any;
   badge?: string;
@@ -31,10 +31,10 @@ export function Navigation() {
 
   const navItems: NavItem[] = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/markets' as const, label: 'Markets', icon: TrendingUp },
-    { href: '/create/new' as any, label: 'Create Market', icon: PlusCircle, highlight: true },
-    { href: '/leaderboard' as const, label: 'Leaderboard', icon: Trophy },
-    { href: '/reputation' as const, label: 'Profile', icon: User },
+    { href: '/markets', label: 'Markets', icon: TrendingUp },
+    { href: '/create/new', label: 'Create Market', icon: PlusCircle, highlight: true },
+    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { href: '/reputation', label: 'Profile', icon: User },
   ];
 
   return (
@@ -57,14 +57,12 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Button
-                  key={item.href}
-                  variant={isActive ? 'default' : 'ghost'}
-                  size="sm"
-                  className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
-                  asChild
-                >
-                  <Link href={item.href}>
+                <Link key={item.href} href={item.href as any}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
+                  >
                     <Icon className="h-4 w-4" />
                     {item.label}
                     {item.badge && (
@@ -72,8 +70,8 @@ export function Navigation() {
                         {item.badge}
                       </span>
                     )}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
@@ -129,18 +127,16 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Button
-                  key={item.href}
-                  variant={isActive ? 'default' : 'ghost'}
-                  size="sm"
-                  className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
-                  asChild
-                >
-                  <Link href={item.href}>
+                <Link key={item.href} href={item.href as any}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
+                  >
                     <Icon className="h-4 w-4" />
                     {item.label}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
