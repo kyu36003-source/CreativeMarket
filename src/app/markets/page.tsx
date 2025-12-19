@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useMarketCount, useMarket } from '@/hooks/useContracts';
+import { STATIC_MARKETS } from '@/lib/static-markets';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,7 +56,6 @@ interface MarketData {
 }
 
 export default function MarketsPage() {
-  const { data: _marketCount } = useMarketCount();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,77 +63,37 @@ export default function MarketsPage() {
   const [loading, setLoading] = useState(true);
   const marketsLoadedRef = useRef(false);
 
-  // Fetch real markets from blockchain
-  const { data: market1Data } = useMarket(1);
-  const { data: market2Data } = useMarket(2);
-  const { data: market3Data } = useMarket(3);
-
+  // Load markets from static data (single source of truth)
   useEffect(() => {
-    // Only prevent re-execution if we already have markets loaded
-    if (marketsLoadedRef.current && markets.length > 0) return;
+    if (marketsLoadedRef.current) return;
     
-    const convertMarketData = (marketId: number, data: unknown): MarketData | null => {
-      if (!data || !Array.isArray(data)) return null;
-
-      const [
-        _id,
-        question,
-        description,
-        category,
-        _creator,
-        endTime,
-        totalYesAmount,
-        totalNoAmount,
-        resolved,
-        outcome,
-        _resolvedAt,
-        aiOracleEnabled,
-      ] = data;
-
-      const yesAmount = Number(formatEther(totalYesAmount as bigint));
-      const noAmount = Number(formatEther(totalNoAmount as bigint));
-      const totalPool = yesAmount + noAmount;
-      const yesPercentage = totalPool > 0 ? (yesAmount / totalPool) * 100 : 50;
+    // Convert STATIC_MARKETS to MarketData format
+    const convertedMarkets = STATIC_MARKETS.map(sm => {
+      const totalYes = Number(formatEther(sm.totalYesAmount));
+      const totalNo = Number(formatEther(sm.totalNoAmount));
+      const totalPool = totalYes + totalNo;
+      const yesPercentage = totalPool > 0 ? (totalYes / totalPool) * 100 : 50;
 
       return {
-        id: marketId,
-        question: question as string,
-        description: description as string,
-        category: category as string,
+        id: Number(sm.id),
+        question: sm.question,
+        description: sm.description,
+        category: sm.category,
         totalPool,
-        yesAmount,
-        noAmount,
+        yesAmount: totalYes,
+        noAmount: totalNo,
         yesPercentage,
-        endTime: Number(endTime),
-        resolved: resolved as boolean,
-        outcome: outcome as boolean,
-        aiOracleEnabled: aiOracleEnabled as boolean,
+        endTime: Number(sm.endTime),
+        resolved: sm.resolved,
+        outcome: sm.outcome,
+        aiOracleEnabled: sm.aiOracleEnabled,
       };
-    };
+    });
 
-    const loadedMarkets: MarketData[] = [];
-
-    if (market1Data) {
-      const market = convertMarketData(1, market1Data);
-      if (market) loadedMarkets.push(market);
-    }
-
-    if (market2Data) {
-      const market = convertMarketData(2, market2Data);
-      if (market) loadedMarkets.push(market);
-    }
-
-    if (market3Data) {
-      const market = convertMarketData(3, market3Data);
-      if (market) loadedMarkets.push(market);
-    }
-
-    if (loadedMarkets.length > 0) {
-      setMarkets(loadedMarkets);
-      marketsLoadedRef.current = true;
-    }
+    setMarkets(convertedMarkets);
+    marketsLoadedRef.current = true;
     setLoading(false);
-  }, [market1Data, market2Data, market3Data, markets.length]);
+  }, []);
 
   const totalMarkets = markets.length;
 

@@ -10,6 +10,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
 import { formatEther } from 'viem';
+import { STATIC_MARKETS } from '@/lib/static-markets';
 import {
   useMarket,
   usePosition,
@@ -57,6 +58,8 @@ export default function MarketDetailPage() {
   const marketId = parseInt(params.id as string);
   const { isConnected, chainId } = useAccount();
 
+  // Use STATIC_MARKETS as primary source of truth, blockchain as backup
+  const staticMarket = STATIC_MARKETS.find(m => Number(m.id) === marketId);
   const { data: marketData, isLoading: loadingMarket } = useMarket(marketId);
   const { data: positionData } = usePosition(marketId);
   const {
@@ -128,7 +131,7 @@ export default function MarketDetailPage() {
     }
   }, [isBetSuccess, isGaslessSuccess]);
 
-  if (loadingMarket) {
+  if (loadingMarket && !staticMarket) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center py-20">
@@ -138,7 +141,7 @@ export default function MarketDetailPage() {
     );
   }
 
-  if (!marketData) {
+  if (!marketData && !staticMarket) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <Card className="p-6 text-center">
@@ -155,17 +158,44 @@ export default function MarketDetailPage() {
     );
   }
 
-  const marketArray = marketData as unknown[];
-  const question = marketArray[1] as string;
-  const description = marketArray[2] as string;
-  const category = marketArray[3] as string;
-  const endTime = marketArray[5] as bigint;
-  const totalYesAmount = marketArray[6] as bigint;
-  const totalNoAmount = marketArray[7] as bigint;
-  const resolved = marketArray[8] as boolean;
-  const outcome = marketArray[9] as boolean;
-  const resolvedAt = marketArray[10] as bigint;
-  const aiOracleEnabled = marketArray[11] as boolean;
+  // Use static market if available, otherwise blockchain data
+  let question: string;
+  let description: string;
+  let category: string;
+  let endTime: bigint;
+  let totalYesAmount: bigint;
+  let totalNoAmount: bigint;
+  let resolved: boolean;
+  let outcome: boolean;
+  let resolvedAt: bigint;
+  let aiOracleEnabled: boolean;
+
+  if (staticMarket) {
+    // Use static market data (primary source of truth)
+    question = staticMarket.question;
+    description = staticMarket.description;
+    category = staticMarket.category;
+    endTime = staticMarket.endTime;
+    totalYesAmount = staticMarket.totalYesAmount;
+    totalNoAmount = staticMarket.totalNoAmount;
+    resolved = staticMarket.resolved;
+    outcome = staticMarket.outcome;
+    resolvedAt = staticMarket.resolvedAt;
+    aiOracleEnabled = staticMarket.aiOracleEnabled;
+  } else {
+    // Fallback to blockchain data
+    const marketArray = marketData as unknown[];
+    question = marketArray[1] as string;
+    description = marketArray[2] as string;
+    category = marketArray[3] as string;
+    endTime = marketArray[5] as bigint;
+    totalYesAmount = marketArray[6] as bigint;
+    totalNoAmount = marketArray[7] as bigint;
+    resolved = marketArray[8] as boolean;
+    outcome = marketArray[9] as boolean;
+    resolvedAt = marketArray[10] as bigint;
+    aiOracleEnabled = marketArray[11] as boolean;
+  }
 
   const endDate = new Date(Number(endTime) * 1000);
   const hasEnded = endDate < new Date();
