@@ -85,18 +85,6 @@ Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). Everything on
 
 ---
 
-## vs Competition
-
-| Feature | PredictBNB | Polymarket | Augur |
-|---------|------------|------------|--------|
-| Gas fees | **0 (x402)** | ✗ Pay per bet | ✗ Pay per bet |
-| Reputation | ✓ On-chain | ✗ Database | ✗ Token voting |
-| Resolution | Data source + UTC | Unclear | Complex voting |
-| Network | BNB Chain | Polygon | Ethereum |
-| Markets | 18 active | 1000+ | 100+ |
-
-**Why BNB Chain?** $0.10 gas makes x402 profitable. Ethereum's $5-20 gas kills facilitator economics.
-
 ## How It Works
 
 **Create Market:** Category → Template → Rules (data source + UTC deadline) → Submit  
