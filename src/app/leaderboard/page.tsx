@@ -56,12 +56,8 @@ export default function LeaderboardPage() {
           } 
         },
         {
-          onSuccess: () => {
-            console.log('Successfully following trader!');
-          },
           onError: (error) => {
-            console.error('Failed to follow trader:', error);
-            alert('Failed to follow trader. Check console for details.');
+            alert('Failed to follow trader. Please try again.');
           },
         }
       );

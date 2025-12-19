@@ -200,7 +200,6 @@ export default function MarketDetailPage() {
       
       // Use x402 protocol for gasless if available and enabled
       if (useGasless && canUseGasless) {
-        console.log('🚀 Using x402 Protocol - Revolutionary Gasless Betting');
         const amount = BigInt(Math.floor(parseFloat(betAmount) * 1e18));
         const result = await placeBetGasless(marketId, position, amount);
         
@@ -210,7 +209,6 @@ export default function MarketDetailPage() {
           await fetchSponsorship(); // Update sponsorship amount
         }
       } else {
-        console.log('⛽ Using regular transaction (paying gas)');
         await placeBet(marketId, position, betAmount);
       }
       // Transaction modal will show automatically via useEffect

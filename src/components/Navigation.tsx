@@ -36,29 +36,6 @@ export function Navigation() {
     { href: '/reputation', label: 'Profile', icon: User },
   ];
 
-  console.log('🔄 Navigation component rendered, current pathname:', pathname);
-
-  const handleNavClick = (item: NavItem, isMobile: boolean) => (e: React.MouseEvent) => {
-    console.log('🎯 CLICK EVENT FIRED!', {
-      label: item.label,
-      href: item.href,
-      currentPath: pathname,
-      isMobile,
-      timestamp: new Date().toISOString(),
-      eventType: e.type,
-      defaultPrevented: e.defaultPrevented,
-      target: e.target,
-      currentTarget: e.currentTarget,
-    });
-
-    // Check if navigation will happen
-    if (e.defaultPrevented) {
-      console.error('❌ Event was prevented!');
-    } else {
-      console.log('✅ Event not prevented, navigation should work');
-    }
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
@@ -79,17 +56,11 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               
-              console.log('🖥️ Rendering desktop nav item:', item.label, 'href:', item.href);
-              
               return (
                 <Link 
                   key={item.href} 
                   href={item.href as any}
                   prefetch={true}
-                  onClick={handleNavClick(item, false)}
-                  onMouseDown={(e) => console.log('🖱️ Mouse down on:', item.label, e)}
-                  onMouseUp={(e) => console.log('🖱️ Mouse up on:', item.label, e)}
-                  style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
@@ -159,19 +130,11 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               
-              console.log('📱 Rendering mobile nav item:', item.label, 'href:', item.href);
-              
               return (
                 <Link 
                   key={item.href} 
                   href={item.href as any}
                   prefetch={true}
-                  onClick={handleNavClick(item, true)}
-                  onMouseDown={(e) => console.log('📱 Mobile mouse down:', item.label, e)}
-                  onMouseUp={(e) => console.log('📱 Mobile mouse up:', item.label, e)}
-                  onTouchStart={(e) => console.log('👆 Touch start:', item.label, e)}
-                  onTouchEnd={(e) => console.log('👆 Touch end:', item.label, e)}
-                  style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
