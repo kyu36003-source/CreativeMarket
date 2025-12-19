@@ -38,7 +38,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 1n,
     question: "Will Bitcoin reach $150,000 by end of Q1 2026?",
-    description: "BTC currently at $106K. Institutional adoption accelerating with BlackRock ETF inflows hitting $2.1B weekly. MicroStrategy buying, halving effects materializing.",
+    description: "BTC currently at $106K. Institutional adoption accelerating with BlackRock ETF inflows hitting $2.1B weekly. MicroStrategy buying, halving effects materializing. Resolution: Resolves YES if BTC trades at or above $150,000 on CoinGecko at any point before March 31, 2026 11:59 PM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 103 * DAY),
@@ -52,7 +52,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 2n,
     question: "Will Ethereum reach $6,000 before March 2026?",
-    description: "ETH at $3,942. Pectra upgrade launching Jan 2026 with major scalability improvements. Staking yields attractive at 3.2%. Institutional interest growing.",
+    description: "ETH at $3,942. Pectra upgrade launching Jan 2026 with major scalability improvements. Staking yields attractive at 3.2%. Institutional interest growing. Resolution: Resolves YES if ETH trades at or above $6,000 on CoinGecko at any point before March 1, 2026 12:00 AM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 73 * DAY),
@@ -66,7 +66,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 3n,
     question: "Will Solana flip BNB in market cap by February 2026?",
-    description: "SOL at $213 ($103B mcap) vs BNB at $108B. Solana's DeFi TVL growing 40% monthly. Firedancer upgrade promising 1M TPS. Memecoin mania driving adoption.",
+    description: "SOL at $213 ($103B mcap) vs BNB at $108B. Solana's DeFi TVL growing 40% monthly. Firedancer upgrade promising 1M TPS. Memecoin mania driving adoption. Resolution: Resolves YES if SOL market cap exceeds BNB market cap on CoinGecko at any point before February 28, 2026 11:59 PM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 45 * DAY),
@@ -82,7 +82,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 4n,
     question: "Will Aave TVL surpass $50B before end of Q1 2026?",
-    description: "Currently at $33.2B with strong momentum. V4 launch imminent with cross-chain liquidity. Real-world assets integration attracting institutions. DeFi leader.",
+    description: "Currently at $33.2B with strong momentum. V4 launch imminent with cross-chain liquidity. Real-world assets integration attracting institutions. DeFi leader. Resolution: Resolves YES if Aave protocol shows TVL of $50B or more on DeFiLlama at any point before March 31, 2026 11:59 PM UTC.",
     category: "DeFi",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 103 * DAY),
@@ -95,8 +95,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   },
   {
     id: 5n,
-    question: "Will Uniswap v4 reach $100B in cumulative volume by March 2026?",
-    description: "V4 hooks revolutionizing AMM design. Currently processing $1.8B daily. Fee switch debate resolved. Institutional integrations with Paradigm backing.",
+    question: "Will Uniswap v4 process $100B total volume by March 2026?",
+    description: "V4 hooks revolutionizing AMM design. Currently processing $1.8B daily. Fee switch debate resolved. Institutional integrations with Paradigm backing. Resolution: Resolves YES if Uniswap v4 cumulative volume since launch reaches $100B on Dune Analytics before March 20, 2026 11:59 PM UTC.",
     category: "DeFi",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 92 * DAY),
@@ -109,8 +109,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   },
   {
     id: 6n,
-    question: "Will MakerDAO rebrand to Sky complete migration before February 2026?",
-    description: "USDS stablecoin replacing DAI. $5B locked in migration contracts. Governance vote passed 89%. New tokenomics launching. DeFi OG's biggest transformation.",
+    question: "Will MakerDAO migrate 80%+ of DAI to USDS before February 2026?",
+    description: "USDS stablecoin replacing DAI. $5B locked in migration contracts. Governance vote passed 89%. New tokenomics launching. DeFi OG's biggest transformation. Resolution: Resolves YES if 80% or more of DAI supply is converted to USDS according to official Sky Protocol dashboard before February 28, 2026 11:59 PM UTC.",
     category: "DeFi",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 62 * DAY),
@@ -126,7 +126,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 7n,
     question: "Will Azuki Elementals floor price exceed 3 ETH by Q1 2026?",
-    description: "Currently at 1.2 ETH. Anime studio partnership announced. Physical redemptions launching. Chiru Labs rebuilding trust after rocky launch. Community hopeful.",
+    description: "Currently at 1.2 ETH. Anime studio partnership announced. Physical redemptions launching. Chiru Labs rebuilding trust after rocky launch. Community hopeful. Resolution: Resolves YES if Azuki Elementals floor price on OpenSea is 3 ETH or higher at any point before March 31, 2026 11:59 PM UTC.",
     category: "NFT",
     creator: DEMO_CREATORS.artist,
     endTime: BigInt(now + 95 * DAY),
@@ -140,7 +140,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 8n,
     question: "Will Illuvium exceed 100K monthly active players by March 2026?",
-    description: "Open beta launched with 45K players. AAA graphics and gameplay. $72M raised. Polygon zkEVM integration smooth. GameFi finally delivering on promise.",
+    description: "Open beta launched with 45K players. AAA graphics and gameplay. $72M raised. Polygon zkEVM integration smooth. GameFi finally delivering on promise. Resolution: Resolves YES if Illuvium reports 100K+ monthly active users via official blog/Twitter or DappRadar shows 100K+ UAW before March 20, 2026 11:59 PM UTC.",
     category: "NFT",
     creator: DEMO_CREATORS.brand,
     endTime: BigInt(now + 82 * DAY),
@@ -156,7 +156,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 9n,
     question: "Will Chainlink reach $50 before end of Q1 2026?",
-    description: "LINK at $28.34. CCIP adoption exploding with SWIFT partnership. Staking v0.2 launching. Banking giants testing oracles. 900+ integrations and growing.",
+    description: "LINK at $28.34. CCIP adoption exploding with SWIFT partnership. Staking v0.2 launching. Banking giants testing oracles. 900+ integrations and growing. Resolution: Resolves YES if LINK trades at or above $50 on CoinGecko at any point before March 31, 2026 11:59 PM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 103 * DAY),
@@ -170,7 +170,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 10n,
     question: "Will Arbitrum TVL exceed Optimism by February 2026?",
-    description: "ARB at $8.2B TVL vs OP at $7.1B. Stylus upgrade enabling Rust contracts. Gaming partnerships announced. L2 wars heating up. Ethereum scaling battle.",
+    description: "ARB at $8.2B TVL vs OP at $7.1B. Stylus upgrade enabling Rust contracts. Gaming partnerships announced. L2 wars heating up. Ethereum scaling battle. Resolution: Resolves YES if Arbitrum TVL exceeds Optimism TVL on L2Beat at any point before February 14, 2026 11:59 PM UTC.",
     category: "DeFi",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 58 * DAY),
@@ -186,7 +186,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 11n,
     question: "Will Bitcoin ETF options launch before March 2026?",
-    description: "SEC reviewing applications from Cboe, CME. BlackRock lobbying heavily. $56B in ETF inflows creating demand. Options could unlock $100B+ in derivatives.",
+    description: "SEC reviewing applications from Cboe, CME. BlackRock lobbying heavily. $56B in ETF inflows creating demand. Options could unlock $100B+ in derivatives. Resolution: Resolves YES if any U.S. exchange (Cboe, CME, Nasdaq) begins trading options on a spot Bitcoin ETF with SEC approval before March 10, 2026 11:59 PM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 82 * DAY),
@@ -200,7 +200,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 12n,
     question: "Will Ethereum ETF inflows exceed $10B by end of Q1 2026?",
-    description: "Currently at $3.2B total inflows. Grayscale conversion complete. Fidelity, BlackRock marketing ramping up. Staking yields attracting institutions.",
+    description: "Currently at $3.2B total inflows. Grayscale conversion complete. Fidelity, BlackRock marketing ramping up. Staking yields attracting institutions. Resolution: Resolves YES if cumulative net inflows to all U.S. spot Ethereum ETFs reach $10B according to Bloomberg ETF data before March 31, 2026 11:59 PM UTC.",
     category: "Crypto",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 103 * DAY),
@@ -215,8 +215,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   // MUSIC & ARTISTS
   {
     id: 13n,
-    question: "Will Beyoncé announce album release before March 2026?",
-    description: "Cryptic Instagram posts hint at studio sessions. Renaissance tour film broke records. Fans analyzing lyrics for clues. Parkwood Entertainment tight-lipped.",
+    question: "Will Beyoncé officially announce new album before March 2026?",
+    description: "Cryptic Instagram posts hint at studio sessions. Renaissance tour film broke records. Fans analyzing lyrics for clues. Parkwood Entertainment tight-lipped. Resolution: Resolves YES if Beyoncé or Parkwood Entertainment makes official announcement (via Instagram, website, or press release) of a new studio album with release date before March 13, 2026 11:59 PM UTC.",
     category: "Music",
     creator: DEMO_CREATORS.artist,
     endTime: BigInt(now + 85 * DAY),
@@ -229,8 +229,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   },
   {
     id: 14n,
-    question: "Will Drake's 'For All The Dogs' go #1 on Billboard by February 2026?",
-    description: "Album dropped with mixed reviews. Streaming numbers strong at 400M+ first week. Competition from Doja Cat and Bad Bunny. Chart battle heating up.",
+    question: "Will Drake's 'For All The Dogs' reach #1 on Billboard 200 by February 2026?",
+    description: "Album dropped with mixed reviews. Streaming numbers strong at 400M+ first week. Competition from Doja Cat and Bad Bunny. Chart battle heating up. Resolution: Resolves YES if 'For All The Dogs' appears at #1 on the official Billboard 200 chart at any point before February 11, 2026 11:59 PM UTC.",
     category: "Music",
     creator: DEMO_CREATORS.artist,
     endTime: BigInt(now + 55 * DAY),
@@ -245,8 +245,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   // MOVIES & TV
   {
     id: 15n,
-    question: "Will Dune 3 release date be announced before Q2 2026?",
-    description: "Denis Villeneuve confirmed working on Messiah. Part Two grossed $714M. Legendary Pictures eager. Script in development. Fans demanding trilogy conclusion.",
+    question: "Will Dune 3 release date be officially announced before Q2 2026?",
+    description: "Denis Villeneuve confirmed working on Messiah. Part Two grossed $714M. Legendary Pictures eager. Script in development. Fans demanding trilogy conclusion. Resolution: Resolves YES if Legendary Pictures or Warner Bros officially announces a theatrical release date for Dune: Messiah before April 1, 2026 12:00 AM UTC.",
     category: "Movies",
     creator: DEMO_CREATORS.brand,
     endTime: BigInt(now + 163 * DAY),
@@ -260,7 +260,7 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   {
     id: 16n,
     question: "Will Stranger Things Season 5 premiere before July 2026?",
-    description: "Final season filming wrapped December 2025. Netflix confirmed 2026 release. Post-production ongoing. Massive finale promised. 286M+ viewers waiting.",
+    description: "Final season filming wrapped December 2025. Netflix confirmed 2026 release. Post-production ongoing. Massive finale promised. 286M+ viewers waiting. Resolution: Resolves YES if first episode of Stranger Things Season 5 is available on Netflix before July 1, 2026 12:00 AM UTC.",
     category: "Movies",
     creator: DEMO_CREATORS.brand,
     endTime: BigInt(now + 195 * DAY),
@@ -275,8 +275,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   // CELEBRITY RELATIONSHIPS
   {
     id: 17n,
-    question: "Will Taylor Swift and Travis Kelce announce engagement before Q2 2026?",
-    description: "Dating since Sept 2023. NFL season boosting visibility. Travis seen at Tiffany's. Swifties analyzing every appearance. Vegas odds at 3:1.",
+    question: "Will Taylor Swift and Travis Kelce officially announce engagement before Q2 2026?",
+    description: "Dating since Sept 2023. NFL season boosting visibility. Travis seen at Tiffany's. Swifties analyzing every appearance. Vegas odds at 3:1. Resolution: Resolves YES if Taylor Swift or Travis Kelce officially announces engagement via social media, statement, or verified media interview before April 1, 2026 12:00 AM UTC. Paparazzi photos or ring sightings without confirmation do NOT count.",
     category: "Entertainment",
     creator: DEMO_CREATORS.community,
     endTime: BigInt(now + 163 * DAY),
@@ -289,8 +289,8 @@ export const STATIC_MARKETS: StaticMarketData[] = [
   },
   {
     id: 18n,
-    question: "Will Bad Bunny release new album before March 2026?",
-    description: "Last album Oct 2023. Studio sessions reported in Puerto Rico. Collaboration rumors with Drake. 'Most wanted' tour grossed $435M. Fans demanding new music.",
+    question: "Will Bad Bunny release new studio album before March 2026?",
+    description: "Last album Oct 2023. Studio sessions reported in Puerto Rico. Collaboration rumors with Drake. 'Most wanted' tour grossed $435M. Fans demanding new music. Resolution: Resolves YES if Bad Bunny releases a new studio album (minimum 8 tracks) on major streaming platforms before March 13, 2026 11:59 PM UTC. Singles, EPs, or compilations do NOT count.",
     category: "Music",
     creator: DEMO_CREATORS.artist,
     endTime: BigInt(now + 85 * DAY),
