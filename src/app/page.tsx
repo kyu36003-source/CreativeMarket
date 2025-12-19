@@ -23,6 +23,8 @@ import {
   Search,
   Brain,
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useMarketCount, useMarket, usePlaceBet } from '@/hooks/useContracts';
 import { useRouter } from 'next/navigation';
@@ -34,16 +36,21 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [markets, setMarkets] = useState<Market[]>([]);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categories] = useState<MarketCategoryInfo[]>([
     { id: 'all', name: 'All Markets', icon: '🎯', count: 0 },
+    { id: 'Crypto', name: 'Crypto', icon: '₿', count: 0 },
+    { id: 'DeFi', name: 'DeFi', icon: '💎', count: 0 },
     { id: 'NFT', name: 'NFT', icon: '🖼️', count: 0 },
+    { id: 'Movies', name: 'Movies', icon: '🎬', count: 0 },
     { id: 'Music', name: 'Music', icon: '🎵', count: 0 },
+    { id: 'Relationships', name: 'Relationships', icon: '💕', count: 0 },
+    { id: 'Entertainment', name: 'Entertainment', icon: '🌟', count: 0 },
     { id: 'Fashion', name: 'Fashion', icon: '👗', count: 0 },
     { id: 'Art', name: 'Art', icon: '🎨', count: 0 },
-    { id: 'Film', name: 'Film', icon: '🎬', count: 0 },
+    { id: 'Film', name: 'Film', icon: '🎥', count: 0 },
     { id: 'Writing', name: 'Writing', icon: '✍️', count: 0 },
     { id: 'Social', name: 'Social', icon: '🌐', count: 0 },
-    { id: 'DeFi', name: 'DeFi', icon: '💎', count: 0 },
     { id: 'Creative', name: 'Creative', icon: '✨', count: 0 },
   ]);
   const [loading, setLoading] = useState(true);
@@ -372,50 +379,96 @@ export default function HomePage() {
         <div className="mb-8">
           <h3 className="text-3xl font-bold mb-4">Active Prediction Markets</h3>
           <p className="text-gray-600 mb-6 text-lg">All markets include AI-verified resolution rules with clear data sources and deadlines</p>
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-5 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all shadow-sm flex items-center gap-2 ${
-                selectedCategory === 'all'
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <span className="text-lg">🎯</span>
-              <span>All Markets</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                selectedCategory === 'all' 
-                  ? 'bg-white/20 text-white' 
-                  : 'bg-gray-100 text-gray-600'
-              }`}>
-                {getCategoryCount('all')}
-              </span>
-            </button>
-            {categories.filter(cat => cat.id !== 'all').map(cat => {
-              const count = getCategoryCount(cat.id);
-              if (count === 0) return null; // Hide empty categories
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all shadow-sm flex items-center gap-2 ${
-                    selectedCategory === cat.id
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                >
-                  <span className="text-lg">{cat.icon}</span>
-                  <span>{cat.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    selectedCategory === cat.id 
-                      ? 'bg-white/20 text-white' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {count}
+          
+          {/* Category Filter */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+            {/* Header with All Markets button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`flex-1 px-5 py-2.5 rounded-lg font-medium transition-all shadow-sm flex items-center justify-center gap-2 ${
+                  selectedCategory === 'all'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                <span className="text-lg">🎯</span>
+                <span>All Markets</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  selectedCategory === 'all' 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-gray-200 text-gray-600'
+                }`}>
+                  {getCategoryCount('all')}
+                </span>
+              </button>
+              <button
+                onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                className="ml-3 px-4 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700 font-medium"
+              >
+                <span>Categories</span>
+                {categoriesExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Collapsible Categories Grid */}
+            {categoriesExpanded && (
+              <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                {categories.filter(cat => cat.id !== 'all').map(cat => {
+                  const count = getCategoryCount(cat.id);
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setSelectedCategory(cat.id);
+                        setCategoriesExpanded(false); // Auto-collapse after selection
+                      }}
+                      className={`px-4 py-3 rounded-lg font-medium transition-all shadow-sm flex flex-col items-center gap-2 ${
+                        selectedCategory === cat.id
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200 ring-2 ring-purple-300'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <span className="text-2xl">{cat.icon}</span>
+                      <span className="text-sm">{cat.name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        selectedCategory === cat.id 
+                          ? 'bg-white/20 text-white' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Selected category indicator (when not 'all') */}
+            {selectedCategory !== 'all' && (
+              <div className="px-4 py-3 bg-purple-50 border-t border-purple-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-purple-700 font-medium">
+                    Showing: {categories.find(c => c.id === selectedCategory)?.icon}{' '}
+                    {categories.find(c => c.id === selectedCategory)?.name}
                   </span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-purple-200 text-purple-700">
+                    {getCategoryCount(selectedCategory)} markets
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Clear filter
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
 
           {/* Search */}
