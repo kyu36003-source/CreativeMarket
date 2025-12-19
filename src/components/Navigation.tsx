@@ -57,14 +57,12 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Button
-                  key={item.href}
-                  variant={isActive ? 'default' : 'ghost'}
-                  size="sm"
-                  className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
-                  asChild
-                >
-                  <Link href={item.href as any}>
+                <Link key={item.href} href={item.href as any} className="inline-flex">
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
+                  >
                     <Icon className="h-4 w-4" />
                     {item.label}
                     {item.badge && (
@@ -72,8 +70,8 @@ export function Navigation() {
                         {item.badge}
                       </span>
                     )}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
@@ -129,18 +127,16 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Button
-                  key={item.href}
-                  variant={isActive ? 'default' : 'ghost'}
-                  size="sm"
-                  className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
-                  asChild
-                >
-                  <Link href={item.href as any}>
+                <Link key={item.href} href={item.href as any} className="inline-flex">
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
+                  >
                     <Icon className="h-4 w-4" />
                     {item.label}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
