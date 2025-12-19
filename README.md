@@ -14,9 +14,12 @@
 ## Core Tech
 
 **x402 Protocol (Gasless On-Chain):**
-- User authorizes via x402 → Executed on-chain → User pays 0 gas, all records on BNB Chain
-- Economics: $0.10 BNB gas + 0.5% fee = profitable at scale
-- Impossible on Ethereum: $5-20 gas kills facilitator economics
+- **You:** Sign authorization (free)
+- **Facilitator:** Pays $0.10 gas to execute on-chain
+- **Facilitator:** Earns 0.5% fee per transaction
+- **Result:** You pay 0 gas, everything recorded on BNB Chain
+
+**Why BNB Chain?** Facilitator pays $0.10 gas, earns 0.5% fee → profitable with volume. On Ethereum, $5-20 gas would kill this model.
 
 **On-Chain Everything:**
 - Reputation: TraderReputation.sol (+10/bet, +20/win)
