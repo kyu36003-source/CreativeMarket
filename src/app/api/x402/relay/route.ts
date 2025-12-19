@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createPublicClient, createWalletClient, http, parseEther } from 'viem';
+import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bsc, bscTestnet } from 'viem/chains';
 
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 }
 
 // OPTIONS handler for CORS preflight
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

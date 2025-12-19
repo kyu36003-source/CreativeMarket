@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createPublicClient, createWalletClient, http, parseEther } from 'viem';
+import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bsc, bscTestnet } from 'viem/chains';
 

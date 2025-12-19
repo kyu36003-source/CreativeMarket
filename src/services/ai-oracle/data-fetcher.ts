@@ -124,7 +124,7 @@ async function fetchCryptoData(market: MarketData): Promise<SourceData | null> {
 /**
  * Fetch NFT market data (simplified - would need real API in production)
  */
-async function fetchNFTData(market: MarketData): Promise<SourceData | null> {
+async function fetchNFTData(_market: MarketData): Promise<SourceData | null> {
   try {
     // In production, use OpenSea API, Reservoir, or similar
     // For now, return mock structure

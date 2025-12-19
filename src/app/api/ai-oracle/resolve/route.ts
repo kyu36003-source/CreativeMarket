@@ -10,7 +10,6 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { bsc, bscTestnet } from 'viem/chains';
 import { AIAnalyzer } from '@/services/ai-oracle/ai-analyzer';
 import { fetchMarketData } from '@/services/ai-oracle/data-fetcher';
-import type { SourceData } from '@/services/ai-oracle/types';
 
 const AI_ORACLE_ABI = [
   {
@@ -157,7 +156,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Create evidence hash (simplified - in production upload to IPFS)
     console.log(`[AI Oracle] Creating evidence hash...`);
-    const evidenceData = JSON.stringify({
+    const _evidenceData = JSON.stringify({
       marketId,
       question,
       analysis,
@@ -281,7 +280,7 @@ export async function GET(request: NextRequest) {
       args: [BigInt(marketId)],
     });
 
-    const [question, description, category, endTime, resolved] = market;
+    const [question, _description, _category, endTime, resolved] = market;
 
     return NextResponse.json({
       marketId: parseInt(marketId),
