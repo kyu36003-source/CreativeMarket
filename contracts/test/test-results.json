@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-12-19T18:38:08.871Z",
+  "network": "localhost",
+  "total": 20,
+  "passed": 5,
+  "failed": 15,
+  "successRate": "25.0"
+}

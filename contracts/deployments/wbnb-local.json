@@ -1,0 +1,16 @@
+{
+  "network": "localhost",
+  "timestamp": "2025-12-19T18:47:34.661Z",
+  "contracts": {
+    "PredictionMarket": "0x998abeb3E57409262aE5b751f60747921B33613E",
+    "WBNB3009": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+    "X402BettingBNB": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528"
+  },
+  "accounts": {
+    "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "facilitator": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "oracle": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "user1": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "user2": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
+  }
+}
