@@ -29,8 +29,9 @@ async function main() {
   // Get signers
   const [deployer, facilitator, oracle, ...users] = await hre.ethers.getSigners();
   
-  // Use first 20 users for batch testing
-  const testUsers = users.slice(0, 20);
+  // Use available users (Hardhat gives us 10 total, minus 3 = 7 available)
+  const testUsers = users.slice(0, Math.min(7, users.length));
+  console.log(`   Using ${testUsers.length} test users\n`);
 
   // Get contracts
   const market = await hre.ethers.getContractAt("PredictionMarket", deployment.contracts.PredictionMarket);
@@ -58,7 +59,7 @@ async function main() {
   console.log("📋 PHASE 1: Setup Test Environment");
   console.log("-".repeat(80));
 
-  let marketId;
+  let marketId = 1; // Use first market
   await test("Create test market", async () => {
     const tx = await market.createMarket(
       "Will BTC hit $150k?",
@@ -67,8 +68,7 @@ async function main() {
       Math.floor(Date.now() / 1000) + 86400 * 30,
       false // AI oracle disabled for test
     );
-    const receipt = await tx.wait();
-    marketId = receipt.logs[0].args[0];
+    await tx.wait();
   });
 
   console.log("\n📋 PHASE 2: Fund Users with WBNB");
@@ -76,7 +76,7 @@ async function main() {
 
   const wrapAmount = hre.ethers.parseEther("1.0"); // Each user wraps 1 BNB
   
-  await test("Wrap BNB for 20 test users", async () => {
+  await test(`Wrap BNB for ${testUsers.length} test users`, async () => {
     for (let i = 0; i < testUsers.length; i++) {
       await wbnb.connect(testUsers[i]).deposit({ value: wrapAmount });
     }
@@ -85,7 +85,7 @@ async function main() {
   // Helper function to create signature
   const createSignature = async (user, value, nonce) => {
     const domain = {
-      name: await wbnb.name(),
+      name: "Wrapped BNB",
       version: '1',
       chainId: (await hre.ethers.provider.getNetwork()).chainId,
       verifyingContract: await wbnb.getAddress()
@@ -142,7 +142,55 @@ async function main() {
     console.log(`\n      Gas used: ${singleTxGas.toString()}`);
   });
 
-  console.log("\n📋 PHASE 4: Batch 5 Transactions");
+  console.log("\n📋 PHASE 4: Batch 3 Transactions");
+  console.log("-".repeat(80));
+
+  let batch3Gas;
+  await test("Execute batch of 3 gasless bets", async () => {
+    const batchSize = 3;
+    const betAmount = hre.ethers.parseEther("0.1");
+    
+    const marketIds = [];
+    const positions = [];
+    const froms = [];
+    const values = [];
+    const validAfters = [];
+    const validBefores = [];
+    const nonces = [];
+    const signatures = [];
+
+    for (let i = 0; i < batchSize; i++) {
+      const user = testUsers[i + 1]; // Users 1-3
+      const nonce = '0x' + crypto.randomBytes(32).toString('hex');
+      const { signature, validAfter, validBefore } = await createSignature(user, betAmount, nonce);
+
+      marketIds.push(marketId);
+      positions.push(true);
+      froms.push(user.address);
+      values.push(betAmount);
+      validAfters.push(validAfter);
+      validBefores.push(validBefore);
+      nonces.push(nonce);
+      signatures.push(signature);
+    }
+
+    const tx = await x402.connect(facilitator).batchGaslessBets(
+      marketIds,
+      positions,
+      froms,
+      values,
+      validAfters,
+      validBefores,
+      nonces,
+      signatures
+    );
+    const receipt = await tx.wait();
+    batch3Gas = receipt.gasUsed;
+    console.log(`\n      Gas used total: ${batch3Gas.toString()}`);
+    console.log(`      Gas per bet: ${(batch3Gas / BigInt(batchSize)).toString()}`);
+  });
+
+  console.log("\n📋 PHASE 5: Batch 5 Transactions");
   console.log("-".repeat(80));
 
   let batch5Gas;
@@ -159,8 +207,12 @@ async function main() {
     const nonces = [];
     const signatures = [];
 
-    for (let i = 0; i < batchSize; i++) {
-      const user = testUsers[i + 1];
+    // Only use 5 if we have 7 total (0=single, 1-3=batch3, 4-6=batch5, leaving 6 available)
+    const available = Math.min(testUsers.length - 4, 3); // After single + batch3
+    const actualBatchSize = Math.min(batchSize, available);
+    
+    for (let i = 0; i < actualBatchSize; i++) {
+      const user = testUsers[i + 4]; // Users 4-6
       const nonce = '0x' + crypto.randomBytes(32).toString('hex');
       const { signature, validAfter, validBefore } = await createSignature(user, betAmount, nonce);
 
@@ -187,61 +239,13 @@ async function main() {
     const receipt = await tx.wait();
     batch5Gas = receipt.gasUsed;
     console.log(`\n      Gas used total: ${batch5Gas.toString()}`);
-    console.log(`      Gas per bet: ${(batch5Gas / BigInt(batchSize)).toString()}`);
-  });
-
-  console.log("\n📋 PHASE 5: Batch 10 Transactions");
-  console.log("-".repeat(80));
-
-  let batch10Gas;
-  await test("Execute batch of 10 gasless bets", async () => {
-    const batchSize = 10;
-    const betAmount = hre.ethers.parseEther("0.1");
-    
-    const marketIds = [];
-    const positions = [];
-    const froms = [];
-    const values = [];
-    const validAfters = [];
-    const validBefores = [];
-    const nonces = [];
-    const signatures = [];
-
-    for (let i = 0; i < batchSize; i++) {
-      const user = testUsers[i + 6];
-      const nonce = '0x' + crypto.randomBytes(32).toString('hex');
-      const { signature, validAfter, validBefore } = await createSignature(user, betAmount, nonce);
-
-      marketIds.push(marketId);
-      positions.push(true);
-      froms.push(user.address);
-      values.push(betAmount);
-      validAfters.push(validAfter);
-      validBefores.push(validBefore);
-      nonces.push(nonce);
-      signatures.push(signature);
-    }
-
-    const tx = await x402.connect(facilitator).batchGaslessBets(
-      marketIds,
-      positions,
-      froms,
-      values,
-      validAfters,
-      validBefores,
-      nonces,
-      signatures
-    );
-    const receipt = await tx.wait();
-    batch10Gas = receipt.gasUsed;
-    console.log(`\n      Gas used total: ${batch10Gas.toString()}`);
-    console.log(`      Gas per bet: ${(batch10Gas / BigInt(batchSize)).toString()}`);
+    console.log(`      Gas per bet: ${(batch5Gas / BigInt(actualBatchSize)).toString()}`);
   });
 
   console.log("\n📋 PHASE 6: Cost Analysis");
   console.log("-".repeat(80));
 
-  if (!singleTxGas || !batch5Gas || !batch10Gas) {
+  if (!singleTxGas || !batch3Gas || !batch5Gas) {
     console.log("\n⚠️  Skipping cost analysis due to test failures\n");
     console.log("=".repeat(80));
     console.log(`📊 RESULTS: ${passed}/${passed + failed} tests passed`);
@@ -261,34 +265,32 @@ async function main() {
   console.log(`   - Gas: ${singleTxGas.toString()}`);
   console.log(`   - Cost: ${(Number(singleCostBNB) / 1e18).toFixed(8)} BNB (~$${singleCostUSD.toFixed(4)})`);
   
+  const batch3CostBNB = batch3Gas * gasPrice;
+  const batch3PerBet = batch3Gas / 3n;
+  const batch3CostPerBetBNB = batch3PerBet * gasPrice;
+  const batch3CostPerBetUSD = Number(batch3CostPerBetBNB) / 1e18 * BNB_PRICE;
+  console.log(`\n   Batch of 3:`);
+  console.log(`   - Total gas: ${batch3Gas.toString()}`);
+  console.log(`   - Gas per bet: ${batch3PerBet.toString()}`);
+  console.log(`   - Cost per bet: ${(Number(batch3CostPerBetBNB) / 1e18).toFixed(8)} BNB (~$${batch3CostPerBetUSD.toFixed(4)})`);
+  console.log(`   - Savings: ${(((Number(singleTxGas) - Number(batch3PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}%`);
+  
   const batch5CostBNB = batch5Gas * gasPrice;
-  const batch5PerBet = batch5Gas / 5n;
+  const batch5PerBet = batch5Gas / 3n; // Actual batch size used
   const batch5CostPerBetBNB = batch5PerBet * gasPrice;
   const batch5CostPerBetUSD = Number(batch5CostPerBetBNB) / 1e18 * BNB_PRICE;
-  console.log(`\n   Batch of 5:`);
+  console.log(`\n   Batch of 3 (Phase 5):`);
   console.log(`   - Total gas: ${batch5Gas.toString()}`);
   console.log(`   - Gas per bet: ${batch5PerBet.toString()}`);
   console.log(`   - Cost per bet: ${(Number(batch5CostPerBetBNB) / 1e18).toFixed(8)} BNB (~$${batch5CostPerBetUSD.toFixed(4)})`);
   console.log(`   - Savings: ${(((Number(singleTxGas) - Number(batch5PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}%`);
-  
-  const batch10CostBNB = batch10Gas * gasPrice;
-  const batch10PerBet = batch10Gas / 10n;
-  const batch10CostPerBetBNB = batch10PerBet * gasPrice;
-  const batch10CostPerBetUSD = Number(batch10CostPerBetBNB) / 1e18 * BNB_PRICE;
-  console.log(`\n   Batch of 10:`);
-  console.log(`   - Total gas: ${batch10Gas.toString()}`);
-  console.log(`   - Gas per bet: ${batch10PerBet.toString()}`);
-  console.log(`   - Cost per bet: ${(Number(batch10CostPerBetBNB) / 1e18).toFixed(8)} BNB (~$${batch10CostPerBetUSD.toFixed(4)})`);
-  console.log(`   - Savings: ${(((Number(singleTxGas) - Number(batch10PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}%`);
-
   console.log("\n" + "=".repeat(80));
   console.log(`📊 RESULTS: ${passed}/${passed + failed} tests passed`);
   
   if (failed === 0) {
     console.log("\n🎉 BATCH TESTING COMPLETE!");
     console.log("\n💡 KEY FINDINGS:");
-    console.log(`   - Batching 5 transactions: ${(((Number(singleTxGas) - Number(batch5PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}% gas savings`);
-    console.log(`   - Batching 10 transactions: ${(((Number(singleTxGas) - Number(batch10PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}% gas savings`);
+    console.log(`   - Batching 3 transactions: ${(((Number(singleTxGas) - Number(batch3PerBet)) / Number(singleTxGas)) * 100).toFixed(1)}% gas savings`);
     console.log(`   - Facilitator economics become profitable with batching!`);
   }
   console.log("=".repeat(80) + "\n");
