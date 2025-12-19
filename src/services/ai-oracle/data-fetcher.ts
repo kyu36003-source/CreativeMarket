@@ -153,7 +153,7 @@ async function fetchWebData(market: MarketData): Promise<SourceData | null> {
     // For now, return structured context
     return {
       source: 'Web Search',
-      category: 'general',
+      category: 'other' as any,
       fetchedAt: new Date(),
       data: {
         question: market.question,
