@@ -76,7 +76,7 @@ export default function HomePage() {
   // Convert blockchain data to Market format
   useEffect(() => {
     // Prevent infinite loop - only run once when data is loaded
-    if (marketsLoadedRef.current) {
+    if (marketsLoadedRef.current && markets.length > 0) {
       return;
     }
 
@@ -194,7 +194,8 @@ export default function HomePage() {
     }
   }, [
     market1Data, market2Data, market3Data, market4Data, market5Data, market6Data,
-    marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isLoading4, isLoading5, isLoading6
+    marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isLoading4, isLoading5, isLoading6,
+    markets.length // Add markets.length to dependencies
   ]);
 
   const selectedMarket = markets.find(m => m.id === selectedMarketId);

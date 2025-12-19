@@ -66,7 +66,8 @@ export default function MarketsPage() {
   const { data: market3Data } = useMarket(3);
 
   useEffect(() => {
-    if (marketsLoadedRef.current) return;
+    // Only prevent re-execution if we already have markets loaded
+    if (marketsLoadedRef.current && markets.length > 0) return;
     
     const convertMarketData = (marketId: number, data: unknown): MarketData | null => {
       if (!data || !Array.isArray(data)) return null;
@@ -124,10 +125,12 @@ export default function MarketsPage() {
       if (market) loadedMarkets.push(market);
     }
 
-    setMarkets(loadedMarkets);
+    if (loadedMarkets.length > 0) {
+      setMarkets(loadedMarkets);
+      marketsLoadedRef.current = true;
+    }
     setLoading(false);
-    marketsLoadedRef.current = true;
-  }, [market1Data, market2Data, market3Data]);
+  }, [market1Data, market2Data, market3Data, markets.length]);
 
   const totalMarkets = markets.length;
 
