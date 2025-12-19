@@ -31,8 +31,8 @@ export default function LeaderboardPage() {
   
   const { mutate: followTrader } = useFollowTrader();
   const { data: followedTraders } = useFollowedTraders();
-  const { followTrader: followTraderGasless } = useFollowTraderGasless();
-  const { unfollowTrader: unfollowTraderGasless } = useUnfollowTraderGasless();
+  const { followTraderGasless } = useFollowTraderGasless();
+  const { unfollowTraderGasless: _unfollowTraderGasless } = useUnfollowTraderGasless();
   
   const handleFollowTrader = async (traderId: string) => {
     if (!isConnected) {
@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
     }
     
     // Try gasless first
-    const result = await followTraderGasless(traderId, 100, 0.1);
+    const result = await followTraderGasless(traderId, '100', 0.1);
     
     if (!result.success) {
       // Fallback to regular follow
@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
           } 
         },
         {
-          onError: (error) => {
+          onError: (_error) => {
             alert('Failed to follow trader. Please try again.');
           },
         }

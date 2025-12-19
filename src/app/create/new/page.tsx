@@ -359,13 +359,13 @@ export default function CreateMarketWizard() {
       const endDateTime = new Date(`${endDate}T${endTime}`);
       
       if (useGasless) {
-        const result = await createMarketGasless(
+        const result = await createMarketGasless({
           question,
           description,
-          selectedCategory?.id || 'other',
-          endDateTime,
-          aiOracleEnabled
-        );
+          category: selectedCategory?.id || 'other',
+          endTime: endDateTime,
+          aiOracleEnabled,
+        });
         if (result.success) {
           router.push('/markets');
         }
@@ -810,7 +810,9 @@ export default function CreateMarketWizard() {
               <>
                 <CheckCircle className="w-5 h-5 mr-2" />
                 {useGasless && '🆓 '}Create Market
-            </p>
+              </>
+            )}
+          </Button>
           </div>
         )}
       </div>
