@@ -150,6 +150,11 @@ export async function POST(request: NextRequest) {
         description: description as string,
         category: (category as string).toLowerCase() as any,
         endTime: new Date(Number(endTime) * 1000),
+        creator: '0x0000000000000000000000000000000000000000',
+        totalYesAmount: BigInt(0),
+        totalNoAmount: BigInt(0),
+        resolved: false,
+        aiOracleEnabled: true,
       },
       sourceData,
     });
