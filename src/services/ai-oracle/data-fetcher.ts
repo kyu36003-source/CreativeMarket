@@ -130,7 +130,7 @@ async function fetchNFTData(_market: MarketData): Promise<SourceData | null> {
     // For now, return mock structure
     return {
       source: 'NFT Market Data',
-      category: 'nft',
+      category: 'crypto' as any,
       fetchedAt: new Date(),
       data: {
         note: 'NFT data fetching not implemented - would use OpenSea/Reservoir API',
