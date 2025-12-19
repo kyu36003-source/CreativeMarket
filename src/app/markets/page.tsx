@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
@@ -58,6 +58,7 @@ export default function MarketsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const marketsLoadedRef = useRef(false);
 
   // Fetch real markets from blockchain
   const { data: market1Data } = useMarket(1);
@@ -65,6 +66,8 @@ export default function MarketsPage() {
   const { data: market3Data } = useMarket(3);
 
   useEffect(() => {
+    if (marketsLoadedRef.current) return;
+    
     const convertMarketData = (marketId: number, data: unknown): MarketData | null => {
       if (!data || !Array.isArray(data)) return null;
 
@@ -123,6 +126,7 @@ export default function MarketsPage() {
 
     setMarkets(loadedMarkets);
     setLoading(false);
+    marketsLoadedRef.current = true;
   }, [market1Data, market2Data, market3Data]);
 
   const totalMarkets = markets.length;
