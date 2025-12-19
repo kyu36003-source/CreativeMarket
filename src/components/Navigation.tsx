@@ -58,7 +58,7 @@ export function Navigation() {
               return (
                 <Link 
                   key={item.href} 
-                  href={item.href}
+                  href={item.href as any}
                   prefetch={true}
                   onClick={(e) => {
                     console.log('🔍 Navigation clicked:', {
@@ -139,7 +139,7 @@ export function Navigation() {
               return (
                 <Link 
                   key={item.href} 
-                  href={item.href}
+                  href={item.href as any}
                   prefetch={true}
                   onClick={(e) => {
                     console.log('📱 Mobile Navigation clicked:', {
