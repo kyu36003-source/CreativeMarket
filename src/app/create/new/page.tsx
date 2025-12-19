@@ -24,123 +24,276 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-// Category definitions with templates
+// Crypto & DeFi focused categories
 const CATEGORIES = [
   {
-    id: 'crypto',
-    name: 'Crypto',
-    icon: '₿',
-    color: 'from-orange-500 to-yellow-500',
-    templates: [
-      {
-        question: 'Will [TOKEN] reach $[PRICE] by [DATE]?',
-        description: 'Price prediction for [TOKEN]. Will it hit the target price within the timeframe?',
-        example: { token: 'BNB', price: '1000', date: 'end of 2025' }
-      },
-      {
-        question: 'Will [TOKEN] outperform [TOKEN2] in [TIMEFRAME]?',
-        description: 'Comparative performance between two tokens over specified period.',
-        example: { token: 'BNB', token2: 'ETH', timeframe: 'Q1 2026' }
-      },
-      {
-        question: 'Will [TOKEN] stay above $[PRICE] for [DAYS] consecutive days?',
-        description: 'Price stability prediction for sustained performance.',
-        example: { token: 'BTC', price: '100000', days: '30' }
-      }
-    ]
-  },
-  {
-    id: 'sports',
-    name: 'Sports',
-    icon: '⚽',
+    id: 'price',
+    name: 'Price Prediction',
+    icon: '📈',
     color: 'from-green-500 to-emerald-500',
+    description: 'Token price movements and targets',
     templates: [
       {
-        question: 'Will [TEAM] win [EVENT]?',
-        description: 'Predict the winner of a major sporting event.',
-        example: { team: 'Team A', event: 'Championship 2026' }
+        question: 'Will BNB reach $1,000 by end of 2025?',
+        description: 'BNB price prediction. Will it hit $1,000 by December 31, 2025?',
+        suggestedEnd: '2025-12-31'
       },
       {
-        question: 'Will [PLAYER] score over [NUMBER] [METRIC] in [EVENT]?',
-        description: 'Player performance prediction for specific statistics.',
-        example: { player: 'Player X', number: '30', metric: 'points', event: 'Finals' }
+        question: 'Will Bitcoin break $150,000 in Q1 2026?',
+        description: 'Bitcoin bull run prediction for early 2026. Will BTC reach new all-time high above $150k?',
+        suggestedEnd: '2026-03-31'
       },
       {
-        question: 'Will [TEAM] make it to [STAGE]?',
-        description: 'Tournament progression prediction.',
-        example: { team: 'Team B', stage: 'semifinals' }
+        question: 'Will ETH stay above $4,000 for 30 consecutive days?',
+        description: 'Ethereum price stability prediction. Will ETH maintain above $4,000 for a full month?',
+        suggestedEnd: '2026-02-28'
+      },
+      {
+        question: 'Will SOL outperform ETH in the next quarter?',
+        description: 'Solana vs Ethereum performance comparison. Which will have better % gains?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will any token in the top 10 drop below $1 by year end?',
+        description: 'Market crash prediction for major tokens. Will a top 10 token fall under $1?',
+        suggestedEnd: '2025-12-31'
       }
     ]
   },
   {
-    id: 'politics',
-    name: 'Politics',
-    icon: '🏛️',
-    color: 'from-blue-500 to-indigo-500',
+    id: 'defi',
+    name: 'DeFi Protocol',
+    icon: '🏦',
+    color: 'from-blue-500 to-cyan-500',
+    description: 'DeFi TVL, yields, and protocol metrics',
     templates: [
       {
-        question: 'Will [POLICY] be passed by [DATE]?',
-        description: 'Legislative outcome prediction.',
-        example: { policy: 'New regulation', date: 'end of 2026' }
+        question: 'Will PancakeSwap TVL exceed $5 billion by Q2 2026?',
+        description: 'PancakeSwap growth prediction. Will Total Value Locked reach $5B?',
+        suggestedEnd: '2026-06-30'
       },
       {
-        question: 'Will [CANDIDATE] win [ELECTION]?',
-        description: 'Election result prediction.',
-        example: { candidate: 'Candidate A', election: '2026 election' }
+        question: 'Will any BNB Chain DEX surpass Uniswap in daily volume?',
+        description: 'DEX competition prediction. Will a BSC DEX flip Uniswap in 24h trading volume?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will stablecoin yields on Venus drop below 5% APY?',
+        description: 'DeFi yield prediction for Venus Protocol. Will USDT/USDC yields fall under 5%?',
+        suggestedEnd: '2026-02-28'
+      },
+      {
+        question: 'Will a new DeFi protocol on BSC reach $1B TVL in 2026?',
+        description: 'New protocol growth prediction. Will any newly launched BSC DeFi hit $1B TVL?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will BNB Chain DeFi TVL overtake Ethereum by end of 2026?',
+        description: 'Chain dominance prediction. Will BNB Smart Chain total DeFi TVL exceed Ethereum?',
+        suggestedEnd: '2026-12-31'
       }
     ]
   },
   {
-    id: 'weather',
-    name: 'Weather',
-    icon: '🌤️',
-    color: 'from-cyan-500 to-blue-500',
+    id: 'nft',
+    name: 'NFT & Gaming',
+    icon: '🎮',
+    color: 'from-purple-500 to-pink-500',
+    description: 'NFT collections, gaming tokens, and metaverse',
     templates: [
       {
-        question: 'Will temperature exceed [TEMP]°F in [CITY] on [DATE]?',
-        description: 'Temperature prediction for specific location and date.',
-        example: { temp: '100', city: 'Miami', date: 'July 4, 2026' }
+        question: 'Will BAYC floor price recover to 50 ETH by mid-2026?',
+        description: 'Bored Ape Yacht Club NFT floor price prediction. Will it reach 50 ETH?',
+        suggestedEnd: '2026-06-30'
       },
       {
-        question: 'Will [CITY] have more than [NUMBER] rainy days in [MONTH]?',
-        description: 'Precipitation frequency prediction.',
-        example: { city: 'Seattle', number: '20', month: 'December' }
+        question: 'Will a BSC gaming token reach top 50 by market cap?',
+        description: 'GameFi growth prediction. Will any BNB Chain gaming token enter top 50?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will NFT trading volume on BSC exceed Ethereum in a single month?',
+        description: 'NFT marketplace competition. Will BNB Chain NFT volume surpass ETH for 30 days?',
+        suggestedEnd: '2026-06-30'
+      },
+      {
+        question: 'Will a play-to-earn game on BSC hit 1 million daily users?',
+        description: 'GameFi adoption prediction. Will any P2E game on BSC reach 1M DAU?',
+        suggestedEnd: '2026-12-31'
       }
     ]
   },
   {
-    id: 'entertainment',
-    name: 'Entertainment',
-    icon: '🎬',
+    id: 'altcoins',
+    name: 'Altcoin Season',
+    icon: '🚀',
+    color: 'from-orange-500 to-red-500',
+    description: 'Altcoin pumps, new launches, and meme coins',
+    templates: [
+      {
+        question: 'Will any new token do a 100x in Q1 2026?',
+        description: 'Moonshot prediction. Will a token launched in Q1 2026 achieve 100x gains?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will meme coins collectively reach $100B market cap?',
+        description: 'Meme coin market prediction. Will all meme coins combined exceed $100B?',
+        suggestedEnd: '2026-06-30'
+      },
+      {
+        question: 'Will PEPE overtake DOGE in market cap?',
+        description: 'Meme coin flippening. Will Pepe surpass Dogecoin in total market capitalization?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will BNB Chain have more daily active addresses than Ethereum?',
+        description: 'Network activity prediction. Will BSC daily active users exceed Ethereum?',
+        suggestedEnd: '2026-03-31'
+      }
+    ]
+  },
+  {
+    id: 'events',
+    name: 'Crypto Events',
+    icon: '📅',
+    color: 'from-indigo-500 to-purple-500',
+    description: 'Exchange listings, token unlocks, and launches',
+    templates: [
+      {
+        question: 'Will a major CEX list PEPE by Q2 2026?',
+        description: 'Exchange listing prediction. Will Coinbase or Binance list PEPE token?',
+        suggestedEnd: '2026-06-30'
+      },
+      {
+        question: 'Will Bitcoin ETF inflows exceed $10B in Q1 2026?',
+        description: 'Institutional adoption prediction. Will spot Bitcoin ETFs see $10B+ net inflows?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will a token unlock crash price by more than 50%?',
+        description: 'Token unlock impact prediction. Will a major unlock cause 50%+ price drop?',
+        suggestedEnd: '2026-02-28'
+      },
+      {
+        question: 'Will PancakeSwap announce a major partnership with Binance?',
+        description: 'Partnership prediction. Will PancakeSwap and Binance announce strategic collaboration?',
+        suggestedEnd: '2026-06-30'
+      }
+    ]
+  },
+  {
+    id: 'music',
+    name: 'Music & Artists',
+    icon: '🎵',
     color: 'from-pink-500 to-rose-500',
+    description: 'Album releases, chart positions, and awards',
     templates: [
       {
-        question: 'Will [MOVIE] gross over $[AMOUNT] million worldwide?',
-        description: 'Box office performance prediction.',
-        example: { movie: 'Upcoming Blockbuster', amount: '1000' }
+        question: 'Will Taylor Swift release a new album in 2026?',
+        description: 'Album release prediction for major artist. Will there be a new Taylor Swift album next year?',
+        suggestedEnd: '2026-12-31'
       },
       {
-        question: 'Will [ARTIST] release [TYPE] by [DATE]?',
-        description: 'Entertainment release prediction.',
-        example: { artist: 'Popular Artist', type: 'new album', date: 'end of 2026' }
+        question: 'Will Bad Bunny have a #1 Billboard hit in Q1 2026?',
+        description: 'Chart performance prediction. Will Bad Bunny top Billboard Hot 100 in early 2026?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will BTS announce a reunion tour by end of 2026?',
+        description: 'K-Pop reunion prediction. Will BTS announce comeback tour dates?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will Spotify announce over 1 billion monthly active users?',
+        description: 'Music streaming milestone. Will Spotify reach 1B MAU by year end?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will a female artist win Album of the Year at Grammys 2026?',
+        description: 'Grammy Awards prediction for Album of the Year category.',
+        suggestedEnd: '2026-02-28'
       }
     ]
   },
   {
-    id: 'technology',
-    name: 'Technology',
-    icon: '💻',
-    color: 'from-purple-500 to-violet-500',
+    id: 'movies',
+    name: 'Movies & TV',
+    icon: '🎬',
+    color: 'from-purple-500 to-indigo-500',
+    description: 'Box office, streaming, and entertainment',
     templates: [
       {
-        question: 'Will [COMPANY] announce [PRODUCT] by [DATE]?',
-        description: 'Tech product launch prediction.',
-        example: { company: 'Tech Corp', product: 'new device', date: 'Q2 2026' }
+        question: 'Will Avatar 3 gross over $2 billion worldwide?',
+        description: 'Box office prediction. Will Avatar 3 surpass $2B in global box office?',
+        suggestedEnd: '2026-12-31'
       },
       {
-        question: 'Will [TECH] reach [MILESTONE] by [DATE]?',
-        description: 'Technology milestone prediction.',
-        example: { tech: 'AI models', milestone: '1 trillion parameters', date: '2027' }
+        question: 'Will Netflix lose subscribers in Q1 2026?',
+        description: 'Streaming service prediction. Will Netflix report negative subscriber growth?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will Dune 3 be announced by end of 2026?',
+        description: 'Sequel announcement prediction. Will Warner Bros officially announce Dune Part Three?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will a superhero movie win Best Picture at Oscars 2027?',
+        description: 'Academy Awards prediction. Will a comic book film win Best Picture?',
+        suggestedEnd: '2027-03-31'
+      },
+      {
+        question: 'Will Stranger Things Season 5 release in 2026?',
+        description: 'Netflix series release prediction. Will the final season drop next year?',
+        suggestedEnd: '2026-12-31'
+      }
+    ]
+  },
+  {
+    id: 'relationships',
+    name: 'Celebrity Couples',
+    icon: '💑',
+    color: 'from-red-500 to-pink-500',
+    description: 'Celebrity relationships, breakups, and drama',
+    templates: [
+      {
+        question: 'Will Taylor Swift and Travis Kelce get engaged in 2026?',
+        description: 'Celebrity engagement prediction. Will they announce an engagement?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will Kim Kardashian start dating someone new by Q2 2026?',
+        description: 'Celebrity dating prediction. Will Kim K be in a new public relationship?',
+        suggestedEnd: '2026-06-30'
+      },
+      {
+        question: 'Will a major celebrity couple announce divorce in Q1 2026?',
+        description: 'Hollywood breakup prediction. Will a high-profile couple split?',
+        suggestedEnd: '2026-03-31'
+      },
+      {
+        question: 'Will Bad Bunny get married in 2026?',
+        description: 'Latin music star wedding prediction. Will Bad Bunny tie the knot?',
+        suggestedEnd: '2026-12-31'
+      },
+      {
+        question: 'Will a celebrity baby announcement get 10M+ likes on Instagram?',
+        description: 'Social media milestone prediction. Will a baby announcement go mega-viral?',
+        suggestedEnd: '2026-12-31'
+      }
+    ]
+  },
+  {
+    id: 'custom',
+    name: 'Custom Market',
+    icon: '✨',
+    color: 'from-yellow-500 to-amber-500',
+    description: 'Create your own unique prediction',
+    templates: [
+      {
+        question: 'Create your own prediction...',
+        description: 'Start from scratch with your custom market idea',
+        suggestedEnd: ''
       }
     ]
   }
@@ -173,13 +326,21 @@ export default function CreateMarketWizard() {
 
   const handleCategorySelect = (category: typeof CATEGORIES[0]) => {
     setSelectedCategory(category);
-    setStep(2);
+    if (category.id === 'custom') {
+      setCustomMode(true);
+      setStep(3);
+    } else {
+      setStep(2);
+    }
   };
 
   const handleTemplateSelect = (template: any) => {
     setSelectedTemplate(template);
     setQuestion(template.question);
     setDescription(template.description);
+    if (template.suggestedEnd) {
+      setEndDate(template.suggestedEnd);
+    }
     setStep(3);
   };
 
@@ -317,11 +478,11 @@ export default function CreateMarketWizard() {
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Choose a Category
+              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                Create Your Prediction
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-lg">
-                What type of prediction do you want to create?
+                Crypto, DeFi, Music, Movies & More
               </p>
             </div>
 
@@ -335,17 +496,20 @@ export default function CreateMarketWizard() {
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                   
-                  <div className="relative flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-3xl shadow-lg`}>
+                  <div className="relative flex items-start gap-4">
+                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-3xl shadow-lg flex-shrink-0`}>
                       {category.icon}
                     </div>
                     <div className="text-left flex-1">
                       <h3 className="text-xl font-bold mb-1">{category.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {category.templates.length} templates
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        {category.description}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {category.templates.length} {category.id === 'custom' ? 'option' : 'templates'}
                       </p>
                     </div>
-                    <ArrowRight className="w-6 h-6 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="w-6 h-6 text-gray-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                   </div>
                 </button>
               ))}
