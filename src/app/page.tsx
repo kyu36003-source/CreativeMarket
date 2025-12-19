@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,6 +48,7 @@ export default function HomePage() {
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const marketsLoadedRef = useRef(false); // Prevent infinite loop
 
   // Betting hook
   const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
@@ -74,6 +75,11 @@ export default function HomePage() {
 
   // Convert blockchain data to Market format
   useEffect(() => {
+    // Prevent infinite loop - only run once when data is loaded
+    if (marketsLoadedRef.current) {
+      return;
+    }
+
     // If all hooks have finished loading (not loading anymore)
     const allFinishedLoading = !isLoadingCount && !isLoading1 && !isLoading2 && 
                                 !isLoading3 && !isLoading4 && !isLoading5 && !isLoading6;
@@ -149,6 +155,7 @@ export default function HomePage() {
       setMarkets(loadedMarkets);
       setLoading(false);
       setError(null);
+      marketsLoadedRef.current = true; // Mark as loaded
     } else if (allFinishedLoading || marketCount !== undefined) {
       // All hooks loaded but no data - this is expected in production demo mode
       // The hooks will have returned static data automatically
@@ -182,6 +189,7 @@ export default function HomePage() {
         });
         
         setMarkets(staticMarkets);
+        marketsLoadedRef.current = true; // Mark as loaded
       }
     }
   }, [
