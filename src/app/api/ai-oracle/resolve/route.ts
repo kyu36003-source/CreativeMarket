@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         question: question as string,
         description: description as string,
         category: (category as string).toLowerCase() as any,
-        endTime: Number(endTime),
+        endTime: new Date(Number(endTime) * 1000),
       },
       sourceData,
     });
