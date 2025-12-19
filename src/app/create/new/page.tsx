@@ -377,7 +377,7 @@ export default function CreateMarketWizard() {
           <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold mb-3">Create Your Prediction Market</h2>
+          <h2 className="text-2xl font-bold mb-3">Create Your Prediction</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-2">
             Connect wallet to create predictions with AI-verified rules
           </p>
@@ -489,7 +489,7 @@ export default function CreateMarketWizard() {
                 <span className="text-sm font-semibold text-purple-800 dark:text-purple-300">AI-Verified Rules Required</span>
               </div>
               <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Create Your Prediction Market
+                Create Your Prediction
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">
                 Choose category, set clear rules, get AI verification

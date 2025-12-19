@@ -264,7 +264,7 @@ export default function HomePage() {
             <Link href="/create/new">
               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-lg px-8 py-6 h-auto gap-3">
                 <Sparkles className="h-6 w-6" />
-                Create Prediction Market
+                Create Prediction
               </Button>
             </Link>
             <Link href="/markets">

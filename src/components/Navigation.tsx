@@ -32,7 +32,7 @@ export function Navigation() {
   const navItems: NavItem[] = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/markets', label: 'Markets', icon: TrendingUp },
-    { href: '/create/new', label: 'Create Market', icon: PlusCircle, highlight: true },
+    { href: '/create/new', label: 'Create Prediction', icon: PlusCircle, highlight: true },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/reputation', label: 'Profile', icon: User },
   ];
@@ -57,12 +57,14 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href as any}>
-                  <Button
-                    variant={isActive ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
-                  >
+                <Button
+                  key={item.href}
+                  variant={isActive ? 'default' : 'ghost'}
+                  size="sm"
+                  className={`gap-2 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : ''}`}
+                  asChild
+                >
+                  <Link href={item.href as any}>
                     <Icon className="h-4 w-4" />
                     {item.label}
                     {item.badge && (
@@ -70,8 +72,8 @@ export function Navigation() {
                         {item.badge}
                       </span>
                     )}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               );
             })}
           </nav>
@@ -127,16 +129,18 @@ export function Navigation() {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href as any}>
-                  <Button
-                    variant={isActive ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
-                  >
+                <Button
+                  key={item.href}
+                  variant={isActive ? 'default' : 'ghost'}
+                  size="sm"
+                  className={`gap-2 whitespace-nowrap shrink-0 ${item.highlight ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : ''}`}
+                  asChild
+                >
+                  <Link href={item.href as any}>
                     <Icon className="h-4 w-4" />
                     {item.label}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               );
             })}
           </nav>
