@@ -215,6 +215,10 @@ export default function HomePage() {
     return matchesCategory && matchesSearch;
   });
 
+  // Limit homepage to first 6 markets for better organization
+  const displayedMarkets = filteredMarkets.slice(0, 6);
+  const hasMoreMarkets = filteredMarkets.length > 6;
+
   // Calculate category counts
   const getCategoryCount = (categoryId: string) => {
     if (categoryId === 'all') return markets.length;
@@ -498,11 +502,11 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold text-gray-900">
                 {selectedCategory === 'all' ? (
-                  <>All Markets <span className="text-gray-500 font-normal">({filteredMarkets.length})</span></>
+                  <>Featured Markets <span className="text-gray-500 font-normal">(showing {displayedMarkets.length} of {filteredMarkets.length})</span></>
                 ) : (
                   <>
                     {categories.find(c => c.id === selectedCategory)?.icon} {categories.find(c => c.id === selectedCategory)?.name} Markets 
-                    <span className="text-gray-500 font-normal">({filteredMarkets.length})</span>
+                    <span className="text-gray-500 font-normal">(showing {displayedMarkets.length} of {filteredMarkets.length})</span>
                   </>
                 )}
               </h4>
@@ -550,9 +554,9 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Markets Grid with better spacing */}
+            {/* Markets Grid - Show only first 6 on homepage */}
             <div className="grid md:grid-cols-2 gap-6">
-              {filteredMarkets.map(market => (
+              {displayedMarkets.map(market => (
                 <MarketCard
                   key={market.id}
                   market={market}
@@ -561,16 +565,26 @@ export default function HomePage() {
               ))}
             </div>
             
-            {/* Show more link if many markets */}
-            {filteredMarkets.length > 6 && (
-              <div className="text-center pt-4">
-                <Link
-                  href="/markets"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
-                >
-                  View All {filteredMarkets.length} Markets
-                  <TrendingUp className="w-4 h-4" />
-                </Link>
+            {/* View All Markets Button */}
+            {hasMoreMarkets && (
+              <div className="text-center pt-8 pb-4">
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-purple-200">
+                    <h3 className="text-2xl font-bold mb-2">
+                      {filteredMarkets.length - displayedMarkets.length} More Markets Available
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Explore all {filteredMarkets.length} markets across Crypto, DeFi, Movies, Music, Relationships & more
+                    </p>
+                    <Link
+                      href="/markets"
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl text-lg font-semibold"
+                    >
+                      <TrendingUp className="w-5 h-5" />
+                      View All {filteredMarkets.length} Markets
+                    </Link>
+                  </div>
+                </div>
               </div>
             )}
           </div>
