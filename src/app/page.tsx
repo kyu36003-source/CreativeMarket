@@ -376,12 +376,14 @@ export default function HomePage() {
         </div>
 
         {/* Market Categories */}
-        <div className="mb-8">
-          <h3 className="text-3xl font-bold mb-4">Active Prediction Markets</h3>
-          <p className="text-gray-600 mb-6 text-lg">All markets include AI-verified resolution rules with clear data sources and deadlines</p>
+        <div className="mb-12">
+          <div className="mb-6">
+            <h3 className="text-3xl font-bold mb-2">Active Prediction Markets</h3>
+            <p className="text-gray-600 text-lg">Browse markets by category with AI-verified resolution rules</p>
+          </div>
           
           {/* Category Filter */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm mb-8">
             {/* Header with All Markets button */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <button
@@ -472,54 +474,102 @@ export default function HomePage() {
           </div>
 
           {/* Search */}
-          <div className="relative max-w-xl">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search markets..."
+              placeholder="Search markets by keyword..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all shadow-sm text-lg"
             />
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-8"></div>
+
         {/* Results Count */}
-        {!loading && !error && (
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              {filteredMarkets.length === 0 ? (
-                <>No markets found {searchQuery && `for "${searchQuery}"`}</>
-              ) : (
-                <>
-                  Showing <span className="font-semibold text-purple-600">{filteredMarkets.length}</span> 
-                  {selectedCategory !== 'all' && ` ${selectedCategory}`} 
-                  {filteredMarkets.length === 1 ? ' market' : ' markets'}
-                  {searchQuery && ` matching "${searchQuery}"`}
-                </>
+        {!loading && !error && filteredMarkets.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">
+                {selectedCategory === 'all' ? (
+                  <>All Markets <span className="text-gray-500 font-normal">({filteredMarkets.length})</span></>
+                ) : (
+                  <>
+                    {categories.find(c => c.id === selectedCategory)?.icon} {categories.find(c => c.id === selectedCategory)?.name} Markets 
+                    <span className="text-gray-500 font-normal">({filteredMarkets.length})</span>
+                  </>
+                )}
+              </h4>
+              {searchQuery && (
+                <span className="text-sm text-gray-600">
+                  Matching "{searchQuery}"
+                </span>
               )}
-            </p>
+            </div>
           </div>
         )}
 
-        {/* Markets Grid */}
+        {/* Markets Display */}
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading markets...</p>
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading markets...</p>
+            </div>
           </div>
         ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-500">{error}</p>
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">⚠️</span>
+              </div>
+              <p className="text-red-600 font-medium">{error}</p>
+            </div>
+          </div>
+        ) : filteredMarkets.length === 0 ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">🔍</span>
+              </div>
+              <p className="text-gray-600 text-lg font-medium mb-2">No markets found</p>
+              <p className="text-gray-500 text-sm">
+                {searchQuery ? (
+                  <>Try adjusting your search or browse all markets</>
+                ) : (
+                  <>No markets available in this category yet</>
+                )}
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMarkets.map(market => (
-              <MarketCard
-                key={market.id}
-                market={market}
-                onPredict={setSelectedMarketId}
-              />
-            ))}
+          <div className="space-y-8">
+            {/* Markets Grid with better spacing */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {filteredMarkets.map(market => (
+                <MarketCard
+                  key={market.id}
+                  market={market}
+                  onPredict={setSelectedMarketId}
+                />
+              ))}
+            </div>
+            
+            {/* Show more link if many markets */}
+            {filteredMarkets.length > 6 && (
+              <div className="text-center pt-4">
+                <Link
+                  href="/markets"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
+                >
+                  View All {filteredMarkets.length} Markets
+                  <TrendingUp className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
