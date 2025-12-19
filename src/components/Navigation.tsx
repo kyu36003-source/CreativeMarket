@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { WalletConnect } from './WalletConnect';
-import { Button } from './ui/button';
 import {
   Home,
   TrendingUp,

@@ -6,7 +6,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMarketCount, useMarket } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
@@ -53,7 +52,6 @@ interface MarketData {
 }
 
 export default function MarketsPage() {
-  const router = useRouter();
   const { data: _marketCount } = useMarketCount();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
