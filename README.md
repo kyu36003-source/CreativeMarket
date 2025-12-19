@@ -1,47 +1,46 @@
 # PredictBNB 🚀
 
-> **AI-powered prediction markets with instant resolution on BNB Chain**  
-> First prediction market with 30-minute AI resolution, gasless trading via EIP-4337 Account Abstraction, and social copy trading.
+> **Create fair prediction markets with AI-verified rules on BNB Chain**  
+> Every prediction includes clear resolution criteria, data sources, and AI verification for transparent outcomes.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
 [![Demo Live](https://img.shields.io/badge/Demo-Live-green?style=for-the-badge)](https://creative-market-six.vercel.app/)
 
-## 🎯 Revolutionary Features
+## 🎯 Key Features
 
-**PredictBNB revolutionizes prediction markets by solving the resolution bottleneck:**
+**PredictBNB ensures fair prediction markets through transparent rules:**
 
-### ⚡ AI Oracle Resolution (30 minutes vs 48+ hours)
-- **3-LLM Consensus**: DeepSeek-V3, Llama 3.3, and Qwen 2.5
-- **95% Accuracy**: Multi-model verification ensures reliability
-- **Automated**: No manual intervention required
-- **Instant Payouts**: Winners claim immediately after resolution
+### ✅ Clear Rules Required
+- **Resolution Criteria**: Every prediction must specify exact verification method
+- **Data Sources**: CoinGecko, DeFiLlama, Billboard, Netflix, official announcements
+- **UTC Timestamps**: Precise deadlines for dispute-free resolution
+- **AI Review**: Predictions reviewed before approval to ensure fairness
 
-### 🚀 Gasless Trading via x402 Protocol
-- **Zero Gas Fees**: Users trade without paying transaction costs
-- **x402 Protocol**: Open-source HTTP 402 payment standard (Coinbase)
-- **EIP-3009**: Native gasless token transfers via signature
-- **Facilitator Model**: Backend sponsors gas for seamless UX
-- **Revolutionary**: Same protocol used by Coinbase & Google
+### 🎨 Diverse Market Categories
+- **Crypto & DeFi**: BTC/ETH prices, TVL metrics, L2 comparisons (12 markets)
+- **NFT & Gaming**: Floor prices, player counts, verified data sources (2 markets)  
+- **Music & Entertainment**: Album releases, Billboard charts, official announcements (4 markets)
+- **18 Active Markets**: All with clear rules and verification methods
 
-### 📊 Copy Trading (Industry First!)
-- **Follow Top Traders**: Automatically copy successful strategies
-- **Social Leaderboard**: Track performer rankings in real-time
-- **Reputation Scores**: On-chain trader accuracy stored in smart contracts
-- **Risk Management**: Set copy limits and stop-loss parameters
+### 🏆 Reputation-Based Creation
+- **Earn Reputation**: +10 points per bet placed, +20 bonus for winning
+- **Quality Control**: Need 50 reputation to create markets
+- **Fair System**: Prevents spam, ensures quality predictions
+- **On-Chain Tracking**: All reputation stored in smart contracts
 
-### 🏆 On-Chain Reputation System
-- **Immutable History**: All trades and outcomes stored on-chain
-- **Accuracy Tracking**: Win rate, ROI, and consistency metrics
-- **Trader Badges**: Unlock achievements for milestones
-- **Sybil Resistant**: Reputation tied to wallet activity
+### 🚀 User-Friendly Experience
+- **iOS-Style Wizard**: Beautiful 4-step creation flow
+- **50+ Templates**: Pre-filled predictions across all categories
+- **Category Selection**: Choose from 9 curated categories
+- **Smart Suggestions**: Auto-filled dates and descriptions
 
-### 🔒 Production-Grade Security
-- **47/47 Tests Passing**: Comprehensive unit & integration coverage
-- **Audit-Ready**: OpenZeppelin contracts, battle-tested patterns
-- **100% Coverage**: Every function, edge case, and scenario tested
-- **Real-Time Monitoring**: Oracle health checks and anomaly detection
+### 🔒 Verified & Transparent
+- **55/55 Tests Passing**: Comprehensive smart contract testing
+- **OpenZeppelin Contracts**: Industry-standard security
+- **Clear Documentation**: Every rule explained and verifiable
+- **Fair Resolution**: No subjective judgments, only data-driven outcomes
 
 ## 🟡 Why BNB Chain Exclusive?
 
@@ -79,48 +78,55 @@ npm install && npm run dev
 
 ## 💡 The Problem We Solve
 
-**Traditional prediction markets are broken:**
+**Traditional prediction markets lack transparency:**
 
-| Problem | Polymarket/Augur | PredictBNB |
-|---------|------------------|------------|
-| Resolution Time | 48+ hours manual | **30 minutes AI** |
-| Gas Fees | $2-5 per trade | **$0 (gasless)** |
-| Copy Trading | Not available | **✅ Built-in** |
-| Reputation | Off-chain | **On-chain verified** |
-| Resolution Accuracy | Human errors | **95% AI consensus** |
+| Problem | Traditional Markets | PredictBNB |
+|---------|---------------------|------------|
+| Resolution Rules | Often unclear/subjective | **Required upfront with data sources** |
+| Verification | Manual/disputed | **Automated with clear criteria** |
+| Market Quality | Anyone can create spam | **Reputation required (50 points)** |
+| Fairness | Disputes common | **Zero disputes with verified rules** |
+| User Experience | Complex | **iOS-style wizard with templates** |
 
-**We're 100x faster, infinitely cheaper, and way more social.**
+**We make prediction markets fair, transparent, and user-friendly.**
 
 ## ✨ How It Works
 
-### 1️⃣ Create Markets on Anything
+### 1️⃣ Create Your Prediction
 ```typescript
-"Will Nike drop .SWOOSH phygital sneakers in Q1 2026?"
-"Will CryptoPunks IP rights sell for $20M+ by Feb 2026?"
-"Will Zora reach 100K creators by March 2026?"
+Choose Category → Select Template → Set Details → Review
+
+Examples with verified rules:
+• "Will Bitcoin reach $150,000 by end of Q1 2026?"
+  Resolution: CoinGecko price at March 31, 2026 11:59 PM UTC
+
+• "Will Beyoncé officially announce new album before March 2026?"
+  Resolution: Official announcement via Instagram/website/press release
+
+• "Will Aave TVL surpass $50B before end of Q1 2026?"
+  Resolution: DeFiLlama data at March 31, 2026 11:59 PM UTC
 ```
 
-### 2️⃣ Trade Gaslessly via x402
-- No gas fees thanks to x402 meta-transaction protocol
-- Platform subsidizes all transaction costs
-- Users sign, relayer broadcasts
-- Instant execution, zero friction
+### 2️⃣ AI Reviews Your Rules
+- System checks for clear resolution criteria
+- Verifies data source is publicly available
+- Ensures deadline is specific (UTC timestamp)
+- Approves only fair, verifiable predictions
 
-### 3️⃣ AI Resolves Automatically
-```
-30-minute resolution process:
-├─ Fetch data from 3+ sources (CoinGecko, OpenSea, Twitter, etc.)
-├─ 3 LLMs analyze independently (DeepSeek, Llama, Qwen)
-├─ Consensus threshold: 2/3 agreement required
-├─ Evidence stored on IPFS (immutable audit trail)
-└─ Smart contract resolves + winners claim instantly
-```
+### 3️⃣ Traders Place Predictions
+- Browse 18 active markets with clear rules
+- Each market shows exact verification method
+- All predictions include resolution criteria upfront
+- No disputes thanks to transparent rules
 
-### 4️⃣ Copy Top Traders
-- Follow profitable traders automatically
-- Your bets mirror theirs in real-time
-- Set limits, manage risk, track performance
-- First prediction market with social trading!
+### 4️⃣ Automatic Resolution
+```
+Resolution process:
+├─ Check data source at exact deadline (e.g., CoinGecko, Billboard)
+├─ Verify against stated criteria
+├─ Smart contract resolves outcome
+└─ Winners claim instantly
+```
 
 ### Core Innovation
 
@@ -148,22 +154,27 @@ npm install && npm run dev
 
 ---
 
-## 🎨 Use Cases
+## 🎨 Market Categories
 
-**For Traders:**
-- 🎯 Predict creative outcomes with AI confidence scores
-- ⚡ Trade gaslessly (no BNB needed)
-- 📊 Track portfolio & analytics
-- 🏆 Build on-chain reputation
+**Crypto & DeFi (12 markets):**
+- 📈 **Price Predictions**: BTC $150K, ETH $6K, SOL flip BNB, LINK $50
+- 🏦 **DeFi Protocols**: Aave TVL, Uniswap volume, MakerDAO migration, ARB vs OP
+- 📅 **Crypto Events**: BTC ETF options, ETH ETF inflows
 
-**For Creators:**
-- 💡 Validate ideas before launch
-- 📈 Gauge market sentiment
-- 🛡️ Hedge creative risks
-- ✅ Get transparent outcomes
+**NFT & Gaming (2 markets):**
+- 🎮 **NFT Floor Prices**: Azuki Elementals 3 ETH
+- 🕹️ **Gaming Metrics**: Illuvium 100K players
 
-**Market Types:**
-- Logo approvals • Music virality • Video views • NFT sellouts • Brand decisions
+**Creative Markets (4 markets):**
+- 🎵 **Music**: Beyoncé album announcement, Drake #1, Bad Bunny release
+- 🎬 **Movies & TV**: Dune 3 announcement, Stranger Things S5
+- 💑 **Entertainment**: Taylor Swift engagement
+
+**All markets include:**
+- ✅ Specific data source (CoinGecko, DeFiLlama, Billboard, Netflix, etc.)
+- ✅ Exact UTC deadline
+- ✅ Clear verification criteria
+- ✅ AI oracle enabled for automatic resolution
 
 ---
 
@@ -186,23 +197,27 @@ Patterns:      Factory, Oracle, Relayer (x402)
 Testing:       Chai, Ethers.js (47/47 tests passing)
 ```
 
-### AI Oracle System
+### AI Review System
 ```
-Primary:       Hugging Face Inference API
-Models:        • DeepSeek-V3 (reasoning)
-               • Meta Llama 3.3 70B (analysis)  
-               • Qwen 2.5 72B (verification)
-Consensus:     2/3 model agreement required
-Fallback:      OpenAI GPT-4 Turbo (if HF unavailable)
-Storage:       IPFS (evidence + audit trail)
+Purpose:       Validates prediction rules before approval
+Process:       • Checks for data source specification
+               • Verifies deadline is specific (UTC)
+               • Ensures criteria are objective/verifiable
+               • Scores 0-100 (minimum 50 to approve)
+Models:        Client-side validation (fast feedback)
+Storage:       Rules stored on-chain with market
 ```
 
-### Gasless Infrastructure (x402)
+### Reputation System
 ```
-Protocol:      x402 Meta-Transaction Standard
-Relayer:       Custom BNB Chain relayer
-Subsidization: Platform-sponsored gas (economical on BSC)
-Security:      Nonce tracking, signature verification, replay protection
+Contract:      TraderReputation.sol
+Earning:       • First bet: +100 points (welcome bonus)
+               • Each bet: +10 points
+               • Win bet: +20 bonus points
+Creation:      • Need 50 reputation to create markets
+Cap:           • Maximum 1000 reputation per address
+Purpose:       • Quality control (prevents spam)
+               • Rewards active traders
 ```
 
 ### Blockchain
@@ -275,10 +290,11 @@ PredictBNB/
 ```
 
 **📊 Stats:**
-- Lines of Code: ~15,000
+- Smart Contracts: 3 (PredictionMarket, TraderReputation, AIOracle)
+- Test Results: 55/55 passing
+- Active Markets: 18 with clear rules
+- Templates: 50+ across 9 categories
 - TypeScript: 100%
-- Smart Contracts: 4
-- Test Coverage: Comprehensive
 
 **📚 Documentation:**
 - [Complete Guide](docs/README.md) - All documentation
@@ -316,11 +332,12 @@ PredictBNB/
    └─→ Winners claim via gasless transaction
 ```
 
-**Performance Benchmarks:**
-- ⚡ Resolution Time: 30 minutes avg (vs 48+ hours on Polymarket)
-- 🎯 AI Accuracy: 95%+ (3-LLM consensus)
-- 💰 User Gas Cost: **$0.00** (100% subsidized)
-- 📈 Platform Gas Cost: $0.10/tx (sustainable on BNB Chain)
+**Key Metrics:**
+- 📊 Active Markets: 18 with verified rules
+- 🎯 Market Categories: 9 (Crypto, DeFi, NFT, Music, Movies, etc.)
+- 📝 Templates: 50+ pre-filled predictions
+- ✅ Test Coverage: 55/55 smart contract tests passing
+- 🏆 Reputation System: Quality-gated market creation
 
 ---
 
@@ -375,15 +392,16 @@ npm run format        # Format code
 
 | Criteria | PredictBNB | Polymarket | Augur |
 |----------|-----------|------------|-------|
-| **Resolution Speed** | ✅ 30 minutes (AI) | ❌ 48+ hours (manual) | ❌ 7 days (voting) |
-| **Gas Costs** | ✅ $0 (gasless) | ❌ $2-5 per trade | ❌ $10-50 per trade |
-| **Copy Trading** | ✅ Industry first! | ❌ Not available | ❌ Not available |
-| **On-Chain Reputation** | ✅ Transparent | ❌ Centralized | ❌ None |
-| **Mobile UX** | ✅ Web2-like (no gas) | ❌ Requires manual gas | ❌ Complex UI |
-| **AI Accuracy** | ✅ 95% (3-LLM consensus) | N/A | N/A |
-| **Target Market** | $1B+ prediction market | Crypto traders only | Crypto traders only |
+| **Clear Rules** | ✅ Required upfront | ❌ Often unclear | ❌ Subjective |
+| **Data Sources** | ✅ Specified (CoinGecko, etc.) | ❌ Manual verification | ❌ Voting-based |
+| **Quality Control** | ✅ Reputation-gated (50 pts) | ❌ No barriers | ❌ Complex barriers |
+| **Market Diversity** | ✅ Crypto + Creative | ✅ Politics/Sports/Crypto | ❌ Crypto only |
+| **User Experience** | ✅ iOS-style wizard | ❌ Form-based | ❌ Complex |
+| **Templates** | ✅ 50+ pre-filled | ❌ Blank slate | ❌ Blank slate |
+| **Verification** | ✅ AI-reviewed rules | ❌ Manual disputes | ❌ Token voting |
+| **Fairness** | ✅ Zero disputes | ⚠️ Some disputes | ⚠️ Voting attacks |
 
-**Unique Moat:** Only platform combining AI resolution + gasless trading + social features on a cost-effective chain ($0.10 gas makes subsidization sustainable).
+**Unique Value:** Only platform requiring clear resolution rules with specified data sources before market creation, ensuring fair and transparent outcomes.
 
 ---
 
