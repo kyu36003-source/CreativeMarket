@@ -58,7 +58,8 @@ export function Navigation() {
               return (
                 <Link 
                   key={item.href} 
-                  href={item.href as any}
+                  href={item.href}
+                  prefetch={true}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
@@ -130,7 +131,8 @@ export function Navigation() {
               return (
                 <Link 
                   key={item.href} 
-                  href={item.href as any}
+                  href={item.href}
+                  prefetch={true}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                     isActive 
                       ? 'bg-primary text-primary-foreground' 
