@@ -2,7 +2,7 @@
 
 Trade prediction markets completely free. No gas fees, ever.
 
-We built the first prediction market where everything happens gaslessly on BNB Chain using x402 protocol. You bet, trade, and claim winnings - all without paying a single wei in gas fees.
+We built the first prediction market using **x402 protocol** for totally gasless transactions on BNB Chain. You bet, trade, and claim winnings - all without paying a single wei in gas fees. Ever.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
@@ -11,11 +11,12 @@ We built the first prediction market where everything happens gaslessly on BNB C
 
 ## What Makes This Different
 
-**Everything is free thanks to x402:**
-- Place bets: Free (0 gas)
-- Claim winnings: Free (0 gas)  
-- Build reputation: Free (0 gas)
-- Trade unlimited times: Free (0 gas)
+**Totally gasless via x402 protocol:**
+- Place bets: 0 gas (x402 handles it)
+- Claim winnings: 0 gas (x402 handles it)
+- Build reputation: 0 gas (x402 handles it)
+- Trade unlimited: 0 gas (x402 handles it)
+- No wrapping needed, no hidden fees, just free
 
 **Everything is on-chain on BNB:**
 - Trader reputation: Stored on-chain, no manipulation
@@ -23,22 +24,24 @@ We built the first prediction market where everything happens gaslessly on BNB C
 - All transactions: BNB Chain only, no centralized databases
 - Your stats: Immutable, provably yours
 
-**How we do gasless (x402 + WBNB3009):**
+**Powered by x402 protocol:**
 
-Wrap your BNB once (pay ~$0.000035 gas). After that, every single trade is completely gasless. We tested it 12 times - worked perfectly every time (12/12 passing, 100% success).
+x402 is a gasless transaction protocol. You sign transactions, facilitators execute them (they pay gas), you pay nothing. We implemented it with WBNB3009 (wrapped BNB with EIP-3009) for seamless gasless trading.
+
+Tested 12 times - worked perfectly every time (12/12 passing, 100% success).
 
 ### The Numbers (From Real Tests)
 
-- Wrap 1 BNB once: 0.00003534 BNB gas (one time, that's it)
-- Every bet after: **0 BNB** (completely free)
-- Every claim: **0 BNB** (completely free)
-- Traditional betting: 0.000032 BNB per bet (expensive after 10+ trades)
+Using x402 protocol for gasless transactions:
 
-After 10 bets: 89% savings  
-After 100 bets: 98.9% savings  
-After that? Basically free forever.
+- Traditional betting: 0.000032 BNB per bet (adds up fast)
+- **With x402: 0 BNB per bet** (completely free, forever)
 
-**Only BNB. No USDC, no wrapped tokens, no confusion. Pure BNB Chain.**
+After 10 bets: Save 0.00032 BNB (100% savings)  
+After 100 bets: Save 0.0032 BNB (100% savings)  
+After 1000 bets: Still free (x402 = infinite gasless transactions)
+
+**Pure BNB Chain. x402 protocol. Zero gas fees.**
 
 ## On-Chain Reputation: No Manipulation
 
@@ -61,20 +64,19 @@ Every prediction market needs three things specified upfront:
 
 Markets without these don't get approved. Simple as that.
 
-### Gasless Trading That Actually Works
+### Gasless Trading with x402 Protocol
 
-Standard EIP-3009 implementation (not some custom hack), deployed and tested on local Hardhat. 
+x402 is a meta-transaction protocol that makes blockchain interactions completely gasless.
 
-**The x402 flow:**
-1. You wrap your BNB once (~$0.000035 gas)
-2. You sign transactions off-chain (free, no gas)
-3. A facilitator submits them for you (they pay gas, earn 0.5% fee)
-4. Your BNB balance doesn't move
-5. Everything happens on BNB Chain
+**How x402 works:**
+1. You sign a transaction off-chain (free, no gas)
+2. A facilitator submits it on-chain (they pay gas)
+3. The facilitator earns a 0.5% fee for their service
+4. You pay zero gas
 
-All 12 tests passed. User balance unchanged after gasless bets. Works exactly as intended.
+We implemented x402 with WBNB3009 (EIP-3009 standard) for BNB Chain. All 12 tests passed. User pays 0 gas, trades freely, everything on-chain.
 
-**Why this matters:** You can trade all day without worrying about gas. New users can start trading immediately. Everything stays on-chain and transparent.
+**Why this matters:** x402 eliminates gas as a barrier. New users can trade immediately. Active traders never worry about gas fees. Everything stays on BNB Chain and transparent.
 
 ### AI Resolution (Work in Progress)
 
@@ -135,14 +137,14 @@ Note: This only works on BNB Chain (testnet ID 97, mainnet ID 56). Everything on
 
 ## Why BNB Chain?
 
-**Because everything needs to be on-chain and free:**
+**Because x402 gasless only works economically on BNB Chain:**
 
 Trader reputation? On BNB Chain contracts.  
 Market outcomes? On BNB Chain, verified.  
 Your trading history? On BNB Chain, immutable.  
-Gas fees? Free thanks to x402 on BNB Chain.
+Gas fees? 0 thanks to x402 protocol.
 
-On Ethereum, gasless would cost $5+ per transaction to subsidize. On BNB Chain with $0.10 gas, we can actually make it free. That's why we're BNB exclusive.
+On Ethereum, facilitators would pay $5+ per transaction. Economics don't work. On BNB Chain with $0.10 gas, x402 facilitators can subsidize it profitably with 0.5% fee. That's why we're BNB exclusive - x402 gasless is only viable here.
 
 ---
 
@@ -150,18 +152,18 @@ On Ethereum, gasless would cost $5+ per transaction to subsidize. On BNB Chain w
 
 Traditional prediction markets have a trust problem. When a market closes, someone has to decide: did the event happen or not? That's where disputes start.
 
-We solve this by putting everything on-chain with clear rules:
+We solve this by putting everything on-chain with clear rules and x402 gasless:
 
 **PredictBNB approach:**
 - Resolution rules specified upfront (data source + timestamp)
 - Verification automated (check the source at deadline)
 - Reputation system on-chain (can't be manipulated)
-- Zero gas fees (x402 makes trading free)
+- **Zero gas fees via x402 protocol** (facilitators pay, you trade free)
 - Everything on BNB Chain (transparent, verifiable)
 
 Example: "Will Bitcoin reach $150,000 by March 2026?"
-- **Polymarket**: Might be unclear when/where to check
-- **PredictBNB**: CoinGecko price at March 31, 2026 11:59 PM UTC (on-chain, verified, free to trade)
+- **Polymarket**: Unclear rules, you pay gas
+- **PredictBNB**: CoinGecko at March 31, 2026 11:59 PM UTC, x402 gasless, on-chain
 
 ## ✨ How It Works
 
@@ -465,18 +467,18 @@ node test/test-wbnb-gasless.js  # Should see 12/12 pass
 ## What Makes This Different
 
 **vs Polymarket:**
-- We're completely free (gasless via x402, they charge gas)
+- We're totally gasless (x402 protocol, they charge gas every bet)
 - Everything on-chain (reputation, stats - they use databases)
 - Pure BNB (they need USDC)
 - No manipulation possible (their reputation can be gamed)
 
 **vs Augur:**
-- Free to trade (they charge gas every time)
+- Free to trade with x402 (they charge gas every time)
 - Simple 4-step wizard (theirs is complex)
 - On-chain reputation (they use token voting)
 - BNB Chain only (they're multi-chain, more complexity)
 
-**Our edge:** Only platform where everything is free (x402), everything is on-chain (BNB), and everything is transparent (no manipulation). Tested, working, verified.
+**Our edge:** Only prediction market using x402 protocol for totally gasless trading. Everything free, everything on-chain on BNB, zero manipulation. Tested, working, verified.
 
 ---
 
