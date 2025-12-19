@@ -512,7 +512,7 @@ export default function HomePage() {
               </h4>
               {searchQuery && (
                 <span className="text-sm text-gray-600">
-                  Matching "{searchQuery}"
+                  Matching &quot;{searchQuery}&quot;
                 </span>
               )}
             </div>
