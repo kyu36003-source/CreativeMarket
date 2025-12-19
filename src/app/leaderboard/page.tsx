@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Leaderboard } from '@/components/copy-trading/Leaderboard';
 import { useTopTraders, useFollowTrader, useFollowedTraders } from '@/hooks/use-copy-trading';
+import { useFollowTraderGasless, useUnfollowTraderGasless } from '@/hooks/useX402Extended';
 import { WalletConnect } from '@/components/WalletConnect';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
@@ -30,33 +31,41 @@ export default function LeaderboardPage() {
   
   const { mutate: followTrader } = useFollowTrader();
   const { data: followedTraders } = useFollowedTraders();
+  const { followTrader: followTraderGasless } = useFollowTraderGasless();
+  const { unfollowTrader: unfollowTraderGasless } = useUnfollowTraderGasless();
   
-  const handleFollowTrader = (traderId: string) => {
+  const handleFollowTrader = async (traderId: string) => {
     if (!isConnected) {
       alert('Connect your wallet to follow traders');
       return;
     }
     
-    followTrader(
-      { 
-        traderId, 
-        settings: { 
-          traderId,
-          enabled: true, 
-          allocation: 100,
-          maxPerTrade: 0.1
-        } 
-      },
-      {
-        onSuccess: () => {
-          console.log('Successfully following trader!');
+    // Try gasless first
+    const result = await followTraderGasless(traderId, 100, 0.1);
+    
+    if (!result.success) {
+      // Fallback to regular follow
+      followTrader(
+        { 
+          traderId, 
+          settings: { 
+            traderId,
+            enabled: true, 
+            allocation: 100,
+            maxPerTrade: 0.1
+          } 
         },
-        onError: (error) => {
-          console.error('Failed to follow trader:', error);
-          alert('Failed to follow trader. Check console for details.');
-        },
-      }
-    );
+        {
+          onSuccess: () => {
+            console.log('Successfully following trader!');
+          },
+          onError: (error) => {
+            console.error('Failed to follow trader:', error);
+            alert('Failed to follow trader. Check console for details.');
+          },
+        }
+      );
+    }
   };
 
   const periods: { value: TimePeriod; label: string }[] = [

@@ -18,6 +18,7 @@ import {
   useCalculateWinnings,
 } from '@/hooks/useContracts';
 import { useX402Bet, useCanUseX402, useGasSponsorship } from '@/hooks/useX402Bet';
+import { useClaimGasless } from '@/hooks/useX402Extended';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -80,6 +81,7 @@ export default function MarketDetailPage() {
   const [_showBetForm, _setShowBetForm] = useState(false);
   const [showTxModal, setShowTxModal] = useState(false);
   const [useGasless, setUseGasless] = useState(true); // Default to gasless
+  const [useGaslessClaim, setUseGaslessClaim] = useState(true); // Gasless claim
 
   const { potentialWinnings, odds: _odds } = useCalculateWinnings(
     marketId,
@@ -98,6 +100,7 @@ export default function MarketDetailPage() {
   const { sponsoredAmount, fetchSponsorship } = useGasSponsorship();
   
   const [gaslessTxHash, setGaslessTxHash] = useState<string | null>(null);
+  const { claimGasless, isPending: isGaslessClaimPending } = useClaimGasless();
   const [isGaslessSuccess, setIsGaslessSuccess] = useState(false);
 
   // Show transaction modal when transaction is initiated
@@ -220,9 +223,17 @@ export default function MarketDetailPage() {
     if (!isConnected) return;
 
     try {
-      await claimWinnings(marketId);
+      if (useGaslessClaim) {
+        const result = await claimGasless(marketId);
+        if (result.success && result.transactionHash) {
+          setGaslessTxHash(result.transactionHash);
+          setShowTxModal(true);
+        }
+      } else {
+        await claimWinnings(marketId);
+      }
     } catch (_error) {
-      // Error handled by wagmi
+      // Error handled by wagmi or gasless hook
     }
   };
 
@@ -494,20 +505,37 @@ export default function MarketDetailPage() {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleClaim}
-              disabled={isClaiming}
-              className="gap-2"
-            >
-              {isClaiming ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Claiming...
-                </>
-              ) : (
-                'Claim Winnings'
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-background rounded-lg">
+                <input
+                  type="checkbox"
+                  id="gasless-claim"
+                  checked={useGaslessClaim}
+                  onChange={(e) => setUseGaslessClaim(e.target.checked)}
+                  className="rounded"
+                />
+                <label htmlFor="gasless-claim" className="text-sm cursor-pointer">
+                  🆓 Gasless
+                </label>
+              </div>
+              <Button
+                onClick={handleClaim}
+                disabled={isClaiming || isGaslessClaimPending}
+                className="gap-2"
+              >
+                {(isClaiming || isGaslessClaimPending) ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {useGaslessClaim ? '🆓 Claiming...' : 'Claiming...'}
+                  </>
+                ) : (
+                  <>
+                    {useGaslessClaim && '🆓 '}
+                    Claim Winnings
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </Card>
       )}

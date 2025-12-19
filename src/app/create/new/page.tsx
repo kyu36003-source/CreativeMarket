@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import { useCreateMarket, useReputationScore, useMinReputationToCreate } from '@/hooks/useContracts';
+import { useCreateMarketGasless } from '@/hooks/useX402Extended';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -303,6 +304,7 @@ export default function CreateMarketWizard() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
   const { createMarket, isPending, isConfirming } = useCreateMarket();
+  const { createMarketGasless, isPending: isGaslessPending } = useCreateMarketGasless();
   
   // Reputation
   const { data: reputationScore } = useReputationScore(address);
@@ -323,6 +325,7 @@ export default function CreateMarketWizard() {
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('12:00');
   const [aiOracleEnabled, setAiOracleEnabled] = useState(true);
+  const [useGasless, setUseGasless] = useState(true);
 
   const handleCategorySelect = (category: typeof CATEGORIES[0]) => {
     setSelectedCategory(category);
@@ -355,15 +358,27 @@ export default function CreateMarketWizard() {
     try {
       const endDateTime = new Date(`${endDate}T${endTime}`);
       
-      await createMarket({
-        question,
-        description,
-        category: selectedCategory?.id || 'other',
-        endTime: endDateTime,
-        aiOracleEnabled,
-      });
-
-      router.push('/markets');
+      if (useGasless) {
+        const result = await createMarketGasless(
+          question,
+          description,
+          selectedCategory?.id || 'other',
+          endDateTime,
+          aiOracleEnabled
+        );
+        if (result.success) {
+          router.push('/markets');
+        }
+      } else {
+        await createMarket({
+          question,
+          description,
+          category: selectedCategory?.id || 'other',
+          endTime: endDateTime,
+          aiOracleEnabled,
+        });
+        router.push('/markets');
+      }
     } catch (error) {
       console.error('Failed to create market:', error);
     }
@@ -764,26 +779,37 @@ export default function CreateMarketWizard() {
               </div>
             </Card>
 
-            <Button
-              onClick={handleSubmit}
-              disabled={isPending || isConfirming}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg h-14 text-lg font-semibold"
-            >
-              {isPending || isConfirming ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  {isPending ? 'Confirm in Wallet...' : 'Creating...'}
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Create Market
-                </>
-              )}
-            </Button>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="gasless-create"
+                  checked={useGasless}
+                  onChange={(e) => setUseGasless(e.target.checked)}
+                  className="rounded"
+                />
+                <label htmlFor="gasless-create" className="text-sm cursor-pointer flex items-center gap-2">
+                  🆓 <span className="font-medium">Create Gaslessly (No transaction fee)</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-              By creating this market, you agree to our terms of service
+          <Button
+            onClick={handleSubmit}
+            disabled={isPending || isConfirming || isGaslessPending}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg h-14 text-lg font-semibold"
+          >
+            {(isPending || isConfirming || isGaslessPending) ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                {isPending ? 'Confirm in Wallet...' : (isGaslessPending ? '🆓 Creating Gaslessly...' : 'Creating...')}
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {useGasless && '🆓 '}Create Market
             </p>
           </div>
         )}
