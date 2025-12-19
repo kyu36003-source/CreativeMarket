@@ -66,13 +66,11 @@ export default function HomePage() {
   // Timeout fallback - stop loading after 3 seconds (faster UX)
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-      }
+      setLoading(false);
     }, 3000); // 3 seconds
 
     return () => clearTimeout(timeout);
-  }, [loading]);
+  }, []); // Empty dependency array - run only once on mount
 
   // Convert blockchain data to Market format
   useEffect(() => {
