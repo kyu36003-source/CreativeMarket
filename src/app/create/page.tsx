@@ -12,13 +12,17 @@ import { useCreateMarket } from '@/hooks/useContracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
-  Plus,
   Loader2,
   Calendar,
   Tag,
   FileText,
   HelpCircle,
   Sparkles,
+  Brain,
+  CheckCircle,
+  AlertCircle,
+  Lightbulb,
+  Shield,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -44,12 +48,93 @@ export default function CreateMarketPage() {
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('');
   const [aiOracleEnabled, setAiOracleEnabled] = useState(true);
+  const [rules, setRules] = useState('');
+  
+  // AI Review states
+  const [aiReviewStatus, setAiReviewStatus] = useState<'idle' | 'reviewing' | 'reviewed'>('idle');
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [aiApprovalScore, setAiApprovalScore] = useState<number>(0);
+  const [showReview, setShowReview] = useState(false);
+
+  const handleAIReview = async () => {
+    setAiReviewStatus('reviewing');
+    setShowReview(true);
+    
+    // Simulate AI review (replace with actual API call)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const suggestions: string[] = [];
+    let score = 100;
+    
+    // Check question clarity
+    if (question.length < 20) {
+      suggestions.push('Question is too short. Add more context for clarity.');
+      score -= 15;
+    }
+    if (!question.includes('?')) {
+      suggestions.push('Question should end with a question mark.');
+      score -= 5;
+    }
+    if (question.toLowerCase().includes('moon') || question.toLowerCase().includes('dump')) {
+      suggestions.push('Avoid vague terms like "moon" or "dump". Use specific numbers.');
+      score -= 20;
+    }
+    
+    // Check description
+    if (description.length < 50) {
+      suggestions.push('Description is too brief. Provide more details about resolution criteria.');
+      score -= 15;
+    }
+    if (!description.toLowerCase().includes('source') && category !== 'other') {
+      suggestions.push('Consider specifying data sources for verification.');
+      score -= 10;
+    }
+    
+    // Check rules
+    if (!rules || rules.length < 20) {
+      suggestions.push('Add specific rules for market resolution. Example: "Market resolves YES if BTC closes above $50,000 on CoinGecko at 11:59 PM UTC on the end date."');
+      score -= 20;
+    }
+    
+    // Check end date
+    const endDateTime = new Date(`${endDate}T${endTime}`);
+    const hoursDiff = (endDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
+    if (hoursDiff < 24) {
+      suggestions.push('Market duration is too short. Recommend at least 24 hours for fair participation.');
+      score -= 15;
+    }
+    
+    // Positive feedback if score is high
+    if (score >= 80) {
+      suggestions.unshift('✅ Market structure looks good! Minor improvements suggested below.');
+    } else if (score >= 60) {
+      suggestions.unshift('⚠️ Market needs some improvements for better clarity.');
+    } else {
+      suggestions.unshift('❌ Market needs significant improvements before approval.');
+    }
+    
+    setAiSuggestions(suggestions);
+    setAiApprovalScore(Math.max(0, score));
+    setAiReviewStatus('reviewed');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isConnected) {
       alert('Please connect your wallet first');
+      return;
+    }
+
+    // Require AI review before submission
+    if (aiReviewStatus !== 'reviewed') {
+      alert('Please review your market with AI before submitting');
+      setShowReview(true);
+      return;
+    }
+
+    if (aiApprovalScore < 50) {
+      alert('Market approval score is too low. Please address AI suggestions before submitting.');
       return;
     }
 
@@ -133,6 +218,26 @@ export default function CreateMarketPage() {
             <p className="text-xs text-muted-foreground mt-1">
               Explain what the market is about and how it will be resolved.
               Include sources if applicable.
+            </p>
+          </div>
+
+          {/* Resolution Rules */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+              <Shield className="w-4 h-4" />
+              Resolution Rules <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={rules}
+              onChange={e => setRules(e.target.value)}
+              placeholder="Example: Market resolves YES if Bitcoin closes above $50,000 on CoinGecko at 11:59 PM UTC on the specified end date. Market resolves NO otherwise. In case of exchange downtime, CoinMarketCap will be used as backup source."
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary h-40"
+              required
+              maxLength={2000}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              <strong>Important:</strong> Define exact conditions for YES/NO resolution, data sources, 
+              edge cases, and backup sources. Clear rules prevent disputes and ensure fair resolution.
             </p>
           </div>
 
@@ -225,6 +330,99 @@ export default function CreateMarketPage() {
             </label>
           </div>
 
+          {/* AI Review Section */}
+          <Card className="p-6 bg-gradient-to-r from-purple-500/5 to-blue-500/5 border-purple-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2 mb-1">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  AI Market Review
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Get AI suggestions to improve your market quality
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleAIReview}
+                disabled={!question || !description || !rules || aiReviewStatus === 'reviewing'}
+                variant="outline"
+                className="gap-2"
+              >
+                {aiReviewStatus === 'reviewing' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Reviewing...
+                  </>
+                ) : aiReviewStatus === 'reviewed' ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Review Again
+                  </>
+                ) : (
+                  <>
+                    <Brain className="w-4 h-4" />
+                    Review Market
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {showReview && aiReviewStatus === 'reviewed' && (
+              <div className="space-y-4">
+                {/* Approval Score */}
+                <div className="p-4 bg-background rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Approval Score</span>
+                    <span className={`text-2xl font-bold ${
+                      aiApprovalScore >= 80 ? 'text-green-600' :
+                      aiApprovalScore >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {aiApprovalScore}/100
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        aiApprovalScore >= 80 ? 'bg-green-600' :
+                        aiApprovalScore >= 60 ? 'bg-yellow-600' :
+                        'bg-red-600'
+                      }`}
+                      style={{ width: `${aiApprovalScore}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {aiApprovalScore >= 80 && '✅ Excellent! Market is ready for submission.'}
+                    {aiApprovalScore >= 60 && aiApprovalScore < 80 && '⚠️ Good, but improvements recommended.'}
+                    {aiApprovalScore < 60 && '❌ Score too low. Address issues before submitting.'}
+                  </p>
+                </div>
+
+                {/* AI Suggestions */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Lightbulb className="w-4 h-4 text-yellow-600" />
+                    AI Suggestions
+                  </div>
+                  {aiSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border text-sm ${
+                        suggestion.startsWith('✅') ? 'bg-green-500/5 border-green-500/20' :
+                        suggestion.startsWith('⚠️') ? 'bg-yellow-500/5 border-yellow-500/20' :
+                        suggestion.startsWith('❌') ? 'bg-red-500/5 border-red-500/20' :
+                        'bg-background'
+                      }`}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Card>
+
           {/* Preview */}
           {question && (
             <div className="p-4 bg-muted rounded-lg">
@@ -270,7 +468,7 @@ export default function CreateMarketPage() {
             </Button>
             <Button
               type="submit"
-              disabled={!isConnected || isPending || isConfirming}
+              disabled={!isConnected || isPending || isConfirming || aiReviewStatus !== 'reviewed' || aiApprovalScore < 50}
               className="flex-1 gap-2"
             >
               {isPending || isConfirming ? (
@@ -280,12 +478,40 @@ export default function CreateMarketPage() {
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4" />
-                  Create Market
+                  {aiReviewStatus === 'reviewed' && aiApprovalScore >= 50 ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Create Market (Approved)
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-4 h-4" />
+                      Review Required
+                    </>
+                  )}
                 </>
               )}
             </Button>
           </div>
+
+          {/* Review Status Messages */}
+          {aiReviewStatus !== 'reviewed' && question && description && rules && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                <Brain className="w-4 h-4" />
+                Click &quot;Review Market&quot; to get AI feedback before submitting
+              </p>
+            </div>
+          )}
+
+          {aiReviewStatus === 'reviewed' && aiApprovalScore < 50 && (
+            <div className="p-4 bg-red-500/10 border border-red-500 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Market approval score is too low. Please address the AI suggestions above.
+              </p>
+            </div>
+          )}
 
           {isSuccess && (
             <div className="p-4 bg-green-500/10 border border-green-500 rounded-lg">
@@ -307,32 +533,45 @@ export default function CreateMarketPage() {
 
       {/* Tips */}
       <Card className="mt-6 p-6">
-        <h3 className="font-semibold mb-3">Tips for Creating Good Markets</h3>
+        <h3 className="font-semibold mb-3 flex items-center gap-2">
+          <Lightbulb className="w-5 h-5 text-yellow-600" />
+          Tips for Creating High-Quality Markets
+        </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li>
-            ✅ <strong>Be Specific:</strong> &ldquo;BTC above $50k&rdquo; not &ldquo;BTC moon&rdquo;
+            <strong>🤖 Use AI Review:</strong> Let our AI analyze your market and suggest improvements
           </li>
           <li>
-            ✅ <strong>Set Clear Criteria:</strong> Specify exact date, price,
-            source
+            <strong>📋 Define Clear Rules:</strong> Specify exact resolution criteria, data sources, and edge cases
           </li>
           <li>
-            ✅ <strong>Choose AI Oracle:</strong> For crypto/sports markets with
-            clear data sources
+            <strong>🎯 Be Specific:</strong> &ldquo;BTC above $50k&rdquo; not &ldquo;BTC moon&rdquo; - avoid vague terms
           </li>
           <li>
-            ✅ <strong>Manual Resolution:</strong> For subjective or
-            hard-to-verify outcomes
+            <strong>📊 Cite Sources:</strong> Mention where data will come from (CoinGecko, CoinMarketCap, etc.)
           </li>
           <li>
-            ✅ <strong>Reasonable Timeline:</strong> Not too short (&lt; 1 hour)
-            or too long (&gt; 1 year)
+            <strong>⏰ Reasonable Timeline:</strong> At least 24 hours recommended for fair participation
           </li>
           <li>
-            ✅ <strong>Popular Topics:</strong> Markets with more interest get
-            more liquidity
+            <strong>✨ Choose AI Oracle:</strong> For crypto/sports markets with clear, verifiable data sources
+          </li>
+          <li>
+            <strong>🔍 Cover Edge Cases:</strong> What happens if data source is unavailable? Define backups
+          </li>
+          <li>
+            <strong>🎬 Popular Topics:</strong> Markets on trending topics get more liquidity and engagement
           </li>
         </ul>
+        
+        <div className="mt-4 p-3 bg-purple-500/5 rounded-lg border border-purple-500/20">
+          <p className="text-sm font-medium text-purple-700 dark:text-purple-400 mb-1">
+            💡 Pro Tip: Higher approval scores attract more traders!
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Markets with 80+ approval scores are featured and get priority visibility on the platform.
+          </p>
+        </div>
       </Card>
     </div>
   );
