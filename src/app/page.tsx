@@ -373,11 +373,6 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-                Our liquidity aggregation technology ensures competitive odds
-                and minimal slippage across all markets.
-              </p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Market Categories */}
