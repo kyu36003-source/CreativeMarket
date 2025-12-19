@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
         id: marketId,
         question: question as string,
         description: description as string,
-        category: category as string,
+        category: (category as string).toLowerCase(),
         endTime: Number(endTime),
       },
       sourceData,
