@@ -266,11 +266,10 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 mb-4">
-            Crypto • DeFi • NFTs • Music • Movies & More
+            From Crypto & DeFi to Movies, Music & Celebrity Relationships
           </p>
-          <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
-            Set your rules, get AI verification, and let traders predict the outcome.
-            Every prediction includes clear resolution criteria for fair results.
+          <p className="text-lg text-gray-500 mb-8 max-w-3xl mx-auto">
+            Predict anything with x402 gasless technology. Create markets for crypto enthusiasts, entertainment fans, sports bettors, and niche communities. Every prediction is backed by AI-verified resolution rules and transparent on-chain data.
           </p>
 
           {/* CTA Buttons */}
@@ -310,9 +309,9 @@ export default function HomePage() {
             <div className="p-6 bg-white/80 backdrop-blur rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all shadow-lg">
               <Zap className="h-10 w-10 text-blue-600 mx-auto mb-3" />
               <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                Gasless Trading
+                x402 Gasless Trading
               </h3>
-              <p className="text-sm text-gray-600">No gas fees, no complexity - just predict and earn</p>
+              <p className="text-sm text-gray-600">Pay-to-predict without transaction fees using HTTP 402 protocol</p>
             </div>
           </div>
         </div>
@@ -343,15 +342,15 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
                 <Shield className="h-6 w-6 text-green-600" />
               </div>
-              <CardTitle>Gasless Transactions</CardTitle>
+              <CardTitle>x402 Gasless Protocol</CardTitle>
               <CardDescription>
-                No gas fees with account abstraction technology
+                Pay-to-predict without blockchain transaction fees
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Trade without worrying about gas fees. Our account abstraction
-                layer makes prediction markets accessible to everyone.
+                Using HTTP 402 payment protocol, our facilitator handles gas fees for you. 
+                Just sign transactions and trade instantly—no native tokens needed, no complex wallets.
               </p>
             </CardContent>
           </Card>
@@ -361,13 +360,19 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
                 <TrendingUp className="h-6 w-6 text-blue-600" />
               </div>
-              <CardTitle>Deep Liquidity</CardTitle>
+              <CardTitle>Markets for Everyone</CardTitle>
               <CardDescription>
-                Aggregated liquidity pools for better trading
+                Diverse categories from crypto to pop culture
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
+                Predict Bitcoin prices, DeFi protocols, movie releases, celebrity relationships, 
+                music charts, and more. We serve both crypto degens and mainstream audiences with 
+                markets that matter to your community.
+              </p>
+            </CardContent>
+          </Card>
                 Our liquidity aggregation technology ensures competitive odds
                 and minimal slippage across all markets.
               </p>
@@ -379,7 +384,10 @@ export default function HomePage() {
         <div className="mb-12">
           <div className="mb-6">
             <h3 className="text-3xl font-bold mb-2">Active Prediction Markets</h3>
-            <p className="text-gray-600 text-lg">Browse markets by category with AI-verified resolution rules</p>
+            <p className="text-gray-600 text-lg">
+              From crypto whales to movie buffs—explore markets tailored for both niche communities and mainstream audiences. 
+              <span className="font-medium text-purple-600"> Trade gaslessly with x402</span>, powered by AI-verified resolution rules.
+            </p>
           </div>
           
           {/* Category Filter */}
