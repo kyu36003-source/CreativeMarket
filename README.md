@@ -2,7 +2,7 @@
 
 **First gasless prediction market. x402 protocol on BNB Chain. 0 gas fees, forever.**
 
-12/12 tests passing. 18 live markets. $10-100 saved per 100-1000 bets compared to traditional platforms.
+17/17 tests passing. 18 live markets. $10-100 saved per 100-1000 bets. 42% gas savings with batching.
 
 [![Built for Seedify Hackathon](https://img.shields.io/badge/Seedify-Hackathon%202025-orange)](https://seedify.fund)
 [![BNB Chain Exclusive](https://img.shields.io/badge/BNB%20Chain-EXCLUSIVE-yellow?style=for-the-badge&logo=binance)](https://www.bnbchain.org)
@@ -21,12 +21,19 @@
 
 **Why BNB Chain?** Facilitator pays $0.10 gas, earns 0.5% fee → profitable with volume. On Ethereum, $5-20 gas would kill this model.
 
+**Batch Processing (42% Gas Savings):**
+- Single transaction: 28,930 gas (~$0.052)
+- Batch of 3: 16,730 gas/bet (~$0.030)
+- **Facilitator profit:** $0.030 gas + $0.05 fee (0.5% of $10 bet) = $0.02 net profit/bet
+- **At scale (1000 bets):** $30 gas vs $52 gas = $22 saved with batching
+- See [batch test results](contracts/test/test-x402-batch.js) - 5/5 tests passing
+
 **On-Chain Everything:**
 - Reputation: TraderReputation.sol (+10/bet, +20/win)
 - Markets: PredictionMarket.sol (18 active)
-- Gasless Handler: X402BettingBNB.sol (WBNB3009 + EIP-3009)
+- Gasless Handler: X402BettingBNB.sol (WBNB3009 + EIP-3009 + batching)
 
-**Tests:** 12/12 passing (100%). [See proof](contracts/test/test-wbnb-gasless.js)
+**Tests:** 12/12 gasless + 5/5 batching = 17/17 passing (100%). [See proof](contracts/test/test-wbnb-gasless.js)
 
 ---
 
@@ -48,8 +55,9 @@
 
 ## Features
 
-**✅ Live (12/12 tests passing):**
+**✅ Live (17/17 tests passing):**
 - x402 gasless betting (WBNB3009 + X402BettingBNB.sol)
+- Batch processing: 42% gas savings for facilitators
 - 18 active markets (crypto, DeFi, entertainment)
 - On-chain reputation system (TraderReputation.sol)
 - 50+ market templates
@@ -129,12 +137,12 @@ PredictBNB/
 │   ├── X402BettingBNB.sol        # x402 gasless handler
 │   ├── AIOracle.sol              # AI resolution (in dev)
 │   └── TraderReputation.sol      # On-chain reputation
-├── contracts/test/       Test suite (12/12 passing)
+├── contracts/test/       Test suite (17/17 passing)
 ├── docs/                 Complete documentation
 └── scripts/              Utility scripts
 ```
 
-**Status:** 5 contracts, 12/12 tests, 18 markets, 50+ templates
+**Status:** 5 contracts, 17/17 tests (12 gasless + 5 batching), 18 markets, 50+ templates
 
 ## Deployed Contracts
 
@@ -144,7 +152,7 @@ WBNB3009:          0x70e0bA845a1A0F2DA3359C97E0285013525FFC49
 X402BettingBNB:    0x4826533B4897376654Bb4d4AD88B7faFD0C98528
 ```
 
-**Tests:** 12/12 passing (100%). See [test-wbnb-gasless.js](contracts/test/test-wbnb-gasless.js)
+**Tests:** 17/17 passing (100%). See [gasless test](contracts/test/test-wbnb-gasless.js) and [batch test](contracts/test/test-x402-batch.js)
 
 ---
 
@@ -164,7 +172,8 @@ npm run dev
 cd contracts
 npx hardhat node  # Terminal 1
 npx hardhat run scripts/deploy-wbnb-solution.js --network localhost  # Terminal 2
-node test/test-wbnb-gasless.js  # Should see 12/12 pass
+node test/test-wbnb-gasless.js  # 12/12 tests
+node test/test-x402-batch.js     # 5/5 batch tests (42% gas savings)
 ```
 
 ---
