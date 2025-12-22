@@ -159,8 +159,8 @@ export class HuggingFaceOracle {
     let adjustedReasoning = analysis.reasoning;
     const adjustments: string[] = [];
 
-    // Get category rules
-    const categoryRules = getRulesForCategory(category);
+    // Get category rules (available for future use)
+    const _categoryRules = getRulesForCategory(category);
     
     // RULE 1: Relationship predictions should have lower confidence
     if (category === 'Relationships') {
@@ -222,7 +222,7 @@ export class HuggingFaceOracle {
     }
 
     // RULE 6: Past events should have high confidence if we know the result
-    const deadlineCheck = new Date();
+    const _deadlineCheck = new Date();
     if (q.includes('2024') || q.match(/january|february|march|april 2025/i)) {
       adjustments.push('Note: This event may have already occurred - verify actual outcome');
     }

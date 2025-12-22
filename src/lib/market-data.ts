@@ -76,7 +76,7 @@ export const calculatePotentialReturn = (
   
   // Your share of the winning pool
   const winningPool = position ? newYes : newNo;
-  const losingPool = position ? newNo : newYes;
+  const _losingPool = position ? newNo : newYes;
   
   // If you win, you get: (your_bet / winning_pool) * total_pool
   const payout = (betAmount / winningPool) * newTotal;

@@ -21,39 +21,6 @@ export async function GET() {
       },
       { status: 401 }
     );
-      {
-        id: 'total_volume_1000',
-        name: 'Big Player',
-        description: 'Reach $1000 in total betting volume',
-        icon: '💎',
-        unlockedAt: null,
-        progress: 0,
-        target: 1000,
-      },
-      {
-        id: 'markets_created_1',
-        name: 'Market Maker',
-        description: 'Create your first market',
-        icon: '🏗️',
-        unlockedAt: null,
-        progress: 0,
-        target: 1,
-      },
-      {
-        id: 'followers_10',
-        name: 'Influencer',
-        description: 'Get 10 followers',
-        icon: '⭐',
-        unlockedAt: null,
-        progress: 0,
-        target: 10,
-      },
-    ];
-
-    return NextResponse.json({
-      success: true,
-      data: achievements,
-    });
   } catch (error) {
     console.error('Error fetching achievements:', error);
     return NextResponse.json(

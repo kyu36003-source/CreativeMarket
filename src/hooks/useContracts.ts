@@ -134,7 +134,7 @@ export function useAllMarkets() {
       const result = marketsData[i];
       if (result.status !== 'success' || !result.result) continue;
 
-      const data = result.result as unknown[];
+      const data = [...result.result] as unknown[];
       if (!data || data.length < 12) continue;
 
       const [
@@ -580,7 +580,8 @@ export function useCalculateWinnings(
     return { potentialWinnings: '0', odds: 0, multiplier: '1.00x', returnPct: '0' };
   }
 
-  const [, , , , , , totalYes, totalNo] = market as any[];
+  const marketArr = [...market] as unknown[];
+  const [, , , , , , totalYes, totalNo] = marketArr as [unknown, unknown, unknown, unknown, unknown, unknown, bigint, bigint, ...unknown[]];
   const totalYesNum = Number(formatEther(totalYes));
   const totalNoNum = Number(formatEther(totalNo));
   const betNum = Number(betAmount);
@@ -801,22 +802,24 @@ export function useUserPositions() {
             // Only include if user has a position
             if (yesAmount > 0n || noAmount > 0n) {
               // Get market details
-              const market = await client.readContract({
+              const marketResult = await client.readContract({
                 address: contractAddress as `0x${string}`,
                 abi: PREDICTION_MARKET_ABI,
                 functionName: 'markets',
                 args: [BigInt(i)],
-              }) as [string, string, string, string, string, bigint, bigint, bigint, boolean, boolean, bigint, boolean];
+              });
+              
+              const market = [...marketResult] as unknown[];
               
               userPositions.push({
                 marketId: i,
-                question: market[1],
-                category: market[3],
-                endTime: market[5],
-                totalYesAmount: market[6],
-                totalNoAmount: market[7],
-                resolved: market[8],
-                outcome: market[9],
+                question: market[1] as string,
+                category: market[3] as string,
+                endTime: market[5] as bigint,
+                totalYesAmount: market[6] as bigint,
+                totalNoAmount: market[7] as bigint,
+                resolved: market[8] as boolean,
+                outcome: market[9] as boolean,
                 yesAmount,
                 noAmount,
                 claimed,

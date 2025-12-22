@@ -221,7 +221,7 @@ export class WeatherAdapter extends BaseAdapter {
       const tempMatch = question.match(/(\d+)\s*(?:°?[CF]|degrees?|celsius|fahrenheit)/i);
       if (tempMatch) {
         const targetTemp = parseInt(tempMatch[1]);
-        const isCelsius = !questionLower.includes('fahrenheit') && !questionLower.includes('°f');
+        const _isCelsius = !questionLower.includes('fahrenheit') && !questionLower.includes('°f');
         const currentTemp = weather.temperature;
 
         lines.push(`\n📊 Target: ${targetTemp}° vs Current: ${currentTemp}°C`);
@@ -277,5 +277,11 @@ export class WeatherAdapter extends BaseAdapter {
       'wind', 'humidity', 'precipitation', 'sunny', 'cloudy', 'climate',
     ];
     return weatherKeywords.some(kw => question.includes(kw));
+  }
+
+  validate(data: unknown): boolean {
+    if (!data || typeof data !== 'object') return false;
+    const d = data as Record<string, unknown>;
+    return typeof d.temperature === 'number' || typeof d.location === 'string';
   }
 }

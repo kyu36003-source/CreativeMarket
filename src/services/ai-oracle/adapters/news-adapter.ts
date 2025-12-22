@@ -242,7 +242,7 @@ export class NewsAdapter extends BaseAdapter {
     return matches / Math.max(queryWords.length, 1);
   }
 
-  private analyzeNewsForMarket(articles: NewsArticle[], question: string): string {
+  private analyzeNewsForMarket(articles: NewsArticle[], _question: string): string {
     if (articles.length === 0) {
       return 'No relevant news articles found. Unable to provide data-driven analysis.';
     }
@@ -253,7 +253,7 @@ export class NewsAdapter extends BaseAdapter {
     return `Found ${articles.length} relevant articles.\n\nTop headlines:\n${headlines}\n\nConsider these sources when determining market outcome.`;
   }
 
-  private calculateSentiment(articles: NewsArticle[], question: string): { positive: number; negative: number; neutral: number } {
+  private calculateSentiment(articles: NewsArticle[], _question: string): { positive: number; negative: number; neutral: number } {
     const positiveWords = ['success', 'win', 'achieve', 'approved', 'passed', 'confirmed', 'yes', 'will', 'announces', 'launches'];
     const negativeWords = ['fail', 'lose', 'reject', 'denied', 'cancelled', 'no', 'won\'t', 'delays', 'problems', 'issues'];
     
@@ -352,5 +352,11 @@ export class NewsAdapter extends BaseAdapter {
     return ![MarketCategory.CRYPTO, MarketCategory.FINANCE].includes(
       query.market.category as MarketCategory
     );
+  }
+
+  validate(data: unknown): boolean {
+    if (!data || typeof data !== 'object') return false;
+    const d = data as Record<string, unknown>;
+    return typeof d.title === 'string' || typeof d.snippet === 'string';
   }
 }

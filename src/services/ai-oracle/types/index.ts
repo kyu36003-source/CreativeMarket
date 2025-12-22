@@ -88,6 +88,7 @@ export interface SourceData {
       reset: Date;
     };
     cost?: number; // in USD
+    [key: string]: any; // Allow additional properties
   };
 }
 

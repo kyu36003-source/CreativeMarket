@@ -56,7 +56,7 @@ export default function HomePage() {
   const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
 
   // Get ALL markets from blockchain using batch query
-  const { markets: blockchainMarkets, marketCount, isLoading: isLoadingMarkets, error: marketsError } = useAllMarkets();
+  const { markets: blockchainMarkets, marketCount, isLoading: isLoadingMarkets, error: _marketsError } = useAllMarkets();
 
   // Convert blockchain market data to Market format for display
   useEffect(() => {

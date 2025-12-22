@@ -279,4 +279,10 @@ export class SportsAdapter extends BaseAdapter {
     ];
     return sportsKeywords.some(kw => question.includes(kw));
   }
+
+  validate(data: unknown): boolean {
+    if (!data || typeof data !== 'object') return false;
+    const d = data as Record<string, unknown>;
+    return Array.isArray(d.results) || typeof d.sport === 'string';
+  }
 }

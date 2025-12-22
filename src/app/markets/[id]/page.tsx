@@ -150,7 +150,7 @@ export default function MarketDetailPage() {
   }
 
   // Parse blockchain data - 100% LIVE from chain
-  const marketArray = marketData as unknown[];
+  const marketArray = [...marketData] as unknown[];
   const question = marketArray[1] as string;
   const description = marketArray[2] as string;
   const category = marketArray[3] as string;
