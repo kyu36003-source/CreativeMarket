@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAccount, useSignTypedData, useChainId } from 'wagmi';
 import { x402Client } from '@/services/x402Client';
 import type { Address } from 'viem';
@@ -114,9 +114,10 @@ export function useGasSponsorship() {
   const { address } = useAccount();
   const [sponsoredAmount, setSponsoredAmount] = useState<bigint>(0n);
   const [isLoading, setIsLoading] = useState(false);
+  const hasFetched = useRef(false);
 
-  const fetchSponsorship = async () => {
-    if (!address) return;
+  const fetchSponsorship = useCallback(async () => {
+    if (!address || isLoading) return;
 
     setIsLoading(true);
     try {
@@ -131,7 +132,20 @@ export function useGasSponsorship() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [address, isLoading]);
+
+  // Auto-fetch once when address is available
+  useEffect(() => {
+    if (address && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchSponsorship();
+    }
+  }, [address, fetchSponsorship]);
+
+  // Reset when address changes
+  useEffect(() => {
+    hasFetched.current = false;
+  }, [address]);
 
   return {
     sponsoredAmount,

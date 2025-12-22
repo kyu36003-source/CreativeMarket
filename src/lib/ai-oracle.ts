@@ -261,28 +261,42 @@ Be objective and thorough in your analysis.`;
   /**
    * Quick prediction for market analytics
    * Uses Hugging Face for real AI analysis (FREE)
+   * NOW ENHANCED: Fetches real external data for better accuracy
    */
   async predictOutcome(market: {
     question: string;
     context: string;
     deadline: number;
+    category?: string;
   }): Promise<{
     probability: number;
     reasoning: string;
     signal: 'bullish' | 'bearish' | 'neutral';
+    externalData?: any;
   }> {
     try {
-      // Use Hugging Face for real AI analysis
+      // Detect category if not provided
+      const category = market.category || this.detectCategory(market.question);
+      
+      // Fetch real external data based on category
+      const externalData = await this.fetchExternalData(market.question, category);
+      
+      // Build enriched context with external data
+      const enrichedContext = this.buildEnrichedContext(market, externalData);
+
+      // Use Hugging Face for real AI analysis with enriched data
       const analysis = await huggingfaceOracle.analyzeMarket({
         question: market.question,
-        description: market.context,
-        category: 'other',
+        description: enrichedContext,
+        category,
         deadline: market.deadline,
         yesAmount: 0,
         noAmount: 0,
       });
 
-      const probability = analysis.confidence;
+      // The probability should reflect the AI's prediction, not just confidence
+      // If outcome is true (YES), use confidence. If false (NO), use 1 - confidence
+      const probability = analysis.outcome ? analysis.confidence : (1 - analysis.confidence);
       const signal =
         probability > 0.6 ? 'bullish' : probability < 0.4 ? 'bearish' : 'neutral';
 
@@ -290,6 +304,7 @@ Be objective and thorough in your analysis.`;
         probability,
         reasoning: analysis.reasoning,
         signal,
+        externalData,
       };
     } catch (error) {
       console.error('Prediction analysis failed:', error);
@@ -301,6 +316,195 @@ Be objective and thorough in your analysis.`;
         signal: 'neutral' as const,
       };
     }
+  }
+
+  /**
+   * Detect market category from question
+   */
+  private detectCategory(question: string): string {
+    const q = question.toLowerCase();
+    
+    const categories: Record<string, string[]> = {
+      crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'blockchain', 'defi', 'nft', 'token'],
+      sports: ['win', 'game', 'match', 'score', 'nfl', 'nba', 'mlb', 'soccer', 'championship', 'super bowl'],
+      politics: ['election', 'vote', 'president', 'congress', 'senate', 'political', 'government'],
+      weather: ['temperature', 'weather', 'rain', 'snow', 'storm', 'celsius', 'fahrenheit'],
+      technology: ['launch', 'release', 'apple', 'google', 'microsoft', 'ai', 'software', 'product'],
+      entertainment: ['movie', 'film', 'music', 'award', 'oscar', 'grammy', 'album'],
+    };
+
+    for (const [category, keywords] of Object.entries(categories)) {
+      if (keywords.some(kw => q.includes(kw))) {
+        return category;
+      }
+    }
+    return 'other';
+  }
+
+  /**
+   * Fetch real external data based on category
+   */
+  private async fetchExternalData(question: string, category: string): Promise<any> {
+    try {
+      // Crypto: Fetch current prices
+      if (category === 'crypto') {
+        return await this.fetchCryptoPrice(question);
+      }
+
+      // Sports: Fetch from ESPN
+      if (category === 'sports') {
+        return await this.fetchSportsData(question);
+      }
+
+      // Weather: Fetch from Open-Meteo
+      if (category === 'weather') {
+        return await this.fetchWeatherData(question);
+      }
+
+      // Default: Use DuckDuckGo for general info
+      return await this.fetchGeneralData(question);
+    } catch (error) {
+      console.error('External data fetch failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch crypto price data
+   */
+  private async fetchCryptoPrice(question: string): Promise<any> {
+    const coinMapping: Record<string, string> = {
+      bitcoin: 'bitcoin', btc: 'bitcoin',
+      ethereum: 'ethereum', eth: 'ethereum',
+      bnb: 'binancecoin', solana: 'solana',
+    };
+
+    const q = question.toLowerCase();
+    let coinId = 'bitcoin'; // default
+    for (const [key, id] of Object.entries(coinMapping)) {
+      if (q.includes(key)) { coinId = id; break; }
+    }
+
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    
+    return {
+      source: 'CoinGecko',
+      coin: coinId,
+      price: data[coinId]?.usd,
+      change24h: data[coinId]?.usd_24h_change,
+    };
+  }
+
+  /**
+   * Fetch sports data from ESPN
+   */
+  private async fetchSportsData(question: string): Promise<any> {
+    const q = question.toLowerCase();
+    let sport = 'football/nfl';
+    if (q.includes('nba') || q.includes('basketball')) sport = 'basketball/nba';
+    else if (q.includes('soccer') || q.includes('premier')) sport = 'soccer/eng.1';
+    else if (q.includes('mlb') || q.includes('baseball')) sport = 'baseball/mlb';
+
+    const url = `https://site.api.espn.com/apis/site/v2/sports/${sport}/scoreboard`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    const games = data.events?.slice(0, 5).map((e: any) => {
+      const c = e.competitions?.[0];
+      const home = c?.competitors?.find((t: any) => t.homeAway === 'home');
+      const away = c?.competitors?.find((t: any) => t.homeAway === 'away');
+      return {
+        home: home?.team?.displayName,
+        away: away?.team?.displayName,
+        homeScore: home?.score,
+        awayScore: away?.score,
+        status: e.status?.type?.description,
+      };
+    }) || [];
+
+    return { source: 'ESPN', sport, recentGames: games };
+  }
+
+  /**
+   * Fetch weather data
+   */
+  private async fetchWeatherData(question: string): Promise<any> {
+    // Simple location extraction
+    const cities = ['New York', 'Los Angeles', 'London', 'Tokyo', 'Paris', 'Sydney'];
+    let location = 'New York';
+    for (const city of cities) {
+      if (question.toLowerCase().includes(city.toLowerCase())) {
+        location = city;
+        break;
+      }
+    }
+
+    // Geocode
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`;
+    const geoRes = await fetch(geoUrl);
+    if (!geoRes.ok) return null;
+    const geo = await geoRes.json();
+    if (!geo.results?.[0]) return null;
+
+    const { latitude, longitude } = geo.results[0];
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&forecast_days=7`;
+    const weatherRes = await fetch(weatherUrl);
+    if (!weatherRes.ok) return null;
+    const weather = await weatherRes.json();
+
+    return {
+      source: 'Open-Meteo',
+      location,
+      currentTemp: weather.current?.temperature_2m,
+      forecast: weather.daily?.time?.map((d: string, i: number) => ({
+        date: d,
+        high: weather.daily?.temperature_2m_max?.[i],
+        low: weather.daily?.temperature_2m_min?.[i],
+      })) || [],
+    };
+  }
+
+  /**
+   * Fetch general data using DuckDuckGo
+   */
+  private async fetchGeneralData(question: string): Promise<any> {
+    const searchQuery = question.replace(/^(will|when|what|who)/i, '').replace(/\?/g, '').trim().slice(0, 80);
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(searchQuery)}&format=json&no_html=1`;
+    
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      
+      return {
+        source: 'DuckDuckGo',
+        summary: data.Abstract || null,
+        relatedTopics: data.RelatedTopics?.slice(0, 3).map((t: any) => t.Text) || [],
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Build enriched context with external data
+   */
+  private buildEnrichedContext(market: { question: string; context: string; deadline: number }, externalData: any): string {
+    let context = market.context || '';
+    
+    if (externalData) {
+      context += '\n\n--- REAL-TIME EXTERNAL DATA ---\n';
+      context += `Source: ${externalData.source}\n`;
+      context += `Fetched: ${new Date().toISOString()}\n`;
+      context += `Data: ${JSON.stringify(externalData, null, 2)}\n`;
+      context += '--- END EXTERNAL DATA ---';
+    }
+    
+    return context;
   }
 }
 

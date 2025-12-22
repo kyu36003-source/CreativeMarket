@@ -276,11 +276,53 @@ export class X402Facilitator {
 // Singleton instance for server-side use
 let facilitatorInstance: X402Facilitator | null = null;
 
+/**
+ * Format a private key to proper Hex format
+ * Accepts keys with or without 0x prefix, validates length
+ */
+function formatPrivateKey(key: string | undefined): Hex | undefined {
+  if (!key) return undefined;
+  
+  // Remove whitespace
+  let cleanKey = key.trim();
+  
+  // Add 0x prefix if missing
+  if (!cleanKey.startsWith('0x')) {
+    cleanKey = `0x${cleanKey}`;
+  }
+  
+  // Validate length (should be 66 chars: 0x + 64 hex chars)
+  if (cleanKey.length !== 66) {
+    console.error(`Invalid private key length: expected 66, got ${cleanKey.length}`);
+    return undefined;
+  }
+  
+  // Validate hex characters
+  if (!/^0x[0-9a-fA-F]{64}$/.test(cleanKey)) {
+    console.error('Invalid private key format: must be hex characters');
+    return undefined;
+  }
+  
+  return cleanKey as Hex;
+}
+
 export function getFacilitator(chainId?: number): X402Facilitator {
   if (!facilitatorInstance) {
+    // Try multiple env var names for flexibility
+    const rawKey = process.env.FACILITATOR_PRIVATE_KEY || 
+                   process.env.X402_FACILITATOR_PRIVATE_KEY ||
+                   process.env.PRIVATE_KEY;
+    
+    const formattedKey = formatPrivateKey(rawKey);
+    
+    if (!formattedKey) {
+      console.warn('⚠️ X402 Facilitator: No valid private key found. Gasless betting will be disabled.');
+      console.warn('Set FACILITATOR_PRIVATE_KEY in .env.local with a valid private key (64 hex chars)');
+    }
+    
     facilitatorInstance = new X402Facilitator(
       chainId || parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '97'),
-      process.env.FACILITATOR_PRIVATE_KEY as Hex,
+      formattedKey,
       process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS as Address
     );
   }

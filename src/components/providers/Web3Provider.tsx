@@ -3,6 +3,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 import { bnbChainConfig } from '@/lib/web3-config';
 import { Web3ErrorBoundary } from '@/components/Web3ErrorBoundary';
 
@@ -145,7 +147,17 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     <Web3ErrorBoundary>
       <WagmiProvider config={bnbChainConfig} reconnectOnMount={true}>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <RainbowKitProvider
+            theme={darkTheme({
+              accentColor: '#3B82F6',
+              accentColorForeground: 'white',
+              borderRadius: 'medium',
+              fontStack: 'system',
+            })}
+            modalSize="compact"
+          >
+            {children}
+          </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </Web3ErrorBoundary>

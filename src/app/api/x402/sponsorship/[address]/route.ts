@@ -9,7 +9,7 @@ import { bsc, bscTestnet } from 'viem/chains';
 
 const X402_BETTING_ABI = [
   {
-    name: 'gasAllowances',
+    name: 'gasCredits',
     type: 'function',
     stateMutability: 'view',
     inputs: [{ name: 'user', type: 'address' }],
@@ -26,26 +26,32 @@ export async function GET(
     const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '97');
     const chain = chainId === 56 ? bsc : bscTestnet;
 
+    const rpcUrl = chainId === 56 
+      ? (process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/')
+      : (process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/');
+
     const publicClient = createPublicClient({
       chain,
-      transport: http(),
+      transport: http(rpcUrl),
     });
 
     const x402BettingAddress = process.env
       .NEXT_PUBLIC_X402_BETTING_ADDRESS as `0x${string}`;
 
     if (!x402BettingAddress) {
-      return NextResponse.json(
-        { error: 'X402 Betting contract not configured' },
-        { status: 500 }
-      );
+      // Return 0 if contract not configured (graceful degradation)
+      return NextResponse.json({
+        address: userAddress,
+        totalSponsored: '0',
+        chain: chainId,
+      });
     }
 
     // Read sponsored amount from contract
     const totalSponsored = await publicClient.readContract({
       address: x402BettingAddress,
       abi: X402_BETTING_ABI,
-      functionName: 'gasAllowances',
+      functionName: 'gasCredits',
       args: [userAddress],
     });
 
@@ -56,11 +62,12 @@ export async function GET(
     });
   } catch (error) {
     console.error('Failed to fetch gas sponsorship:', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to fetch',
-      },
-      { status: 500 }
-    );
+    // Return 0 on error (graceful degradation)
+    return NextResponse.json({
+      address: params.address,
+      totalSponsored: '0',
+      chain: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '97'),
+      error: error instanceof Error ? error.message : 'Failed to fetch',
+    });
   }
 }

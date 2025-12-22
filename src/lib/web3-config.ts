@@ -1,5 +1,5 @@
 // ============================================================================
-// BNB Chain EXCLUSIVE Web3 Configuration
+// BNB Chain EXCLUSIVE Web3 Configuration with RainbowKit
 // ============================================================================
 //
 // 🟡 IMPORTANT: This dApp ONLY works on BNB Chain (BSC)
@@ -21,79 +21,25 @@
 // See full explanation: /docs/BNB_CHAIN_EXCLUSIVE.md
 // ============================================================================
 
-import { http, createConfig, fallback } from 'wagmi';
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { http } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
-import { injected } from 'wagmi/connectors';
 
-// Multiple RPC endpoints for fallback (improves reliability)
-const BSC_MAINNET_RPCS = [
-  process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/',
-  'https://bsc-dataseed1.binance.org/',
-  'https://bsc-dataseed2.binance.org/',
-  'https://bsc-dataseed3.binance.org/',
-  'https://bsc.publicnode.com',
-];
-
-const BSC_TESTNET_RPCS = [
-  process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL ||
-    'https://data-seed-prebsc-1-s1.binance.org:8545/',
-  'https://data-seed-prebsc-2-s1.binance.org:8545/',
-  'https://bsc-testnet.publicnode.com',
-  'https://bsc-testnet-rpc.publicnode.com',
-];
-
-// BNB Chain Configuration with fallback transports
-// Production ready - uses BSC Testnet with static data fallback
-export const bnbChainConfig = createConfig({
+// RainbowKit configuration with BNB Chain support
+export const bnbChainConfig = getDefaultConfig({
+  appName: 'PredictBNB',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
   chains: [bscTestnet, bsc],
-  connectors: [
-    injected({
-      shimDisconnect: true,
-    }),
-  ],
   transports: {
-    // BSC Testnet (Chain ID 97) - Primary network for demo
-    [bscTestnet.id]: fallback(
-      BSC_TESTNET_RPCS.map(url =>
-        http(url, {
-          batch: {
-            wait: 100,
-          },
-          timeout: 10000,
-          retryCount: 2, // Reduced retries for faster fallback to static data
-          retryDelay: 500,
-          fetchOptions: {
-            mode: 'cors',
-          },
-        })
-      ),
-      {
-        rank: true,
-      }
+    [bscTestnet.id]: http(
+      process.env.NEXT_PUBLIC_BSC_TESTNET_RPC_URL ||
+        'https://data-seed-prebsc-1-s1.binance.org:8545/'
     ),
-    // BSC Mainnet (Chain ID 56) - For future production use
-    [bsc.id]: fallback(
-      BSC_MAINNET_RPCS.map(url =>
-        http(url, {
-          batch: {
-            wait: 100,
-          },
-          timeout: 10000,
-          retryCount: 3,
-          retryDelay: 1000,
-          fetchOptions: {
-            mode: 'cors',
-          },
-        })
-      ),
-      {
-        rank: true,
-      }
+    [bsc.id]: http(
+      process.env.NEXT_PUBLIC_BSC_RPC_URL || 'https://bsc-dataseed.binance.org/'
     ),
   },
   ssr: true,
-  multiInjectedProviderDiscovery: true,
-  pollingInterval: 4000,
 });
 
 // Chain IDs for easy reference

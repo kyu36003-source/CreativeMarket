@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useMarketCount, useMarket } from '@/hooks/useContracts';
+import { useAllMarkets } from '@/hooks/useContracts';
 import {
   TrendingUp,
   TrendingDown,
@@ -63,31 +63,49 @@ export default function MarketsPage() {
   const [loading, setLoading] = useState(true);
   const marketsLoadedRef = useRef(false);
 
-  // Get market count from blockchain
-  const { data: marketCount, isLoading: isCountLoading } = useMarketCount();
+  // Get ALL markets from blockchain using batch query
+  const { markets: blockchainMarkets, marketCount, isLoading: isMarketsLoading } = useAllMarkets();
 
-  // Fetch individual market data from blockchain
+  // Convert blockchain data to local format
   useEffect(() => {
-    const loadMarkets = async () => {
-      if (!marketCount || marketsLoadedRef.current) return;
-      
-      const count = Number(marketCount);
-      if (count === 0) {
-        setMarkets([]);
-        setLoading(false);
-        return;
-      }
+    if (marketsLoadedRef.current && markets.length > 0) return;
 
-      // Note: This component would need to fetch each market individually
-      // In a production system, you'd want a subgraph or API for efficient batch queries
-      // For now, we'll show the capability exists
-      setMarkets([]);
+    if (blockchainMarkets.length > 0) {
+      const convertedMarkets: MarketData[] = blockchainMarkets.map((m) => {
+        const yesAmount = Number(formatEther(m.totalYesAmount));
+        const noAmount = Number(formatEther(m.totalNoAmount));
+        const totalPool = yesAmount + noAmount;
+        const yesPercentage = totalPool > 0 ? (yesAmount / totalPool) * 100 : 50;
+        
+        return {
+          id: m.id,
+          question: m.question,
+          description: m.description,
+          category: m.category,
+          totalPool,
+          yesAmount,
+          noAmount,
+          yesPercentage,
+          endTime: m.endTime,
+          resolved: m.resolved,
+          outcome: m.outcome,
+          aiOracleEnabled: m.aiOracleEnabled,
+        };
+      });
+      setMarkets(convertedMarkets);
       setLoading(false);
       marketsLoadedRef.current = true;
-    };
+    } else if (!isMarketsLoading && marketCount === 0) {
+      setMarkets([]);
+      setLoading(false);
+    }
+  }, [blockchainMarkets, marketCount, isMarketsLoading, markets.length]);
 
-    loadMarkets();
-  }, [marketCount]);
+  // Timeout fallback
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 5000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const totalMarkets = markets.length;
 

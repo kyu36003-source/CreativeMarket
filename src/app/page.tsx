@@ -26,7 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { useMarketCount, useMarket, usePlaceBet } from '@/hooks/useContracts';
+import { useAllMarkets, usePlaceBet } from '@/hooks/useContracts';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
@@ -38,19 +38,15 @@ export default function HomePage() {
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categories] = useState<MarketCategoryInfo[]>([
     { id: 'all', name: 'All Markets', icon: '🎯', count: 0 },
-    { id: 'Crypto', name: 'Crypto', icon: '₿', count: 0 },
-    { id: 'DeFi', name: 'DeFi', icon: '💎', count: 0 },
-    { id: 'NFT', name: 'NFT', icon: '🖼️', count: 0 },
+    { id: 'Cryptocurrency', name: 'Crypto', icon: '₿', count: 0 },
     { id: 'Movies', name: 'Movies', icon: '🎬', count: 0 },
     { id: 'Music', name: 'Music', icon: '🎵', count: 0 },
     { id: 'Relationships', name: 'Relationships', icon: '💕', count: 0 },
     { id: 'Entertainment', name: 'Entertainment', icon: '🌟', count: 0 },
-    { id: 'Fashion', name: 'Fashion', icon: '👗', count: 0 },
-    { id: 'Art', name: 'Art', icon: '🎨', count: 0 },
-    { id: 'Film', name: 'Film', icon: '🎥', count: 0 },
-    { id: 'Writing', name: 'Writing', icon: '✍️', count: 0 },
-    { id: 'Social', name: 'Social', icon: '🌐', count: 0 },
-    { id: 'Creative', name: 'Creative', icon: '✨', count: 0 },
+    { id: 'DeFi', name: 'DeFi', icon: '💎', count: 0 },
+    { id: 'NFT', name: 'NFT', icon: '🖼️', count: 0 },
+    { id: 'Blockchain', name: 'Blockchain', icon: '⛓️', count: 0 },
+    { id: 'Technology', name: 'Technology', icon: '💻', count: 0 },
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,128 +55,57 @@ export default function HomePage() {
   // Betting hook
   const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
 
-  // Get market count from blockchain
-  const { data: marketCount, isLoading: isLoadingCount } = useMarketCount();
-  
-  // Fetch markets 1-6 directly from blockchain
-  const { data: market1Data, isLoading: isLoading1 } = useMarket(1);
-  const { data: market2Data, isLoading: isLoading2 } = useMarket(2);
-  const { data: market3Data, isLoading: isLoading3 } = useMarket(3);
-  const { data: market4Data, isLoading: isLoading4 } = useMarket(4);
-  const { data: market5Data, isLoading: isLoading5 } = useMarket(5);
-  const { data: market6Data, isLoading: isLoading6 } = useMarket(6);
+  // Get ALL markets from blockchain using batch query
+  const { markets: blockchainMarkets, marketCount, isLoading: isLoadingMarkets, error: marketsError } = useAllMarkets();
 
-  // Timeout fallback - stop loading after 3 seconds (faster UX)
+  // Convert blockchain market data to Market format for display
+  useEffect(() => {
+    if (marketsLoadedRef.current && markets.length > 0) {
+      return; // Already loaded
+    }
+
+    if (blockchainMarkets.length > 0) {
+      const convertedMarkets: Market[] = blockchainMarkets.map((m) => {
+        const { yesOdds, noOdds } = calculateMarketOdds(m.totalYesAmount, m.totalNoAmount);
+        return {
+          id: m.id.toString(),
+          question: m.question,
+          description: m.description,
+          category: m.category,
+          creator: m.creator,
+          endTime: m.endTime,
+          totalYesAmount: m.totalYesAmount,
+          totalNoAmount: m.totalNoAmount,
+          resolved: m.resolved,
+          outcome: m.outcome,
+          resolvedAt: m.resolvedAt,
+          aiOracleEnabled: m.aiOracleEnabled,
+          yesOdds,
+          noOdds,
+          totalVolume: m.totalYesAmount + m.totalNoAmount,
+          participantCount: Math.floor(Math.random() * 50) + 10, // Placeholder
+        };
+      });
+      setMarkets(convertedMarkets);
+      setLoading(false);
+      setError(null);
+      marketsLoadedRef.current = true;
+    } else if (!isLoadingMarkets && marketCount > 0) {
+      // Still loading
+    } else if (!isLoadingMarkets && marketCount === 0) {
+      setMarkets([]);
+      setLoading(false);
+      setError('No markets available. Please ensure you are connected to BSC Testnet.');
+    }
+  }, [blockchainMarkets, marketCount, isLoadingMarkets, markets.length]);
+
+  // Timeout fallback - stop loading after 5 seconds
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 3000); // 3 seconds
-
+    }, 5000);
     return () => clearTimeout(timeout);
-  }, []); // Empty dependency array - run only once on mount
-
-  // Convert blockchain data to Market format
-  useEffect(() => {
-    // Prevent infinite loop - only run once when data is loaded
-    if (marketsLoadedRef.current && markets.length > 0) {
-      return;
-    }
-
-    // If all hooks have finished loading (not loading anymore)
-    const allFinishedLoading = !isLoadingCount && !isLoading1 && !isLoading2 && 
-                                !isLoading3 && !isLoading4 && !isLoading5 && !isLoading6;
-    
-    if (allFinishedLoading) {
-      // Hooks loading complete
-    }
-
-    const convertToMarket = (marketId: number, data: unknown[]): Market | null => {
-      if (!data || data.length < 12) {
-        return null;
-      }
-
-      const [
-        _id,
-        question,
-        description,
-        category,
-        creator,
-        endTime,
-        totalYesAmount,
-        totalNoAmount,
-        resolved,
-        outcome,
-        resolvedAt,
-        aiOracleEnabled,
-      ] = data as [bigint, string, string, string, string, bigint, bigint, bigint, boolean, boolean, bigint, boolean];
-
-      const totalYes = totalYesAmount as bigint;
-      const totalNo = totalNoAmount as bigint;
-      const { yesOdds, noOdds } = calculateMarketOdds(totalYes, totalNo);
-
-      return {
-        id: marketId.toString(),
-        question: question as string,
-        description: description as string,
-        category: category as string,
-        creator: creator as string,
-        endTime: Number(endTime),
-        totalYesAmount: totalYes,
-        totalNoAmount: totalNo,
-        resolved: resolved as boolean,
-        outcome: outcome as boolean,
-        resolvedAt: Number(resolvedAt),
-        aiOracleEnabled: aiOracleEnabled as boolean,
-        yesOdds,
-        noOdds,
-        totalVolume: totalYes + totalNo,
-        participantCount: Math.floor(Math.random() * 50) + 10, // Placeholder
-      };
-    };
-
-    const loadedMarkets: Market[] = [];
-    
-    // Try to load from blockchain data
-    const marketDataArray = [
-      { id: 1, data: market1Data },
-      { id: 2, data: market2Data },
-      { id: 3, data: market3Data },
-      { id: 4, data: market4Data },
-      { id: 5, data: market5Data },
-      { id: 6, data: market6Data },
-    ];
-
-    for (const { id, data } of marketDataArray) {
-      if (data) {
-        const market = convertToMarket(id, data as unknown[]);
-        if (market) loadedMarkets.push(market);
-      }
-    }
-
-    if (loadedMarkets.length > 0) {
-      setMarkets(loadedMarkets);
-      setLoading(false);
-      setError(null);
-      marketsLoadedRef.current = true; // Mark as loaded
-    } else if (allFinishedLoading || marketCount !== undefined) {
-      // All hooks loaded - only show blockchain data
-      setLoading(false);
-      
-      // Show only loaded blockchain data (no fallback to static)
-      if (loadedMarkets.length > 0) {
-        setMarkets(loadedMarkets);
-        marketsLoadedRef.current = true; // Mark as loaded
-      } else {
-        // No markets loaded from blockchain yet
-        setMarkets([]);
-        setError('No markets available. Please ensure you are connected to BSC Testnet.');
-      }
-    }
-  }, [
-    market1Data, market2Data, market3Data, market4Data, market5Data, market6Data,
-    marketCount, isLoadingCount, isLoading1, isLoading2, isLoading3, isLoading4, isLoading5, isLoading6,
-    markets.length // Add markets.length to dependencies
-  ]);
+  }, []);
 
   const selectedMarket = markets.find(m => m.id === selectedMarketId);
   const filteredMarkets = markets.filter(market => {
@@ -406,7 +331,6 @@ export default function HomePage() {
               <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
                 {categories.filter(cat => cat.id !== 'all').map(cat => {
                   const count = getCategoryCount(cat.id);
-                  if (count === 0) return null;
                   return (
                     <button
                       key={cat.id}
@@ -417,8 +341,11 @@ export default function HomePage() {
                       className={`px-4 py-3 rounded-lg font-medium transition-all shadow-sm flex flex-col items-center gap-2 ${
                         selectedCategory === cat.id
                           ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-200 ring-2 ring-purple-300'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-purple-300'
+                          : count > 0 
+                            ? 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-purple-300'
+                            : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed opacity-60'
                       }`}
+                      disabled={count === 0}
                     >
                       <span className="text-2xl">{cat.icon}</span>
                       <span className="text-sm">{cat.name}</span>

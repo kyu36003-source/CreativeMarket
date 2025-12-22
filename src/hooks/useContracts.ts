@@ -6,9 +6,10 @@
  * All data comes directly from BSC Testnet smart contracts
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   useReadContract,
+  useReadContracts,
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
@@ -67,6 +68,115 @@ export function useMarketCount() {
       staleTime: 30000,
     },
   });
+}
+
+/**
+ * Market data structure from blockchain
+ */
+export interface MarketData {
+  id: number;
+  question: string;
+  description: string;
+  category: string;
+  creator: string;
+  endTime: number;
+  totalYesAmount: bigint;
+  totalNoAmount: bigint;
+  resolved: boolean;
+  outcome: boolean;
+  resolvedAt: number;
+  aiOracleEnabled: boolean;
+}
+
+/**
+ * Get ALL markets from blockchain dynamically
+ * Fetches markets 1 to marketCount using batch queries
+ */
+export function useAllMarkets() {
+  const chainId = useChainId();
+  const effectiveChainId = chainId || 97;
+  const { data: marketCount, isLoading: isCountLoading } = useMarketCount();
+
+  // Create contract calls for all markets
+  const contracts = useMemo(() => {
+    if (!marketCount) return [];
+    
+    const count = Number(marketCount);
+    const contractAddress = getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`;
+    
+    // Create array of contract calls for markets 1 to count
+    return Array.from({ length: count }, (_, i) => ({
+      address: contractAddress,
+      abi: PREDICTION_MARKET_ABI,
+      functionName: 'markets' as const,
+      args: [BigInt(i + 1)], // Markets are 1-indexed
+      chainId: effectiveChainId,
+    }));
+  }, [marketCount, effectiveChainId]);
+
+  // Batch fetch all markets
+  const { data: marketsData, isLoading: isMarketsLoading, error } = useReadContracts({
+    contracts,
+    query: {
+      enabled: contracts.length > 0,
+      retry: 3,
+      staleTime: 30000,
+    },
+  });
+
+  // Parse the market data
+  const markets = useMemo(() => {
+    if (!marketsData) return [];
+
+    const parsedMarkets: MarketData[] = [];
+    
+    for (let i = 0; i < marketsData.length; i++) {
+      const result = marketsData[i];
+      if (result.status !== 'success' || !result.result) continue;
+
+      const data = result.result as unknown[];
+      if (!data || data.length < 12) continue;
+
+      const [
+        _id,
+        question,
+        description,
+        category,
+        creator,
+        endTime,
+        totalYesAmount,
+        totalNoAmount,
+        resolved,
+        outcome,
+        resolvedAt,
+        aiOracleEnabled,
+      ] = data as [bigint, string, string, string, string, bigint, bigint, bigint, boolean, boolean, bigint, boolean];
+
+      parsedMarkets.push({
+        id: i + 1, // Markets are 1-indexed
+        question: question as string,
+        description: description as string,
+        category: category as string,
+        creator: creator as string,
+        endTime: Number(endTime),
+        totalYesAmount: totalYesAmount as bigint,
+        totalNoAmount: totalNoAmount as bigint,
+        resolved: resolved as boolean,
+        outcome: outcome as boolean,
+        resolvedAt: Number(resolvedAt),
+        aiOracleEnabled: aiOracleEnabled as boolean,
+      });
+    }
+
+    return parsedMarkets;
+  }, [marketsData]);
+
+  return {
+    markets,
+    marketCount: marketCount ? Number(marketCount) : 0,
+    isLoading: isCountLoading || isMarketsLoading,
+    error,
+  };
 }
 
 /**
@@ -130,7 +240,6 @@ export function useCreateMarket() {
     isSuccess,
     error,
   };
-}
 }
 
 /**
@@ -448,7 +557,17 @@ export function useMinBet() {
 }
 
 /**
- * Calculate potential winnings
+ * Calculate potential winnings - POLYMARKET STYLE
+ * 
+ * Polymarket model:
+ * - Price = probability (50¢ = 50% chance)
+ * - If you buy at 50¢ and win, you get $1 (100% profit)
+ * - If you buy at 25¢ and win, you get $1 (300% profit)
+ * - Multiplier = 1 / price
+ * 
+ * In parimutuel:
+ * - Price = yourSidePool / totalPool
+ * - Payout = (your_bet / winning_pool) * total_pool
  */
 export function useCalculateWinnings(
   marketId: number,
@@ -458,7 +577,7 @@ export function useCalculateWinnings(
   const { data: market } = useMarket(marketId);
 
   if (!market || !betAmount) {
-    return { potentialWinnings: '0', odds: 0 };
+    return { potentialWinnings: '0', odds: 0, multiplier: '1.00x', returnPct: '0' };
   }
 
   const [, , , , , , totalYes, totalNo] = market as any[];
@@ -466,19 +585,46 @@ export function useCalculateWinnings(
   const totalNoNum = Number(formatEther(totalNo));
   const betNum = Number(betAmount);
 
-  const totalPool = totalYesNum + totalNoNum + betNum;
-  const winningPool = position ? totalYesNum + betNum : totalNoNum + betNum;
-  const losingPool = position ? totalNoNum : totalYesNum;
+  if (isNaN(betNum) || betNum <= 0) {
+    return { potentialWinnings: '0', odds: 0, multiplier: '1.00x', returnPct: '0' };
+  }
 
-  // Calculate payout: (your bet / winning pool) * total pool
-  const payout = (betNum / winningPool) * totalPool;
+  const totalPool = totalYesNum + totalNoNum;
+  
+  // Handle empty pool - 50/50 odds, 2x multiplier
+  if (totalPool === 0) {
+    return {
+      potentialWinnings: betNum.toFixed(4),
+      odds: 50,
+      multiplier: '2.00x',
+      returnPct: '100',
+      payout: (betNum * 2).toFixed(4),
+    };
+  }
+
+  // Calculate current price (probability) for chosen position
+  const yourSidePool = position ? totalYesNum : totalNoNum;
+  const price = yourSidePool / totalPool; // This is the "cost" per share
+  
+  // After your bet, the new pools
+  const newYourSide = yourSidePool + betNum;
+  const newTotal = totalPool + betNum;
+  
+  // Your payout if you win = (your_bet / winning_pool) * total_pool
+  const payout = (betNum / newYourSide) * newTotal;
   const profit = payout - betNum;
-  const odds = losingPool / winningPool;
+  
+  // Polymarket-style multiplier and return
+  const multiplier = payout / betNum;
+  const returnPct = ((multiplier - 1) * 100);
 
   return {
     potentialWinnings: profit.toFixed(4),
-    odds: odds.toFixed(2),
+    odds: (price * 100).toFixed(1),
+    multiplier: multiplier.toFixed(2) + 'x',
+    returnPct: returnPct.toFixed(1),
     payout: payout.toFixed(4),
+    price: (price * 100).toFixed(1), // Price in cents (like 65¢)
   };
 }
 
@@ -584,4 +730,129 @@ export function useFollowingList(followerAddress?: string) {
       enabled: !!followerAddress,
     },
   });
+}
+
+/**
+ * User position with market data
+ */
+export interface UserBetPosition {
+  marketId: number;
+  question: string;
+  category: string;
+  endTime: bigint;
+  resolved: boolean;
+  outcome: boolean;
+  yesAmount: bigint;
+  noAmount: bigint;
+  claimed: boolean;
+  totalYesAmount: bigint;
+  totalNoAmount: bigint;
+}
+
+/**
+ * Hook to fetch all user positions across all markets
+ * Scans all markets and returns positions where user has placed bets
+ */
+export function useUserPositions() {
+  const { address } = useAccount();
+  const chainId = useChainId();
+  const effectiveChainId = chainId || 97;
+  const { data: marketCount } = useMarketCount();
+  
+  const [positions, setPositions] = useState<UserBetPosition[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!address || !marketCount) return;
+
+    const fetchPositions = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const contractAddress = getContractAddress(effectiveChainId, 'PREDICTION_MARKET');
+        const count = Number(marketCount);
+        const userPositions: UserBetPosition[] = [];
+        
+        // Fetch positions for all markets
+        const { createPublicClient, http } = await import('viem');
+        const { bscTestnet, bsc } = await import('viem/chains');
+        
+        const chain = effectiveChainId === 56 ? bsc : bscTestnet;
+        const client = createPublicClient({
+          chain,
+          transport: http(),
+        });
+        
+        // Batch fetch all positions
+        for (let i = 1; i <= count; i++) {
+          try {
+            // Get user position
+            const position = await client.readContract({
+              address: contractAddress as `0x${string}`,
+              abi: PREDICTION_MARKET_ABI,
+              functionName: 'positions',
+              args: [BigInt(i), address],
+            }) as [bigint, bigint, boolean];
+            
+            const [yesAmount, noAmount, claimed] = position;
+            
+            // Only include if user has a position
+            if (yesAmount > 0n || noAmount > 0n) {
+              // Get market details
+              const market = await client.readContract({
+                address: contractAddress as `0x${string}`,
+                abi: PREDICTION_MARKET_ABI,
+                functionName: 'markets',
+                args: [BigInt(i)],
+              }) as [string, string, string, string, string, bigint, bigint, bigint, boolean, boolean, bigint, boolean];
+              
+              userPositions.push({
+                marketId: i,
+                question: market[1],
+                category: market[3],
+                endTime: market[5],
+                totalYesAmount: market[6],
+                totalNoAmount: market[7],
+                resolved: market[8],
+                outcome: market[9],
+                yesAmount,
+                noAmount,
+                claimed,
+              });
+            }
+          } catch (e) {
+            // Skip invalid markets
+            console.debug(`Skipping market ${i}:`, e);
+          }
+        }
+        
+        setPositions(userPositions);
+      } catch (e) {
+        setError(e as Error);
+        console.error('Failed to fetch user positions:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPositions();
+  }, [address, marketCount, effectiveChainId]);
+
+  // Separate active and resolved bets
+  const activeBets = positions.filter(p => !p.resolved);
+  const resolvedBets = positions.filter(p => p.resolved);
+
+  return {
+    positions,
+    activeBets,
+    resolvedBets,
+    isLoading,
+    error,
+    refetch: () => {
+      // Trigger a refetch by resetting positions
+      setPositions([]);
+    },
+  };
 }

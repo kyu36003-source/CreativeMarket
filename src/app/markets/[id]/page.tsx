@@ -110,13 +110,6 @@ export default function MarketDetailPage() {
       setShowTxModal(true);
     }
   }, [betTxHash, claimTxHash, gaslessTxHash]);
-  
-  // Fetch gas sponsorship on mount
-  useEffect(() => {
-    if (isConnected) {
-      fetchSponsorship();
-    }
-  }, [isConnected, fetchSponsorship]);
 
   // Close modal and reset form when transaction succeeds
   useEffect(() => {
@@ -156,44 +149,18 @@ export default function MarketDetailPage() {
     );
   }
 
-  // Use static market if available, otherwise blockchain data
-  let question: string;
-  let description: string;
-  let category: string;
-  let endTime: bigint;
-  let totalYesAmount: bigint;
-  let totalNoAmount: bigint;
-  let resolved: boolean;
-  let outcome: boolean;
-  let resolvedAt: bigint;
-  let aiOracleEnabled: boolean;
-
-  if (staticMarket) {
-    // Use static market data (primary source of truth)
-    question = staticMarket.question;
-    description = staticMarket.description;
-    category = staticMarket.category;
-    endTime = staticMarket.endTime;
-    totalYesAmount = staticMarket.totalYesAmount;
-    totalNoAmount = staticMarket.totalNoAmount;
-    resolved = staticMarket.resolved;
-    outcome = staticMarket.outcome;
-    resolvedAt = staticMarket.resolvedAt;
-    aiOracleEnabled = staticMarket.aiOracleEnabled;
-  } else {
-    // Fallback to blockchain data
-    const marketArray = marketData as unknown[];
-    question = marketArray[1] as string;
-    description = marketArray[2] as string;
-    category = marketArray[3] as string;
-    endTime = marketArray[5] as bigint;
-    totalYesAmount = marketArray[6] as bigint;
-    totalNoAmount = marketArray[7] as bigint;
-    resolved = marketArray[8] as boolean;
-    outcome = marketArray[9] as boolean;
-    resolvedAt = marketArray[10] as bigint;
-    aiOracleEnabled = marketArray[11] as boolean;
-  }
+  // Parse blockchain data - 100% LIVE from chain
+  const marketArray = marketData as unknown[];
+  const question = marketArray[1] as string;
+  const description = marketArray[2] as string;
+  const category = marketArray[3] as string;
+  const endTime = marketArray[5] as bigint;
+  const totalYesAmount = marketArray[6] as bigint;
+  const totalNoAmount = marketArray[7] as bigint;
+  const resolved = marketArray[8] as boolean;
+  const outcome = marketArray[9] as boolean;
+  const resolvedAt = marketArray[10] as bigint;
+  const aiOracleEnabled = marketArray[11] as boolean;
 
   const endDate = new Date(Number(endTime) * 1000);
   const hasEnded = endDate < new Date();

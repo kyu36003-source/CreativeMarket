@@ -44,11 +44,12 @@ export function AIMarketAnalytics({
   const analyzeMarket = async () => {
     setLoading(true);
     try {
-      // Get AI prediction
+      // Get AI prediction with category for better data fetching
       const prediction = await aiOracle.predictOutcome({
         question: marketData.question,
         context: marketData.context || '',
         deadline: marketData.deadline,
+        category: marketData.category,
       });
 
       // Calculate market metrics
@@ -61,17 +62,23 @@ export function AIMarketAnalytics({
       const priceDiff = Math.abs(prediction.probability - marketProbability);
       const _hasOpportunity = priceDiff > 0.1; // 10% difference
 
+      // Build key factors from external data if available
+      const factors = generateKeyFactors(marketData);
+      if (prediction.externalData) {
+        factors.unshift(`📊 ${prediction.externalData.source}: Real-time data integrated`);
+      }
+
       const analysis: MarketAnalysis = {
         probability: prediction.probability,
         reasoning: prediction.reasoning,
         signal: prediction.signal,
-        confidence: 0.75 + Math.random() * 0.2, // 75-95% confidence
+        confidence: Math.min(0.95, 0.7 + Math.abs(prediction.probability - 0.5) * 0.5), // Higher confidence for decisive predictions
         recommendation: generateRecommendation(
           prediction.probability,
           marketProbability,
           prediction.signal
         ),
-        keyFactors: generateKeyFactors(marketData),
+        keyFactors: factors,
       };
 
       setAnalysis(analysis);

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { WalletConnect } from './WalletConnect';
+import { RainbowKitButton } from './RainbowKitButton';
 import {
   Home,
   TrendingUp,
@@ -96,7 +96,7 @@ export function Navigation() {
           </div>
 
           {/* Wallet Connect */}
-          <WalletConnect />
+          <RainbowKitButton />
         </div>
 
         {/* Secondary Feature Bar - Desktop */}

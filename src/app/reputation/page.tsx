@@ -12,6 +12,7 @@ import {
   useSuccessRate,
   useTraderTier,
   useEnableCopyTrading,
+  useUserPositions,
 } from '@/hooks/useContracts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ export default function ReputationPage() {
   const { data: successRateData } = useSuccessRate(address);
   const { data: tierData } = useTraderTier(address);
   const { enableCopyTrading, isPending } = useEnableCopyTrading();
+  const { activeBets, resolvedBets, isLoading: positionsLoading } = useUserPositions();
 
   const [copyTradingEnabled, setCopyTradingEnabled] = useState(false);
 
@@ -118,9 +120,16 @@ export default function ReputationPage() {
     }
   };
 
-  // Mock data for demonstration (replace with actual contract calls)
-  const userActiveBets: any[] = [];
-  const userResolvedBets: any[] = [];
+  // User bets from blockchain
+  const userActiveBets = activeBets;
+  const userResolvedBets = resolvedBets;
+
+  // Calculate portfolio stats from blockchain data
+  const totalActiveValue = activeBets.reduce((sum, bet) => {
+    return sum + (bet.yesAmount > 0n ? bet.yesAmount : bet.noAmount);
+  }, 0n);
+  
+  const totalBetsPlaced = activeBets.length + resolvedBets.length;
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
@@ -180,6 +189,44 @@ export default function ReputationPage() {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
+          {/* Portfolio Summary */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+              <div className="flex items-center gap-3 mb-2">
+                <Wallet className="w-5 h-5 text-blue-500" />
+                <p className="text-sm text-muted-foreground">Active Positions Value</p>
+              </div>
+              <p className="text-2xl font-bold">
+                {formatEther(totalActiveValue)} BNB
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {activeBets.length} active bet{activeBets.length !== 1 ? 's' : ''}
+              </p>
+            </Card>
+            
+            <Card className="p-6 bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-5 h-5 text-green-500" />
+                <p className="text-sm text-muted-foreground">Total Bets Placed</p>
+              </div>
+              <p className="text-2xl font-bold">{totalBetsPlaced}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                From blockchain data
+              </p>
+            </Card>
+            
+            <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+              <div className="flex items-center gap-3 mb-2">
+                <History className="w-5 h-5 text-purple-500" />
+                <p className="text-sm text-muted-foreground">Resolved Bets</p>
+              </div>
+              <p className="text-2xl font-bold">{resolvedBets.length}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Completed predictions
+              </p>
+            </Card>
+          </div>
+
           {/* Tier Card */}
           <Card className="p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
         <div className="flex items-center justify-between">
@@ -398,34 +445,39 @@ export default function ReputationPage() {
               Betting History
             </h3>
             <div className="space-y-3">
-              {userResolvedBets.length === 0 ? (
+              {positionsLoading ? (
+                <div className="text-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                  <p className="text-muted-foreground">Loading your bets...</p>
+                </div>
+              ) : userResolvedBets.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No resolved bets yet</p>
                   <p className="text-sm mt-1">Your betting history will appear here</p>
                 </div>
               ) : (
-                userResolvedBets.map((market: any, i: number) => {
-                  const userPosition = market.positions?.find(
-                    (p: any) => p.user.toLowerCase() === address?.toLowerCase()
-                  );
+                userResolvedBets.map((bet) => {
+                  const userBetAmount = bet.yesAmount > 0n ? bet.yesAmount : bet.noAmount;
+                  const userPosition = bet.yesAmount > 0n;
+                  const won = bet.outcome === userPosition;
                   return (
-                    <Card key={i} className="p-4 hover:bg-muted/50 transition-colors">
+                    <Card key={bet.marketId} className="p-4 hover:bg-muted/50 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <Link href={`/markets/${market.id}`} className="hover:underline">
-                            <h4 className="font-semibold mb-1">{market.question}</h4>
+                          <Link href={`/markets/${bet.marketId}`} className="hover:underline">
+                            <h4 className="font-semibold mb-1">{bet.question}</h4>
                           </Link>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Wallet className="w-3 h-3" />
-                              Bet: {formatEther(userPosition?.amount || BigInt(0))} BNB
+                              Bet: {formatEther(userBetAmount)} BNB
                             </span>
-                            <span className={`font-medium ${userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
-                              {userPosition?.position ? 'YES' : 'NO'}
+                            <span className={`font-medium ${userPosition ? 'text-green-600' : 'text-red-600'}`}>
+                              {userPosition ? 'YES' : 'NO'}
                             </span>
-                            <span className={`flex items-center gap-1 ${market.outcome === userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
-                              {market.outcome === userPosition?.position ? (
+                            <span className={`flex items-center gap-1 ${won ? 'text-green-600' : 'text-red-600'}`}>
+                              {won ? (
                                 <>
                                   <CheckCircle className="w-3 h-3" />
                                   Won
@@ -434,15 +486,21 @@ export default function ReputationPage() {
                                 <>Lost</>
                               )}
                             </span>
+                            {bet.claimed && (
+                              <span className="text-blue-600 flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Claimed
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-lg font-bold ${market.outcome === userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
-                            {market.outcome === userPosition?.position ? '+' : '-'}
-                            {formatEther(userPosition?.amount || BigInt(0))} BNB
+                          <p className={`text-lg font-bold ${won ? 'text-green-600' : 'text-red-600'}`}>
+                            {won ? '+' : '-'}
+                            {formatEther(userBetAmount)} BNB
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(Number(market.endTime) * 1000).toLocaleDateString()}
+                            {new Date(Number(bet.endTime) * 1000).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -462,47 +520,55 @@ export default function ReputationPage() {
               Active Positions
             </h3>
             <div className="space-y-3">
-              {userActiveBets.length === 0 ? (
+              {positionsLoading ? (
+                <div className="text-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                  <p className="text-muted-foreground">Loading your positions...</p>
+                </div>
+              ) : userActiveBets.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No active bets</p>
                   <p className="text-sm mt-1">Start predicting on markets to see them here</p>
                   <Button asChild className="mt-4" size="sm">
-                    <Link href="/">Browse Markets</Link>
+                    <Link href="/markets">Browse Markets</Link>
                   </Button>
                 </div>
               ) : (
-                userActiveBets.map((market: any, i: number) => {
-                  const userPosition = market.positions?.find(
-                    (p: any) => p.user.toLowerCase() === address?.toLowerCase()
-                  );
+                userActiveBets.map((bet) => {
+                  const userBetAmount = bet.yesAmount > 0n ? bet.yesAmount : bet.noAmount;
+                  const userPosition = bet.yesAmount > 0n;
+                  const totalPool = bet.totalYesAmount + bet.totalNoAmount;
+                  const odds = totalPool > 0n 
+                    ? Number((userPosition ? bet.totalYesAmount : bet.totalNoAmount) * 100n / totalPool)
+                    : 50;
                   return (
-                    <Card key={i} className="p-4 hover:bg-muted/50 transition-colors">
+                    <Card key={bet.marketId} className="p-4 hover:bg-muted/50 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <Link href={`/markets/${market.id}`} className="hover:underline">
-                            <h4 className="font-semibold mb-1">{market.question}</h4>
+                          <Link href={`/markets/${bet.marketId}`} className="hover:underline">
+                            <h4 className="font-semibold mb-1">{bet.question}</h4>
                           </Link>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Wallet className="w-3 h-3" />
-                              Bet: {formatEther(userPosition?.amount || BigInt(0))} BNB
+                              Bet: {formatEther(userBetAmount)} BNB
                             </span>
-                            <span className={`font-medium ${userPosition?.position ? 'text-green-600' : 'text-red-600'}`}>
-                              {userPosition?.position ? 'YES' : 'NO'}
+                            <span className={`font-medium ${userPosition ? 'text-green-600' : 'text-red-600'}`}>
+                              {userPosition ? 'YES' : 'NO'}
                             </span>
                             <span className="flex items-center gap-1 text-yellow-600">
                               <Clock className="w-3 h-3" />
-                              Pending
+                              {odds}% odds
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-muted-foreground">
-                            Ends: {new Date(Number(market.endTime) * 1000).toLocaleDateString()}
+                            Ends: {new Date(Number(bet.endTime) * 1000).toLocaleDateString()}
                           </p>
                           <Button asChild size="sm" variant="outline" className="mt-2">
-                            <Link href={`/markets/${market.id}`}>
+                            <Link href={`/markets/${bet.marketId}`}>
                               <ExternalLink className="w-3 h-3 mr-1" />
                               View Market
                             </Link>

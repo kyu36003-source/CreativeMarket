@@ -56,21 +56,31 @@ export function MarketCard({ market, onPredict }: MarketCardProps) {
           {market.description}
         </p>
 
-        {/* Odds Display */}
+        {/* Odds Display - Polymarket Style */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-green-50 p-3 rounded-lg">
-            <div className="text-xs text-gray-600 mb-1">YES</div>
+          <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-green-700">YES</span>
+              <span className="text-xs text-green-600">
+                {odds.yesOdds > 0 ? `${((1 / (odds.yesOdds / 100) - 1) * 100).toFixed(0)}% return` : ''}
+              </span>
+            </div>
             <div className="text-2xl font-bold text-green-600">
-              {odds.yesOdds}%
+              {odds.yesOdds.toFixed(0)}¢
             </div>
             <div className="text-xs text-gray-500">
               {formatBNB(market.totalYesAmount)} BNB
             </div>
           </div>
-          <div className="bg-red-50 p-3 rounded-lg">
-            <div className="text-xs text-gray-600 mb-1">NO</div>
+          <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-red-700">NO</span>
+              <span className="text-xs text-red-600">
+                {odds.noOdds > 0 ? `${((1 / (odds.noOdds / 100) - 1) * 100).toFixed(0)}% return` : ''}
+              </span>
+            </div>
             <div className="text-2xl font-bold text-red-600">
-              {odds.noOdds}%
+              {odds.noOdds.toFixed(0)}¢
             </div>
             <div className="text-xs text-gray-500">
               {formatBNB(market.totalNoAmount)} BNB

@@ -57,13 +57,49 @@ export function PredictionModal({
     }
   }, [showAIAnalysis, marketId, aiAnalysis]);
 
+  /**
+   * POLYMARKET-STYLE POTENTIAL WINNINGS
+   * 
+   * In Polymarket:
+   * - You buy shares at current price (e.g., 65¢ for YES)
+   * - If you win, each share pays $1
+   * - Profit per share = $1 - price = $0.35
+   * - Return % = (1 / price) - 1 = 53.8%
+   * 
+   * In our parimutuel system:
+   * - Your payout = (your_bet / winning_pool) * total_pool
+   * - Profit = payout - your_bet
+   */
   const calculatePotentialWinnings = () => {
-    if (!position || !amount) return '0';
+    if (position === null || !amount) return { profit: '0', multiplier: '1.00x', returnPct: '0' };
     const investAmount = parseFloat(amount);
-    const odds = position ? yesOdds : noOdds;
-    const potentialReturn = (investAmount / (odds / 100)) * (1 - odds / 100);
-    return potentialReturn.toFixed(4);
+    if (isNaN(investAmount) || investAmount <= 0) return { profit: '0', multiplier: '1.00x', returnPct: '0' };
+    
+    // Current price (probability) for chosen position
+    const chosenPrice = position ? yesOdds / 100 : noOdds / 100;
+    
+    if (chosenPrice <= 0 || chosenPrice >= 1) {
+      return { profit: investAmount.toFixed(4), multiplier: '2.00x', returnPct: '100' };
+    }
+    
+    // Polymarket-style calculation:
+    // Shares you get = investment / price
+    // If you win, payout = shares * $1 = investment / price
+    // Profit = (investment / price) - investment = investment * ((1 / price) - 1)
+    const multiplier = 1 / chosenPrice;
+    const payout = investAmount * multiplier;
+    const profit = payout - investAmount;
+    const returnPct = ((multiplier - 1) * 100).toFixed(1);
+    
+    return {
+      profit: profit.toFixed(4),
+      payout: payout.toFixed(4),
+      multiplier: multiplier.toFixed(2) + 'x',
+      returnPct,
+    };
   };
+
+  const winnings = calculatePotentialWinnings();
 
   const getSentimentLabel = (sentiment: number): string => {
     if (sentiment > 0.3) return 'Bullish';
@@ -171,7 +207,7 @@ export function PredictionModal({
             </div>
           )}
 
-          {/* Position Selection */}
+          {/* Position Selection - Polymarket Style */}
           <div className="space-y-3">
             <label className="text-sm font-semibold">
               Choose Your Position
@@ -181,33 +217,45 @@ export function PredictionModal({
                 onClick={() => setPosition(true)}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   position === true
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-green-300'
+                    ? 'border-green-500 bg-green-50 shadow-lg'
+                    : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span className="font-bold text-lg">YES</span>
+                  <span className="font-bold text-lg text-green-700">YES</span>
                 </div>
-                <div className="text-2xl font-bold text-green-600">
-                  {yesOdds}%
+                <div className="text-3xl font-bold text-green-600">
+                  {yesOdds.toFixed(1)}¢
                 </div>
-                <div className="text-xs text-gray-500 mt-1">Current odds</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {yesOdds.toFixed(0)}% chance
+                </div>
+                <div className="text-xs text-green-600 mt-2 font-medium">
+                  {yesOdds > 0 ? `${((1 / (yesOdds / 100) - 1) * 100).toFixed(0)}% potential return` : '∞ return'}
+                </div>
               </button>
               <button
                 onClick={() => setPosition(false)}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   position === false
-                    ? 'border-red-500 bg-red-50'
-                    : 'border-gray-200 hover:border-red-300'
+                    ? 'border-red-500 bg-red-50 shadow-lg'
+                    : 'border-gray-200 hover:border-red-300 hover:bg-red-50/50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <TrendingDown className="h-5 w-5 text-red-600" />
-                  <span className="font-bold text-lg">NO</span>
+                  <span className="font-bold text-lg text-red-700">NO</span>
                 </div>
-                <div className="text-2xl font-bold text-red-600">{noOdds}%</div>
-                <div className="text-xs text-gray-500 mt-1">Current odds</div>
+                <div className="text-3xl font-bold text-red-600">
+                  {noOdds.toFixed(1)}¢
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {noOdds.toFixed(0)}% chance
+                </div>
+                <div className="text-xs text-red-600 mt-2 font-medium">
+                  {noOdds > 0 ? `${((1 / (noOdds / 100) - 1) * 100).toFixed(0)}% potential return` : '∞ return'}
+                </div>
               </button>
             </div>
           </div>
@@ -243,20 +291,33 @@ export function PredictionModal({
             </div>
           </div>
 
-          {/* Potential Winnings */}
-          {position !== null && amount && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold">
-                  Potential Winnings:
+          {/* Potential Winnings - Polymarket Style */}
+          {position !== null && amount && parseFloat(amount) > 0 && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">If {position ? 'YES' : 'NO'} wins</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    +{winnings.profit} BNB
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-gray-500 mb-1">Total Payout</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {winnings.payout || (parseFloat(amount) + parseFloat(winnings.profit)).toFixed(4)} BNB
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">
+                  Multiplier: <span className="font-bold text-indigo-600">{winnings.multiplier}</span>
                 </span>
-                <span className="text-2xl font-bold text-blue-600">
-                  {calculatePotentialWinnings()} BNB
+                <span className="text-gray-600">
+                  Return: <span className="font-bold text-green-600">+{winnings.returnPct}%</span>
                 </span>
               </div>
-              <div className="text-xs text-gray-600">
-                If your prediction is correct, you will receive your investment
-                plus winnings
+              <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-blue-100">
+                Buy {position ? 'YES' : 'NO'} shares at {position ? yesOdds.toFixed(1) : noOdds.toFixed(1)}¢. If correct, each share pays $1.
               </div>
             </div>
           )}
