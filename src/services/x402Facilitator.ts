@@ -234,19 +234,27 @@ export class X402Facilitator {
     amount: bigint,
     resourceUrl: string
   ): PaymentRequirements {
+    // For native BNB, use zero address to indicate native token
+    // The client will handle this appropriately
+    const bettingToken = process.env.NEXT_PUBLIC_BETTING_TOKEN_ADDRESS;
+    const isNativeBNB = !bettingToken || bettingToken === '0x0' || bettingToken === '';
+    
     return {
       scheme: 'exact',
       network: `eip155:${this.chainId}`,
       amount: amount.toString(),
-      asset: process.env.NEXT_PUBLIC_BETTING_TOKEN_ADDRESS as Address || '0x0', // USDC or betting token
+      asset: isNativeBNB 
+        ? '0x0000000000000000000000000000000000000000' as Address  // Native BNB
+        : bettingToken as Address,
       payTo: this.x402BettingAddress,
       maxTimeoutSeconds: 300, // 5 minutes
       resource: resourceUrl,
       description: `Place bet on market #${marketId}`,
       mimeType: 'application/json',
       extra: {
-        name: 'USDC',
+        name: isNativeBNB ? 'BNB' : 'USDC',
         version: '2',
+        isNative: isNativeBNB,
       },
     };
   }

@@ -19,6 +19,7 @@ export interface PaymentRequirements {
   extra?: {
     name: string; // token name
     version: string; // EIP-712 version
+    isNative?: boolean; // true for native BNB
   };
 }
 
@@ -79,6 +80,7 @@ export class X402Client {
 
   /**
    * Create EIP-3009 authorization signature for gasless betting
+   * For native BNB, creates a simpler authorization using the betting contract
    * @param params Authorization parameters
    * @param signTypedData Wallet signing function
    */
@@ -94,15 +96,25 @@ export class X402Client {
       tokenName: string;
       tokenVersion: string;
       chainId: number;
+      isNative?: boolean;
     },
     signTypedData: (args: any) => Promise<Hex>
   ): Promise<PaymentPayload['payload']> {
-    // EIP-3009 TransferWithAuthorization type
+    // Check if this is native BNB (zero address)
+    const isNativeBNB = params.isNative || 
+      params.tokenAddress === '0x0000000000000000000000000000000000000000' ||
+      params.tokenAddress.toLowerCase() === '0x0';
+    
+    // For native BNB, use the betting contract as verifying contract
+    const verifyingContract = isNativeBNB ? params.to : params.tokenAddress;
+    const tokenName = isNativeBNB ? 'X402BettingBNB' : params.tokenName;
+    
+    // EIP-3009 TransferWithAuthorization type (or similar for native)
     const domain = {
-      name: params.tokenName,
+      name: tokenName,
       version: params.tokenVersion,
       chainId: params.chainId,
-      verifyingContract: params.tokenAddress,
+      verifyingContract: verifyingContract,
     };
 
     const types = {
@@ -253,9 +265,10 @@ export class X402Client {
           validBefore: now + selectedPayment.maxTimeoutSeconds,
           nonce,
           tokenAddress: selectedPayment.asset,
-          tokenName: selectedPayment.extra?.name || 'USDC',
+          tokenName: selectedPayment.extra?.name || 'BNB',
           tokenVersion: selectedPayment.extra?.version || '2',
           chainId,
+          isNative: selectedPayment.extra?.isNative || false,
         },
         signTypedData
       );
