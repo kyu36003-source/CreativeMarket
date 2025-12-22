@@ -100,6 +100,11 @@ export class X402Client {
     },
     signTypedData: (args: any) => Promise<Hex>
   ): Promise<PaymentPayload['payload']> {
+    // Validate required address params
+    if (!params.from || !params.to) {
+      throw new Error('Missing required address params: from or to');
+    }
+    
     // Check if this is native BNB (zero address or undefined)
     const tokenAddr = params.tokenAddress || '0x0000000000000000000000000000000000000000';
     const isNativeBNB = params.isNative || 
@@ -247,7 +252,15 @@ export class X402Client {
 
       // Step 3: Select payment method (first available)
       const selectedPayment = paymentRequired.accepts[0];
-
+      
+      // Validate selectedPayment has required fields
+      if (!selectedPayment || !selectedPayment.payTo || !selectedPayment.amount) {
+        console.error('Invalid payment requirements:', selectedPayment);
+        return {
+          success: false,
+          error: 'Invalid payment requirements from server',
+        };
+      }
       // Step 4: Create payment authorization
       const now = Math.floor(Date.now() / 1000);
       const nonce = keccak256(
