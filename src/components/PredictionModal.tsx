@@ -69,6 +69,10 @@ export function PredictionModal({
    * In our parimutuel system:
    * - Your payout = (your_bet / winning_pool) * total_pool
    * - Profit = payout - your_bet
+   * 
+   * Edge cases:
+   * - If odds = 0%: The market is empty on your side, you get ALL the opposing pool
+   * - If odds = 100%: Everyone agrees with you, minimal profit (just your share back)
    */
   const calculatePotentialWinnings = () => {
     if (position === null || !amount) return { profit: '0', multiplier: '1.00x', returnPct: '0' };
@@ -78,11 +82,35 @@ export function PredictionModal({
     // Current price (probability) for chosen position
     const chosenPrice = position ? yesOdds / 100 : noOdds / 100;
     
-    if (chosenPrice <= 0 || chosenPrice >= 1) {
-      return { profit: investAmount.toFixed(4), multiplier: '2.00x', returnPct: '100' };
+    // Handle edge cases for empty or one-sided markets
+    // If odds are 0% or very close to 0, you're the first better on this side
+    // Maximum theoretical return: you get the entire opposing pool + your stake
+    if (chosenPrice <= 0.01) {
+      // Near-zero odds = very high return potential (cap at 100x for display)
+      const multiplier = 100;
+      const payout = investAmount * multiplier;
+      const profit = payout - investAmount;
+      return {
+        profit: profit.toFixed(4),
+        payout: payout.toFixed(4),
+        multiplier: '100x+',
+        returnPct: '9900+',
+      };
     }
     
-    // Polymarket-style calculation:
+    // If odds are 100% or very close, everyone is on this side
+    // Minimal return: mostly just your money back
+    if (chosenPrice >= 0.99) {
+      // Near-100% odds = minimal return
+      return {
+        profit: '0.0001',
+        payout: (investAmount + 0.0001).toFixed(4),
+        multiplier: '1.00x',
+        returnPct: '~0',
+      };
+    }
+    
+    // Normal case: Polymarket-style calculation
     // Shares you get = investment / price
     // If you win, payout = shares * $1 = investment / price
     // Profit = (investment / price) - investment = investment * ((1 / price) - 1)
@@ -232,7 +260,7 @@ export function PredictionModal({
                   {yesOdds.toFixed(0)}% chance
                 </div>
                 <div className="text-xs text-green-600 mt-2 font-medium">
-                  {yesOdds > 0 ? `${((1 / (yesOdds / 100) - 1) * 100).toFixed(0)}% potential return` : '∞ return'}
+                  {yesOdds <= 1 ? '9900%+ return' : yesOdds >= 99 ? '~0% return' : `${((1 / (yesOdds / 100) - 1) * 100).toFixed(0)}% potential return`}
                 </div>
               </button>
               <button
@@ -254,7 +282,7 @@ export function PredictionModal({
                   {noOdds.toFixed(0)}% chance
                 </div>
                 <div className="text-xs text-red-600 mt-2 font-medium">
-                  {noOdds > 0 ? `${((1 / (noOdds / 100) - 1) * 100).toFixed(0)}% potential return` : '∞ return'}
+                  {noOdds <= 1 ? '9900%+ return' : noOdds >= 99 ? '~0% return' : `${((1 / (noOdds / 100) - 1) * 100).toFixed(0)}% potential return`}
                 </div>
               </button>
             </div>

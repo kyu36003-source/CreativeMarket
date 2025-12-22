@@ -26,8 +26,10 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { useAllMarkets, usePlaceBet } from '@/hooks/useContracts';
+import { useAllMarkets } from '@/hooks/useContracts';
+import { useX402Bet } from '@/hooks/useX402Bet';
 import { useRouter } from 'next/navigation';
+import { parseEther } from 'viem';
 
 export default function HomePage() {
   const router = useRouter();
@@ -52,8 +54,9 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const marketsLoadedRef = useRef(false); // Prevent infinite loop
 
-  // Betting hook
-  const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
+  // X402 Gasless Betting hook
+  const { placeBetGasless, isPending: isBetting, error: _betError } = useX402Bet();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Get ALL markets from blockchain using batch query
   const { markets: blockchainMarkets, marketCount, isLoading: isLoadingMarkets, error: _marketsError } = useAllMarkets();
@@ -131,11 +134,26 @@ export default function HomePage() {
     if (!selectedMarketId) return;
     
     try {
-      await placeBet(parseInt(selectedMarketId), position, amount);
-      // Close modal after successful transaction
-      setSelectedMarketId(null);
-      // Navigate to market detail page to see the result
-      router.push(`/markets/${selectedMarketId}`);
+      // Convert amount string to bigint wei
+      const amountInWei = parseEther(amount);
+      
+      // Use X402 gasless betting
+      const result = await placeBetGasless(
+        parseInt(selectedMarketId), 
+        position, 
+        amountInWei
+      );
+      
+      if (result.success) {
+        setIsSuccess(true);
+        // Close modal after successful transaction
+        setSelectedMarketId(null);
+        // Navigate to market detail page to see the result
+        router.push(`/markets/${selectedMarketId}`);
+      } else {
+        console.error('Gasless bet failed:', result.error);
+        // Keep modal open so user can retry
+      }
     } catch (error) {
       console.error('Failed to place bet:', error);
       // Keep modal open so user can retry
