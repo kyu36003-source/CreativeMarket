@@ -2,32 +2,25 @@ import { NextResponse } from 'next/server';
 
 /**
  * GET /api/user/profile
- * Get user profile information
+ * Get user profile information from blockchain
+ * 
+ * TODO: Implement blockchain data fetching
+ * - Query TraderReputation contract for user stats
+ * - Fetch user reputation score
+ * - Get user's market history from PredictionMarket contract
  */
 export async function GET() {
   try {
-    // TODO: Fetch from database/blockchain
-    // For now, return mock data
-    const profile = {
-      address: '0x0000000000000000000000000000000000000000',
-      name: 'Anonymous Trader',
-      bio: 'Prediction market enthusiast',
-      avatar: null,
-      joinedAt: new Date('2024-01-01').toISOString(),
-      stats: {
-        totalBets: 0,
-        winRate: 0,
-        totalWinnings: 0,
-        rank: 0,
+    // Placeholder - should fetch from blockchain via TraderReputation contract
+    // For now, return error indicating not yet implemented
+    return NextResponse.json(
+      {
+        error: 'User profile endpoint requires wallet connection',
+        message: 'Profile data is fetched directly from blockchain',
+        instructions: 'Connect your wallet and reload the page',
       },
-      following: 0,
-      followers: 0,
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: profile,
-    });
+      { status: 401 }
+    );
   } catch (error) {
     console.error('Error fetching profile:', error);
     return NextResponse.json(

@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 import { useMarketCount, useMarket, usePlaceBet } from '@/hooks/useContracts';
 import { useRouter } from 'next/navigation';
-import { STATIC_MARKETS } from '@/lib/static-markets';
 
 export default function HomePage() {
   const router = useRouter();
@@ -60,10 +59,10 @@ export default function HomePage() {
   // Betting hook
   const { placeBet, isPending: isBetting, isSuccess } = usePlaceBet();
 
-  // Get market count from blockchain (with static fallback)
+  // Get market count from blockchain
   const { data: marketCount, isLoading: isLoadingCount } = useMarketCount();
   
-  // Fetch markets 1-6 directly (with static fallback)
+  // Fetch markets 1-6 directly from blockchain
   const { data: market1Data, isLoading: isLoading1 } = useMarket(1);
   const { data: market2Data, isLoading: isLoading2 } = useMarket(2);
   const { data: market3Data, isLoading: isLoading3 } = useMarket(3);
@@ -164,39 +163,17 @@ export default function HomePage() {
       setError(null);
       marketsLoadedRef.current = true; // Mark as loaded
     } else if (allFinishedLoading || marketCount !== undefined) {
-      // All hooks loaded but no data - this is expected in production demo mode
-      // The hooks will have returned static data automatically
+      // All hooks loaded - only show blockchain data
       setLoading(false);
       
-      // Convert static markets for display if no blockchain data
-      if (loadedMarkets.length === 0) {
-        const staticMarkets = STATIC_MARKETS.map(sm => {
-          const totalYes = sm.totalYesAmount;
-          const totalNo = sm.totalNoAmount;
-          const { yesOdds, noOdds } = calculateMarketOdds(totalYes, totalNo);
-          
-          return {
-            id: sm.id.toString(),
-            question: sm.question,
-            description: sm.description,
-            category: sm.category,
-            creator: sm.creator,
-            endTime: Number(sm.endTime),
-            totalYesAmount: sm.totalYesAmount,
-            totalNoAmount: sm.totalNoAmount,
-            resolved: sm.resolved,
-            outcome: sm.outcome,
-            resolvedAt: Number(sm.resolvedAt),
-            aiOracleEnabled: sm.aiOracleEnabled,
-            yesOdds,
-            noOdds,
-            totalVolume: totalYes + totalNo,
-            participantCount: Math.floor(Math.random() * 50) + 15,
-          };
-        });
-        
-        setMarkets(staticMarkets);
+      // Show only loaded blockchain data (no fallback to static)
+      if (loadedMarkets.length > 0) {
+        setMarkets(loadedMarkets);
         marketsLoadedRef.current = true; // Mark as loaded
+      } else {
+        // No markets loaded from blockchain yet
+        setMarkets([]);
+        setError('No markets available. Please ensure you are connected to BSC Testnet.');
       }
     }
   }, [

@@ -1,8 +1,23 @@
 /**
- * Static Market Data for Production Demo
+ * DEPRECATED - Static Market Data
  * 
- * Used when blockchain connection is unavailable or for initial demo
- * Data is designed to look realistic and showcase platform capabilities
+ * ⚠️ THIS FILE IS NO LONGER USED
+ * 
+ * As of December 22, 2025, the application is 100% blockchain-driven
+ * with no static data fallback. This file is kept for reference only.
+ * 
+ * All market data is fetched directly from:
+ * - BSC Testnet Smart Contracts
+ * - PredictionMarket contract (main market data)
+ * - TraderReputation contract (user statistics)
+ * - AIOracle contract (market resolution)
+ * 
+ * To use real blockchain data:
+ * 1. Connect your wallet
+ * 2. Set NEXT_PUBLIC_USE_STATIC_DATA=false in your .env.local
+ * 3. Ensure NEXT_PUBLIC_DEFAULT_CHAIN_ID=97 (BSC Testnet)
+ * 
+ * See: src/hooks/useContracts.ts for blockchain data fetching
  */
 
 import { parseEther } from 'viem';

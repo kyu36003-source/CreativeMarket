@@ -99,8 +99,8 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         require(_endTime > block.timestamp, "End time must be in the future");
         require(bytes(_question).length > 0, "Question cannot be empty");
         
-        // Check reputation requirement
-        if (address(reputationContract) != address(0)) {
+        // Check reputation requirement (owner bypasses this)
+        if (address(reputationContract) != address(0) && msg.sender != owner()) {
             uint256 reputation = reputationContract.getReputationScore(msg.sender);
             require(reputation >= MIN_REPUTATION_TO_CREATE, "Insufficient reputation to create markets. Place predictions to earn reputation.");
         }

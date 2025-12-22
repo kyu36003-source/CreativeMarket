@@ -35,21 +35,17 @@ async function main() {
     console.log('   https://testnet.bnbchain.org/faucet-smart\n');
   }
 
-  // Deploy TraderReputation
-  console.log('📝 Deploying TraderReputation...');
-  const TraderReputation = await ethers.getContractFactory('TraderReputation');
-  const reputation = await TraderReputation.deploy(deployer.address);
-  await reputation.waitForDeployment();
-  const reputationAddress = await reputation.getAddress();
-  console.log(`✅ TraderReputation: ${reputationAddress}\n`);
-
-  // Deploy PredictionMarket
+  // Deploy PredictionMarket (creates reputation contract internally)
   console.log('📝 Deploying PredictionMarket...');
   const PredictionMarket = await ethers.getContractFactory('PredictionMarket');
-  const predictionMarket = await PredictionMarket.deploy(reputationAddress);
+  const predictionMarket = await PredictionMarket.deploy();
   await predictionMarket.waitForDeployment();
   const marketAddress = await predictionMarket.getAddress();
   console.log(`✅ PredictionMarket: ${marketAddress}\n`);
+
+  // Get reputation contract address from PredictionMarket
+  const reputationAddress = await predictionMarket.reputationContract();
+  console.log(`✅ TraderReputation: ${reputationAddress}\n`);
 
   // Deploy AIOracle
   console.log('📝 Deploying AIOracle...');
@@ -62,7 +58,7 @@ async function main() {
   // Deploy GaslessRelayer
   console.log('📝 Deploying GaslessRelayer...');
   const GaslessRelayer = await ethers.getContractFactory('GaslessRelayer');
-  const gaslessRelayer = await GaslessRelayer.deploy(marketAddress);
+  const gaslessRelayer = await GaslessRelayer.deploy();
   await gaslessRelayer.waitForDeployment();
   const relayerAddress = await gaslessRelayer.getAddress();
   console.log(`✅ GaslessRelayer: ${relayerAddress}\n`);
@@ -75,18 +71,13 @@ async function main() {
   await tx.wait();
   console.log('✅ Reputation contract set');
 
-  // Authorize AI Oracle
-  tx = await predictionMarket.setAIOracle(oracleAddress);
-  await tx.wait();
-  console.log('✅ AI Oracle authorized');
-
-  // Authorize oracle address
-  tx = await predictionMarket.authorizeOracle(deployer.address);
+  // Set deployer as authorized oracle
+  tx = await predictionMarket.setAuthorizedOracle(deployer.address, true);
   await tx.wait();
   console.log('✅ Oracle address authorized');
 
-  // Whitelist gasless relayer
-  tx = await predictionMarket.whitelistRelayer(relayerAddress, true);
+  // Whitelist gasless relayer as authorized oracle
+  tx = await predictionMarket.setAuthorizedOracle(relayerAddress, true);
   await tx.wait();
   console.log('✅ Gasless relayer whitelisted\n');
 

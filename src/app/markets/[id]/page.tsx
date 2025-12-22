@@ -10,7 +10,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
 import { formatEther } from 'viem';
-import { STATIC_MARKETS } from '@/lib/static-markets';
 import {
   useMarket,
   usePosition,
@@ -58,8 +57,7 @@ export default function MarketDetailPage() {
   const marketId = parseInt(params.id as string);
   const { isConnected, chainId } = useAccount();
 
-  // Use STATIC_MARKETS as primary source of truth, blockchain as backup
-  const staticMarket = STATIC_MARKETS.find(m => Number(m.id) === marketId);
+  // Use BLOCKCHAIN as primary and only source of truth (100% LIVE)
   const { data: marketData, isLoading: loadingMarket } = useMarket(marketId);
   const { data: positionData } = usePosition(marketId);
   const {
@@ -131,7 +129,7 @@ export default function MarketDetailPage() {
     }
   }, [isBetSuccess, isGaslessSuccess]);
 
-  if (loadingMarket && !staticMarket) {
+  if (loadingMarket) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center py-20">
@@ -141,7 +139,7 @@ export default function MarketDetailPage() {
     );
   }
 
-  if (!marketData && !staticMarket) {
+  if (!marketData) {
     return (
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <Card className="p-6 text-center">

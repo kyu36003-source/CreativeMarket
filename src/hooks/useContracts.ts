@@ -2,7 +2,8 @@
  * React Hooks for Smart Contract Interactions
  * Using Wagmi v2 for type-safe contract interactions
  * 
- * With Static Data Fallback for production demo
+ * 100% LIVE BLOCKCHAIN - No static data fallback
+ * All data comes directly from BSC Testnet smart contracts
  */
 
 import { useEffect, useState } from 'react';
@@ -22,119 +23,50 @@ import {
   AI_ORACLE_ABI,
   TRADER_REPUTATION_ABI,
 } from '../lib/contracts/abis';
-import { getStaticMarket, getStaticMarketCount, StaticMarketData } from '../lib/static-markets';
 
 // ============================================================================
-// Prediction Market Hooks (with Static Data Fallback)
+// Prediction Market Hooks - LIVE BLOCKCHAIN ONLY
 // ============================================================================
 
 /**
  * Get market details by ID
- * Falls back to static data if blockchain connection fails
+ * Data comes directly from BSC Testnet blockchain
  */
 export function useMarket(marketId: number) {
   const chainId = useChainId();
   const effectiveChainId = chainId || 97;
   
-  const blockchainResult = useReadContract({
+  return useReadContract({
     address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
     functionName: 'markets',
     args: [BigInt(marketId)],
     chainId: effectiveChainId,
     query: {
-      retry: false, // Don't retry on failure
+      retry: 3, // Retry failed requests
       staleTime: 30000, // 30 seconds
     },
   });
-
-  // Use static data if blockchain call fails
-  const [staticData, setStaticData] = useState<StaticMarketData | null>(null);
-  
-  useEffect(() => {
-    if (blockchainResult.isError) {
-      const market = getStaticMarket(marketId);
-      if (market) {
-        // Convert StaticMarketData to array format matching contract response
-        const _marketArray = [
-          market.id,
-          market.question,
-          market.description,
-          market.category,
-          market.creator,
-          market.endTime,
-          market.totalYesAmount,
-          market.totalNoAmount,
-          market.resolved,
-          market.outcome,
-          market.resolvedAt,
-          market.aiOracleEnabled,
-        ];
-        setStaticData(market);
-      }
-    }
-  }, [blockchainResult.isError, marketId]);
-
-  // Return blockchain data if available, otherwise static data
-  if (blockchainResult.data) {
-    return blockchainResult;
-  }
-
-  if (staticData) {
-    return {
-      ...blockchainResult,
-      data: [
-        staticData.id,
-        staticData.question,
-        staticData.description,
-        staticData.category,
-        staticData.creator,
-        staticData.endTime,
-        staticData.totalYesAmount,
-        staticData.totalNoAmount,
-        staticData.resolved,
-        staticData.outcome,
-        staticData.resolvedAt,
-        staticData.aiOracleEnabled,
-      ],
-      isError: false,
-      error: null,
-    };
-  }
-
-  return blockchainResult;
 }
 
 /**
  * Get total market count
- * Falls back to static data count if blockchain connection fails
+ * Data comes directly from BSC Testnet blockchain
  */
 export function useMarketCount() {
   const chainId = useChainId();
   const effectiveChainId = chainId || 97;
 
-  const blockchainResult = useReadContract({
+  return useReadContract({
     address: getContractAddress(effectiveChainId, 'PREDICTION_MARKET') as `0x${string}`,
     abi: PREDICTION_MARKET_ABI,
     functionName: 'marketCount',
     chainId: effectiveChainId,
     query: {
-      retry: false,
+      retry: 3,
       staleTime: 30000,
     },
   });
-
-  // Use static data count if blockchain call fails
-  if (blockchainResult.isError || blockchainResult.data === undefined) {
-    return {
-      ...blockchainResult,
-      data: getStaticMarketCount(),
-      isError: false,
-      error: null,
-    };
-  }
-
-  return blockchainResult;
 }
 
 /**
@@ -198,6 +130,7 @@ export function useCreateMarket() {
     isSuccess,
     error,
   };
+}
 }
 
 /**

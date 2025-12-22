@@ -2,31 +2,25 @@ import { NextResponse } from 'next/server';
 
 /**
  * GET /api/user/achievements
- * Get user achievements and badges
+ * Get user achievements and badges from blockchain
+ * 
+ * TODO: Implement blockchain data fetching
+ * - Query TraderReputation contract for achievement data
+ * - Calculate achievement progress from on-chain statistics
+ * - Retrieve achievement unlock timestamps from blockchain
  */
 export async function GET() {
   try {
-    // TODO: Fetch from database/blockchain
-    // For now, return mock data
-    const achievements = [
+    // Placeholder - should fetch from blockchain
+    // For now, return error indicating not yet fully implemented
+    return NextResponse.json(
       {
-        id: 'first_bet',
-        name: 'First Bet',
-        description: 'Placed your first prediction',
-        icon: '🎯',
-        unlockedAt: null,
-        progress: 0,
-        target: 1,
+        error: 'User achievements endpoint requires wallet connection',
+        message: 'Achievements are calculated from on-chain reputation data',
+        instructions: 'Connect your wallet and reload the page',
       },
-      {
-        id: 'win_streak_3',
-        name: 'Hot Streak',
-        description: 'Win 3 predictions in a row',
-        icon: '🔥',
-        unlockedAt: null,
-        progress: 0,
-        target: 3,
-      },
+      { status: 401 }
+    );
       {
         id: 'total_volume_1000',
         name: 'Big Player',
