@@ -26,9 +26,14 @@ import { http } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 
 // RainbowKit configuration with BNB Chain support
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+if (!walletConnectProjectId || walletConnectProjectId === 'demo-project-id') {
+  console.warn('⚠️ WalletConnect: Missing NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID in env');
+}
+
 export const bnbChainConfig = getDefaultConfig({
   appName: 'PredictBNB',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+  projectId: walletConnectProjectId || '7d5b379d54bd7c2bafb6464aacf75b68', // Fallback to actual project ID
   chains: [bscTestnet, bsc],
   transports: {
     [bscTestnet.id]: http(

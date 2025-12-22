@@ -100,13 +100,14 @@ export class X402Client {
     },
     signTypedData: (args: any) => Promise<Hex>
   ): Promise<PaymentPayload['payload']> {
-    // Check if this is native BNB (zero address)
+    // Check if this is native BNB (zero address or undefined)
+    const tokenAddr = params.tokenAddress || '0x0000000000000000000000000000000000000000';
     const isNativeBNB = params.isNative || 
-      params.tokenAddress === '0x0000000000000000000000000000000000000000' ||
-      params.tokenAddress.toLowerCase() === '0x0';
+      tokenAddr === '0x0000000000000000000000000000000000000000' ||
+      tokenAddr.toLowerCase() === '0x0';
     
     // For native BNB, use the betting contract as verifying contract
-    const verifyingContract = isNativeBNB ? params.to : params.tokenAddress;
+    const verifyingContract = isNativeBNB ? params.to : tokenAddr;
     const tokenName = isNativeBNB ? 'X402BettingBNB' : params.tokenName;
     
     // EIP-3009 TransferWithAuthorization type (or similar for native)
