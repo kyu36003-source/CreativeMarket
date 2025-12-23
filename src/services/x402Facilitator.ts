@@ -420,7 +420,7 @@ export function getFacilitator(chainId?: number): X402Facilitator {
     
     console.log('[X402 Facilitator] Initializing...');
     console.log('[X402 Facilitator] Chain ID:', chainId || process.env.NEXT_PUBLIC_CHAIN_ID || '97');
-    console.log('[X402 Facilitator] Betting contract:', process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS);
+    console.log('[X402 Facilitator] PredictionMarket:', process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS);
     console.log('[X402 Facilitator] Private key present:', !!rawKey, rawKey ? `(length: ${rawKey.length})` : '');
     
     const formattedKey = formatPrivateKey(rawKey);
@@ -435,7 +435,7 @@ export function getFacilitator(chainId?: number): X402Facilitator {
     facilitatorInstance = new X402Facilitator(
       chainId || parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '97'),
       formattedKey,
-      process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS as Address
+      process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as Address // TRUE GASLESS: Use PredictionMarket, not X402BettingBNB
     );
   }
   return facilitatorInstance;
