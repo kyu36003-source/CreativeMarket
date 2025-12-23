@@ -9,16 +9,17 @@ import { bsc, bscTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { PaymentPayload, PaymentRequirements, SettlementResponse } from './x402Client';
 
+// ABI for X402BettingBNB contract - matches the actual deployed contract
 const X402_BETTING_ABI = [
   {
-    name: 'buyPositionWithAuthorization',
+    name: 'gaslessBetWithBNB',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [
       { name: 'marketId', type: 'uint256' },
       { name: 'position', type: 'bool' },
       { name: 'from', type: 'address' },
-      { name: 'value', type: 'uint256' },
+      { name: 'wbnbValue', type: 'uint256' },
       { name: 'validAfter', type: 'uint256' },
       { name: 'validBefore', type: 'uint256' },
       { name: 'nonce', type: 'bytes32' },
@@ -27,21 +28,18 @@ const X402_BETTING_ABI = [
     outputs: [],
   },
   {
-    name: 'verifyAuthorization',
+    name: 'usedNonces',
     type: 'function',
     stateMutability: 'view',
-    inputs: [
-      { name: 'from', type: 'address' },
-      { name: 'value', type: 'uint256' },
-      { name: 'validAfter', type: 'uint256' },
-      { name: 'validBefore', type: 'uint256' },
-      { name: 'nonce', type: 'bytes32' },
-      { name: 'signature', type: 'bytes' },
-    ],
-    outputs: [
-      { name: 'valid', type: 'bool' },
-      { name: 'reason', type: 'string' },
-    ],
+    inputs: [{ name: 'nonce', type: 'bytes32' }],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    name: 'facilitator',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'address' }],
   },
 ] as const;
 
@@ -95,6 +93,8 @@ export class X402Facilitator {
 
   /**
    * Verify payment authorization (x402 /verify endpoint)
+   * Note: X402BettingBNB doesn't have on-chain verification, 
+   * we do basic checks and rely on the WBNB3009 contract's signature verification
    */
   async verifyPayment(request: VerificationRequest): Promise<VerificationResponse> {
     try {
@@ -105,7 +105,7 @@ export class X402Facilitator {
       if (!authorization || !signature) {
         return {
           isValid: false,
-          payer: authorization.from,
+          payer: authorization?.from || '0x0' as Address,
           invalidReason: 'missing_authorization_or_signature',
         };
       }
@@ -119,26 +119,41 @@ export class X402Facilitator {
         };
       }
 
-      // Call contract verification
-      const [valid, reason] = await this.publicClient.readContract({
-        address: this.x402BettingAddress,
-        abi: X402_BETTING_ABI,
-        functionName: 'verifyAuthorization',
-        args: [
-          authorization.from,
-          BigInt(authorization.value),
-          BigInt(authorization.validAfter),
-          BigInt(authorization.validBefore),
-          authorization.nonce,
-          signature,
-        ],
-      });
+      // Check nonce hasn't been used
+      try {
+        const nonceUsed = await this.publicClient.readContract({
+          address: this.x402BettingAddress,
+          abi: X402_BETTING_ABI,
+          functionName: 'usedNonces',
+          args: [authorization.nonce],
+        });
 
-      if (!valid) {
+        if (nonceUsed) {
+          return {
+            isValid: false,
+            payer: authorization.from,
+            invalidReason: 'nonce_already_used',
+          };
+        }
+      } catch (e) {
+        // If we can't check nonce, continue (will fail at execution if duplicate)
+        console.warn('Could not check nonce:', e);
+      }
+
+      // Check time validity
+      const now = Math.floor(Date.now() / 1000);
+      if (now < parseInt(authorization.validAfter)) {
         return {
           isValid: false,
           payer: authorization.from,
-          invalidReason: reason || 'verification_failed',
+          invalidReason: 'authorization_not_yet_valid',
+        };
+      }
+      if (now > parseInt(authorization.validBefore)) {
+        return {
+          isValid: false,
+          payer: authorization.from,
+          invalidReason: 'authorization_expired',
         };
       }
 
@@ -150,7 +165,7 @@ export class X402Facilitator {
       console.error('Payment verification error:', error);
       return {
         isValid: false,
-        payer: request.paymentPayload.payload.authorization.from,
+        payer: request.paymentPayload.payload.authorization?.from || '0x0' as Address,
         invalidReason: error instanceof Error ? error.message : 'unknown_error',
       };
     }
@@ -159,6 +174,7 @@ export class X402Facilitator {
   /**
    * Settle payment (execute on-chain transaction)
    * x402 /settle endpoint - Facilitator sponsors gas
+   * Calls gaslessBetWithBNB on X402BettingBNB contract
    */
   async settlePayment(
     request: VerificationRequest,
@@ -189,11 +205,21 @@ export class X402Facilitator {
 
       const { authorization, signature } = request.paymentPayload.payload;
 
+      console.log('[X402] Executing gaslessBetWithBNB:', {
+        marketId,
+        position,
+        from: authorization.from,
+        value: authorization.value,
+        validAfter: authorization.validAfter,
+        validBefore: authorization.validBefore,
+        nonce: authorization.nonce,
+      });
+
       // Execute gasless transaction (facilitator pays gas)
       const hash = await this.walletClient.writeContract({
         address: this.x402BettingAddress,
         abi: X402_BETTING_ABI,
-        functionName: 'buyPositionWithAuthorization',
+        functionName: 'gaslessBetWithBNB',
         args: [
           BigInt(marketId),
           position,
@@ -206,8 +232,12 @@ export class X402Facilitator {
         ],
       });
 
+      console.log('[X402] Transaction submitted:', hash);
+
       // Wait for confirmation
       await this.publicClient.waitForTransactionReceipt({ hash });
+
+      console.log('[X402] Transaction confirmed!');
 
       return {
         success: true,
@@ -228,33 +258,32 @@ export class X402Facilitator {
 
   /**
    * Get payment requirements for a bet
+   * Uses WBNB3009 for gasless BNB betting
    */
   getPaymentRequirements(
     marketId: number,
     amount: bigint,
     resourceUrl: string
   ): PaymentRequirements {
-    // For native BNB, use zero address to indicate native token
-    // The client will handle this appropriately
-    const bettingToken = process.env.NEXT_PUBLIC_BETTING_TOKEN_ADDRESS;
-    const isNativeBNB = !bettingToken || bettingToken === '0x0' || bettingToken === '';
+    // WBNB3009 address for gasless betting
+    const wbnbAddress = process.env.NEXT_PUBLIC_WBNB_ADDRESS as Address || 
+      '0x70e4730A3b4aC6E6E395e8ED9c46B9c0f753A4fA' as Address;
     
     return {
       scheme: 'exact',
       network: `eip155:${this.chainId}`,
       amount: amount.toString(),
-      asset: isNativeBNB 
-        ? '0x0000000000000000000000000000000000000000' as Address  // Native BNB
-        : bettingToken as Address,
+      asset: wbnbAddress, // WBNB3009 address (user needs WBNB balance)
       payTo: this.x402BettingAddress,
       maxTimeoutSeconds: 300, // 5 minutes
       resource: resourceUrl,
       description: `Place bet on market #${marketId}`,
       mimeType: 'application/json',
       extra: {
-        name: isNativeBNB ? 'BNB' : 'USDC',
-        version: '2',
-        isNative: isNativeBNB,
+        name: 'WBNB3009',
+        version: '1',
+        isNative: false, // Using WBNB3009, not raw BNB
+        wbnbAddress: wbnbAddress,
       },
     };
   }

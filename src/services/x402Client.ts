@@ -10,16 +10,17 @@ export interface PaymentRequirements {
   scheme: 'exact';
   network: string; // e.g., "eip155:56" for BSC mainnet
   amount: string; // atomic units
-  asset: Address; // token contract address
-  payTo: Address; // recipient (X402Betting contract)
+  asset: Address; // token contract address (WBNB3009)
+  payTo: Address; // recipient (X402BettingBNB contract)
   maxTimeoutSeconds: number;
   resource: string; // URL path
   description: string;
   mimeType: string;
   extra?: {
-    name: string; // token name
+    name: string; // token name (WBNB3009)
     version: string; // EIP-712 version
-    isNative?: boolean; // true for native BNB
+    isNative?: boolean; // true for native BNB (not used in current flow)
+    wbnbAddress?: string; // WBNB3009 contract address for signature domain
   };
 }
 
@@ -80,7 +81,7 @@ export class X402Client {
 
   /**
    * Create EIP-3009 authorization signature for gasless betting
-   * For native BNB, creates a simpler authorization using the betting contract
+   * For WBNB3009 gasless betting, signs against the WBNB3009 contract
    * @param params Authorization parameters
    * @param signTypedData Wallet signing function
    */
@@ -97,6 +98,7 @@ export class X402Client {
       tokenVersion: string;
       chainId: number;
       isNative?: boolean;
+      wbnbAddress?: Address; // WBNB3009 contract address for gasless betting
     },
     signTypedData: (args: any) => Promise<Hex>
   ): Promise<PaymentPayload['payload']> {
@@ -105,22 +107,20 @@ export class X402Client {
       throw new Error('Missing required address params: from or to');
     }
     
-    // Check if this is native BNB (zero address or undefined)
-    const tokenAddr = params.tokenAddress || '0x0000000000000000000000000000000000000000';
-    const isNativeBNB = params.isNative || 
-      tokenAddr === '0x0000000000000000000000000000000000000000' ||
-      tokenAddr.toLowerCase() === '0x0';
+    // For gasless BNB betting, we sign against WBNB3009 contract
+    // The X402BettingBNB contract will call wbnb.transferWithAuthorization
+    const wbnbAddress = params.wbnbAddress || 
+      (typeof window !== 'undefined' ? 
+        (process.env.NEXT_PUBLIC_WBNB_ADDRESS as Address) : 
+        '0x70e4730A3b4aC6E6E395e8ED9c46B9c0f753A4fA' as Address);
     
-    // For native BNB, use the betting contract as verifying contract
-    const verifyingContract = isNativeBNB ? params.to : tokenAddr;
-    const tokenName = isNativeBNB ? 'X402BettingBNB' : params.tokenName;
-    
-    // EIP-3009 TransferWithAuthorization type (or similar for native)
+    // EIP-3009 TransferWithAuthorization for WBNB3009
+    // The signature must be verifiable by WBNB3009 contract
     const domain = {
-      name: tokenName,
-      version: params.tokenVersion,
+      name: 'WBNB3009',  // Must match WBNB3009 contract's EIP-712 domain
+      version: '1',      // WBNB3009 uses version 1
       chainId: params.chainId,
-      verifyingContract: verifyingContract,
+      verifyingContract: wbnbAddress,
     };
 
     const types = {
@@ -134,14 +134,21 @@ export class X402Client {
       ],
     };
 
+    // Note: 'to' should be the X402BettingBNB contract address
+    // because WBNB is transferred from user to betting contract
     const message = {
       from: params.from,
-      to: params.to,
+      to: params.to,  // X402BettingBNB contract address
       value: params.value.toString(),
       validAfter: params.validAfter.toString(),
       validBefore: params.validBefore.toString(),
       nonce: params.nonce,
     };
+
+    console.log('[X402] Signing WBNB3009 authorization:', {
+      domain,
+      message,
+    });
 
     const signature = await signTypedData({
       domain,
@@ -270,19 +277,24 @@ export class X402Client {
         )
       );
 
+      // Get WBNB address from payment requirements (for signature domain)
+      const wbnbAddress = selectedPayment.extra?.wbnbAddress as Address || 
+        selectedPayment.asset;
+
       const authPayload = await this.createPaymentAuthorization(
         {
           from: walletAddress,
-          to: selectedPayment.payTo,
+          to: selectedPayment.payTo, // X402BettingBNB contract
           value: BigInt(selectedPayment.amount),
           validAfter: now,
           validBefore: now + selectedPayment.maxTimeoutSeconds,
           nonce,
           tokenAddress: selectedPayment.asset,
-          tokenName: selectedPayment.extra?.name || 'BNB',
-          tokenVersion: selectedPayment.extra?.version || '2',
+          tokenName: selectedPayment.extra?.name || 'WBNB3009',
+          tokenVersion: selectedPayment.extra?.version || '1',
           chainId,
           isNative: selectedPayment.extra?.isNative || false,
+          wbnbAddress: wbnbAddress,
         },
         signTypedData
       );
