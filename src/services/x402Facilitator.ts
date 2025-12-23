@@ -1,60 +1,55 @@
 /**
  * x402 Facilitator Service
- * Handles payment verification and settlement (gas sponsorship)
+ * Handles payment verification and gas sponsorship
  * 
- * TRUE GASLESS BNB BETTING (NO WRAPPING REQUIRED!):
- * 1. User signs EIP-712 bet authorization (no gas, just proving intent)
- * 2. Facilitator verifies signature
- * 3. Facilitator fronts its own BNB and calls buyPositionForUser on PredictionMarket
- * 4. User gets position, 100% gasless - no wrapping, no tokens needed!
+ * GASLESS GAS BETTING (User pays bet, Facilitator pays gas):
+ * 1. User wraps BNB → WBNB3009 (one-time, user pays)
+ * 2. User signs EIP-3009 authorization (free, off-chain)
+ * 3. Facilitator calls gaslessBetWithBNB (facilitator pays GAS only)
+ * 4. User's WBNB3009 is transferred and used for bet
  * 
- * User Experience: Just sign and bet. That's it.
+ * User pays: Bet amount (in WBNB3009)
+ * Facilitator pays: Gas fees only (~$0.03-0.10)
  */
 
-import { Address, Hex, createPublicClient, createWalletClient, http, verifyTypedData, formatEther } from 'viem';
+import { Address, Hex, createPublicClient, createWalletClient, http, formatEther } from 'viem';
 import { bsc, bscTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { PaymentPayload, PaymentRequirements, SettlementResponse } from './x402Client';
 
-// ABI for PredictionMarket contract - buyPositionForUser function
-const PREDICTION_MARKET_ABI = [
+// ABI for X402BettingBNB contract
+const X402_BETTING_ABI = [
   {
-    name: 'buyPositionForUser',
+    name: 'gaslessBetWithBNB',
     type: 'function',
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     inputs: [
-      { name: '_marketId', type: 'uint256' },
-      { name: '_position', type: 'bool' },
-      { name: 'user', type: 'address' },
+      { name: 'marketId', type: 'uint256' },
+      { name: 'position', type: 'bool' },
+      { name: 'from', type: 'address' },
+      { name: 'wbnbValue', type: 'uint256' },
+      { name: 'validAfter', type: 'uint256' },
+      { name: 'validBefore', type: 'uint256' },
+      { name: 'nonce', type: 'bytes32' },
+      { name: 'signature', type: 'bytes' },
     ],
     outputs: [],
   },
   {
-    name: 'authorizedOracles',
+    name: 'usedNonces',
     type: 'function',
     stateMutability: 'view',
-    inputs: [{ name: '', type: 'address' }],
+    inputs: [{ name: '', type: 'bytes32' }],
     outputs: [{ name: '', type: 'bool' }],
   },
+  {
+    name: 'facilitator',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'address' }],
+  },
 ] as const;
-
-// EIP-712 domain for bet authorization signatures
-const BET_AUTHORIZATION_DOMAIN = {
-  name: 'PredictBNB',
-  version: '1',
-};
-
-// EIP-712 types for bet authorization
-const BET_AUTHORIZATION_TYPES = {
-  BetAuthorization: [
-    { name: 'marketId', type: 'uint256' },
-    { name: 'position', type: 'bool' },
-    { name: 'amount', type: 'uint256' },
-    { name: 'user', type: 'address' },
-    { name: 'nonce', type: 'bytes32' },
-    { name: 'validBefore', type: 'uint256' },
-  ],
-};
 
 // Track used nonces to prevent replay attacks (in production, use Redis/DB)
 const usedNonces = new Set<string>();
@@ -71,20 +66,20 @@ export interface VerificationResponse {
 }
 
 /**
- * x402 Facilitator - TRUE GASLESS BNB BETTING
- * Facilitator fronts the BNB and places bets on behalf of users
+ * x402 Facilitator - GASLESS GAS BETTING
+ * User pays bet amount (WBNB3009), Facilitator pays gas only
  */
 export class X402Facilitator {
   private publicClient;
   private walletClient;
   private facilitatorAccount;
-  private predictionMarketAddress: Address;
+  private x402BettingAddress: Address;
   private chainId: number;
 
   constructor(
     chainId: number = 97, // BSC Testnet
     facilitatorPrivateKey?: Hex,
-    predictionMarketAddress?: Address
+    x402BettingAddress?: Address
   ) {
     this.chainId = chainId;
     const chain = chainId === 56 ? bsc : bscTestnet;
@@ -106,13 +101,13 @@ export class X402Facilitator {
       console.log('[X402] Facilitator wallet:', this.facilitatorAccount.address);
     }
 
-    this.predictionMarketAddress = predictionMarketAddress || 
-      process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as Address;
+    this.x402BettingAddress = x402BettingAddress || 
+      process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS as Address;
   }
 
   /**
-   * Verify bet authorization signature
-   * TRUE GASLESS: User just signs a bet intent, no tokens needed!
+   * Verify WBNB3009 transfer authorization
+   * User signs EIP-3009 to authorize transfer of their WBNB3009
    */
   async verifyPayment(request: VerificationRequest): Promise<VerificationResponse> {
     try {
@@ -137,17 +132,42 @@ export class X402Facilitator {
         };
       }
 
-      // Check nonce hasn't been used (local tracking)
-      if (usedNonces.has(authorization.nonce)) {
-        return {
-          isValid: false,
-          payer: authorization.from,
-          invalidReason: 'nonce_already_used',
-        };
+      // Check nonce hasn't been used on-chain
+      try {
+        const nonceUsed = await this.publicClient.readContract({
+          address: this.x402BettingAddress,
+          abi: X402_BETTING_ABI,
+          functionName: 'usedNonces',
+          args: [authorization.nonce as Hex],
+        });
+
+        if (nonceUsed) {
+          return {
+            isValid: false,
+            payer: authorization.from,
+            invalidReason: 'nonce_already_used',
+          };
+        }
+      } catch (e) {
+        // If we can't check nonce on-chain, use local tracking
+        if (usedNonces.has(authorization.nonce)) {
+          return {
+            isValid: false,
+            payer: authorization.from,
+            invalidReason: 'nonce_already_used',
+          };
+        }
       }
 
       // Check time validity
       const now = Math.floor(Date.now() / 1000);
+      if (now < parseInt(authorization.validAfter || '0')) {
+        return {
+          isValid: false,
+          payer: authorization.from,
+          invalidReason: 'authorization_not_yet_valid',
+        };
+      }
       if (now > parseInt(authorization.validBefore)) {
         return {
           isValid: false,
@@ -156,45 +176,7 @@ export class X402Facilitator {
         };
       }
 
-      // Verify signature using EIP-712
-      // For true gasless, we verify the user's bet authorization signature
-      try {
-        const betAmount = BigInt(authorization.value);
-        const marketId = paymentRequirements.extra?.marketId || 0;
-        const position = paymentRequirements.extra?.position ?? true;
-
-        const isValid = await verifyTypedData({
-          address: authorization.from,
-          domain: {
-            ...BET_AUTHORIZATION_DOMAIN,
-            chainId: this.chainId,
-            verifyingContract: this.predictionMarketAddress,
-          },
-          types: BET_AUTHORIZATION_TYPES,
-          primaryType: 'BetAuthorization',
-          message: {
-            marketId: BigInt(marketId),
-            position: position,
-            amount: betAmount,
-            user: authorization.from,
-            nonce: authorization.nonce,
-            validBefore: BigInt(authorization.validBefore),
-          },
-          signature: signature,
-        });
-
-        if (!isValid) {
-          return {
-            isValid: false,
-            payer: authorization.from,
-            invalidReason: 'invalid_signature',
-          };
-        }
-      } catch (sigError) {
-        console.warn('[X402] Signature verification failed (may be legacy format):', sigError);
-        // Continue - will validate during execution
-      }
-
+      // Signature will be verified on-chain by WBNB3009 contract
       return {
         isValid: true,
         payer: authorization.from,
@@ -210,9 +192,8 @@ export class X402Facilitator {
   }
 
   /**
-   * Settle payment - TRUE GASLESS execution
-   * Facilitator fronts its own BNB and calls buyPositionForUser
-   * User doesn't need WBNB - just a signature!
+   * Settle payment - Execute gasless bet
+   * Facilitator pays GAS only, user's WBNB3009 is transferred for the bet
    */
   async settlePayment(
     request: VerificationRequest,
@@ -241,49 +222,37 @@ export class X402Facilitator {
         };
       }
 
-      const { authorization } = request.paymentPayload.payload;
-      const betAmount = BigInt(authorization.value);
+      const { authorization, signature } = request.paymentPayload.payload;
 
-      // Mark nonce as used
+      // Mark nonce as used locally
       usedNonces.add(authorization.nonce);
 
-      // Check facilitator BNB balance
-      const facilitatorBalance = await this.publicClient.getBalance({
-        address: this.facilitatorAccount.address,
-      });
-
-      console.log('[X402] Facilitator balance:', formatEther(facilitatorBalance), 'BNB');
-      console.log('[X402] Bet amount:', formatEther(betAmount), 'BNB');
-
-      if (facilitatorBalance < betAmount) {
-        return {
-          success: false,
-          payer: verification.payer,
-          network: `eip155:${this.chainId}`,
-          errorReason: `facilitator_insufficient_balance: has ${formatEther(facilitatorBalance)} BNB, needs ${formatEther(betAmount)} BNB`,
-        };
-      }
-
-      console.log('[X402] TRUE GASLESS - Executing buyPositionForUser:', {
+      console.log('[X402] Executing gaslessBetWithBNB:', {
         marketId,
         position,
-        user: authorization.from,
-        betAmount: formatEther(betAmount),
-        facilitator: this.facilitatorAccount.address,
+        from: authorization.from,
+        value: authorization.value,
+        validAfter: authorization.validAfter,
+        validBefore: authorization.validBefore,
+        nonce: authorization.nonce,
       });
 
-      // Execute TRUE GASLESS transaction
-      // Facilitator fronts its own BNB and places bet for user!
+      // Execute gasless transaction
+      // Facilitator pays GAS, user's WBNB3009 is used for the bet
       const hash = await this.walletClient.writeContract({
-        address: this.predictionMarketAddress,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: 'buyPositionForUser',
+        address: this.x402BettingAddress,
+        abi: X402_BETTING_ABI,
+        functionName: 'gaslessBetWithBNB',
         args: [
           BigInt(marketId),
           position,
           authorization.from,
+          BigInt(authorization.value),
+          BigInt(authorization.validAfter || '0'),
+          BigInt(authorization.validBefore),
+          authorization.nonce as Hex,
+          signature,
         ],
-        value: betAmount, // Facilitator's BNB!
       });
 
       console.log('[X402] Transaction submitted:', hash);
@@ -291,11 +260,11 @@ export class X402Facilitator {
       // Wait for confirmation
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
 
-      console.log('[X402] ✅ TRUE GASLESS bet confirmed!', {
+      console.log('[X402] ✅ Gasless bet confirmed!', {
         txHash: hash,
         gasUsed: receipt.gasUsed.toString(),
         user: authorization.from,
-        betAmount: formatEther(betAmount),
+        betAmount: formatEther(BigInt(authorization.value)),
       });
 
       return {
@@ -317,7 +286,7 @@ export class X402Facilitator {
 
   /**
    * Get payment requirements for a bet
-   * TRUE GASLESS - user doesn't need WBNB, just signs authorization!
+   * User needs WBNB3009 balance and signs EIP-3009 authorization
    */
   getPaymentRequirements(
     marketId: number,
@@ -325,49 +294,41 @@ export class X402Facilitator {
     resourceUrl: string,
     position: boolean = true
   ): PaymentRequirements {
+    // WBNB3009 address for gasless betting
+    const wbnbAddress = process.env.NEXT_PUBLIC_WBNB_ADDRESS as Address || 
+      '0x70e4730A3b4aC6E6E395e8ED9c46B9c0f753A4fA' as Address;
+    
     return {
       scheme: 'exact',
       network: `eip155:${this.chainId}`,
       amount: amount.toString(),
-      asset: '0x0000000000000000000000000000000000000000' as Address, // Native BNB (no token needed!)
-      payTo: this.predictionMarketAddress,
+      asset: wbnbAddress, // WBNB3009 - user needs this balance!
+      payTo: this.x402BettingAddress,
       maxTimeoutSeconds: 300, // 5 minutes
       resource: resourceUrl,
       description: `Place ${position ? 'YES' : 'NO'} bet on market #${marketId}`,
       mimeType: 'application/json',
       extra: {
-        name: 'PredictBNB',
+        name: 'WBNB3009',
         version: '1',
-        isNative: true, // TRUE GASLESS - facilitator fronts BNB
-        marketId: marketId,
-        position: position,
+        isNative: false, // User pays with WBNB3009
+        wbnbAddress: wbnbAddress,
       },
     };
   }
 
   /**
-   * Check if gasless betting is available
-   * TRUE GASLESS - always available if facilitator has BNB
+   * Check if user can use gasless betting
+   * User needs WBNB3009 balance
    */
   async canUseGasless(_userAddress: Address): Promise<{
     canUse: boolean;
     reason?: string;
-    facilitatorBalance?: string;
   }> {
     try {
-      // Check facilitator balance
-      if (this.facilitatorAccount) {
-        const balance = await this.publicClient.getBalance({
-          address: this.facilitatorAccount.address,
-        });
-        return {
-          canUse: true,
-          facilitatorBalance: formatEther(balance),
-        };
-      }
+      // In production, could check user's WBNB3009 balance
       return {
-        canUse: false,
-        reason: 'facilitator_not_configured',
+        canUse: true,
       };
     } catch (_error) {
       return {
@@ -420,7 +381,7 @@ export function getFacilitator(chainId?: number): X402Facilitator {
     
     console.log('[X402 Facilitator] Initializing...');
     console.log('[X402 Facilitator] Chain ID:', chainId || process.env.NEXT_PUBLIC_CHAIN_ID || '97');
-    console.log('[X402 Facilitator] PredictionMarket:', process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS);
+    console.log('[X402 Facilitator] X402BettingBNB:', process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS);
     console.log('[X402 Facilitator] Private key present:', !!rawKey, rawKey ? `(length: ${rawKey.length})` : '');
     
     const formattedKey = formatPrivateKey(rawKey);
@@ -435,7 +396,7 @@ export function getFacilitator(chainId?: number): X402Facilitator {
     facilitatorInstance = new X402Facilitator(
       chainId || parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '97'),
       formattedKey,
-      process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as Address // TRUE GASLESS: Use PredictionMarket, not X402BettingBNB
+      process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS as Address // X402BettingBNB contract
     );
   }
   return facilitatorInstance;

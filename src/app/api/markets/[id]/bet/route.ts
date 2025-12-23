@@ -25,8 +25,7 @@ export async function POST(
       const paymentRequirements = facilitator.getPaymentRequirements(
         marketId,
         BigInt(amount),
-        `/api/markets/${marketId}/bet`,
-        position // Pass position for true gasless
+        `/api/markets/${marketId}/bet`
       );
 
       const paymentRequired: PaymentRequiredResponse = {
@@ -77,8 +76,7 @@ export async function POST(
     const paymentRequirements = facilitator.getPaymentRequirements(
       marketId,
       BigInt(amount),
-      `/api/markets/${marketId}/bet`,
-      position // Pass position for true gasless
+      `/api/markets/${marketId}/bet`
     );
 
     console.log('[X402] Settling payment for market', marketId, 'position', position);

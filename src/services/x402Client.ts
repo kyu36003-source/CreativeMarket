@@ -3,8 +3,8 @@
  * Implements HTTP 402 "Payment Required" protocol for gasless betting
  * Based on: https://github.com/coinbase/x402
  * 
- * TRUE GASLESS: User just signs a bet authorization, no tokens needed!
- * Facilitator fronts the BNB and places the bet on user's behalf.
+ * GASLESS GAS: User pays bet amount (WBNB3009), facilitator pays gas only.
+ * User signs EIP-3009 authorization to transfer their WBNB3009.
  */
 
 import { Address, Hex, keccak256, encodePacked } from 'viem';
@@ -13,18 +13,17 @@ export interface PaymentRequirements {
   scheme: 'exact';
   network: string; // e.g., "eip155:56" for BSC mainnet
   amount: string; // atomic units
-  asset: Address; // 0x0 for native BNB (true gasless)
-  payTo: Address; // recipient (PredictionMarket contract)
+  asset: Address; // WBNB3009 contract address
+  payTo: Address; // recipient (X402BettingBNB contract)
   maxTimeoutSeconds: number;
   resource: string; // URL path
   description: string;
   mimeType: string;
   extra?: {
-    name: string; // 'PredictBNB'
+    name: string; // 'WBNB3009'
     version: string; // '1'
-    isNative?: boolean; // true for true gasless
-    marketId?: number;
-    position?: boolean;
+    isNative?: boolean; 
+    wbnbAddress?: string; // WBNB3009 contract for signature domain
   };
 }
 
@@ -84,8 +83,8 @@ export class X402Client {
   }
 
   /**
-   * Create bet authorization signature for TRUE GASLESS betting
-   * User just signs a simple authorization - no WBNB needed!
+   * Create EIP-3009 authorization signature for WBNB3009 transfer
+   * User signs to authorize transfer of their WBNB3009
    * @param params Authorization parameters
    * @param signTypedData Wallet signing function
    */
@@ -102,8 +101,7 @@ export class X402Client {
       tokenVersion: string;
       chainId: number;
       isNative?: boolean;
-      marketId?: number;
-      position?: boolean;
+      wbnbAddress?: Address;
     },
     signTypedData: (args: any) => Promise<Hex>
   ): Promise<PaymentPayload['payload']> {
@@ -112,36 +110,42 @@ export class X402Client {
       throw new Error('Missing required address params: from or to');
     }
     
-    // TRUE GASLESS: Sign a simple bet authorization
-    // No WBNB needed - facilitator fronts the BNB!
+    // Get WBNB3009 address for signature domain
+    const wbnbAddress = params.wbnbAddress || 
+      (typeof window !== 'undefined' ? 
+        (process.env.NEXT_PUBLIC_WBNB_ADDRESS as Address) : 
+        '0x70e4730A3b4aC6E6E395e8ED9c46B9c0f753A4fA' as Address);
+    
+    // EIP-3009 TransferWithAuthorization for WBNB3009
     const domain = {
-      name: 'PredictBNB',
+      name: 'WBNB3009',  // Must match WBNB3009 contract's EIP-712 domain
       version: '1',
       chainId: params.chainId,
-      verifyingContract: params.to, // PredictionMarket contract
+      verifyingContract: wbnbAddress,
     };
 
     const types = {
-      BetAuthorization: [
-        { name: 'marketId', type: 'uint256' },
-        { name: 'position', type: 'bool' },
-        { name: 'amount', type: 'uint256' },
-        { name: 'user', type: 'address' },
-        { name: 'nonce', type: 'bytes32' },
+      TransferWithAuthorization: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'validAfter', type: 'uint256' },
         { name: 'validBefore', type: 'uint256' },
+        { name: 'nonce', type: 'bytes32' },
       ],
     };
 
+    // Transfer WBNB3009 from user to X402BettingBNB contract
     const message = {
-      marketId: params.marketId?.toString() || '0',
-      position: params.position ?? true,
-      amount: params.value.toString(),
-      user: params.from,
-      nonce: params.nonce,
+      from: params.from,
+      to: params.to,  // X402BettingBNB contract
+      value: params.value.toString(),
+      validAfter: params.validAfter.toString(),
       validBefore: params.validBefore.toString(),
+      nonce: params.nonce,
     };
 
-    console.log('[X402] TRUE GASLESS - Signing bet authorization:', {
+    console.log('[X402] Signing WBNB3009 transfer authorization:', {
       domain,
       message,
     });
@@ -149,7 +153,7 @@ export class X402Client {
     const signature = await signTypedData({
       domain,
       types,
-      primaryType: 'BetAuthorization',
+      primaryType: 'TransferWithAuthorization',
       message,
     });
 
@@ -273,21 +277,23 @@ export class X402Client {
         )
       );
 
+      // Get WBNB address from payment requirements
+      const wbnbAddress = (selectedPayment.extra?.wbnbAddress || selectedPayment.asset) as Address;
+
       const authPayload = await this.createPaymentAuthorization(
         {
           from: walletAddress,
-          to: selectedPayment.payTo, // PredictionMarket contract
+          to: selectedPayment.payTo, // X402BettingBNB contract
           value: BigInt(selectedPayment.amount),
           validAfter: now,
           validBefore: now + selectedPayment.maxTimeoutSeconds,
           nonce,
           tokenAddress: selectedPayment.asset,
-          tokenName: selectedPayment.extra?.name || 'PredictBNB',
+          tokenName: selectedPayment.extra?.name || 'WBNB3009',
           tokenVersion: selectedPayment.extra?.version || '1',
           chainId,
-          isNative: selectedPayment.extra?.isNative ?? true,
-          marketId: selectedPayment.extra?.marketId ?? marketId,
-          position: selectedPayment.extra?.position ?? position,
+          isNative: selectedPayment.extra?.isNative || false,
+          wbnbAddress: wbnbAddress,
         },
         signTypedData
       );
