@@ -325,9 +325,32 @@ export class X402Client {
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json();
         console.error('[X402 Client] Payment failed:', errorData);
+        
+        // Extract user-friendly error message from contract revert reason
+        let errorMessage = errorData.error || errorData.details || 'Payment failed';
+        
+        // Parse common revert reasons for better UX
+        if (errorMessage.includes('Market has ended')) {
+          errorMessage = 'This market has ended and is no longer accepting bets';
+        } else if (errorMessage.includes('Market already resolved')) {
+          errorMessage = 'This market has already been resolved';
+        } else if (errorMessage.includes('Bet amount too low')) {
+          errorMessage = 'Bet amount is too low. Minimum is 0.0101 BNB for gasless bets';
+        } else if (errorMessage.includes('Insufficient balance')) {
+          errorMessage = 'Insufficient WBNB3009 balance. Please wrap more BNB first';
+        } else if (errorMessage.includes('Invalid signature')) {
+          errorMessage = 'Signature verification failed. Please try again';
+        } else if (errorMessage.includes('reverted with the following reason:')) {
+          // Extract the reason from viem error
+          const match = errorMessage.match(/reverted with the following reason:\s*\n?\s*(.+?)(\n|Contract Call:|$)/);
+          if (match) {
+            errorMessage = match[1].trim();
+          }
+        }
+        
         return {
           success: false,
-          error: errorData.error || errorData.details || 'Payment failed',
+          error: errorMessage,
         };
       }
 

@@ -715,6 +715,19 @@ export default function MarketDetailPage() {
             </div>
           </div>
 
+          {/* Error display for gasless betting */}
+          {gaslessError && (
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <p className="font-medium text-red-600 dark:text-red-400">Bet Failed</p>
+                  <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-1">{gaslessError}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {!isConnected && (
             <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">
