@@ -35,7 +35,7 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
     // State variables
     uint256 public marketCount;
     uint256 public constant PLATFORM_FEE = 200; // 2% fee (in basis points)
-    uint256 public constant MIN_BET = 0.01 ether;
+    uint256 public constant MIN_BET = 0.001 ether; // 0.001 BNB minimum bet
     uint256 public constant MIN_REPUTATION_TO_CREATE = 50; // Minimum reputation score to create markets
     
     TraderReputation public reputationContract;

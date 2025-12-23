@@ -84,10 +84,10 @@ export default function MarketDetailPage() {
   const [useGasless, setUseGasless] = useState(true); // Default to gasless
   const [useGaslessClaim, setUseGaslessClaim] = useState(true); // Gasless claim
 
-  // Minimum bet requirements (contract MIN_BET = 0.01 BNB)
+  // Minimum bet requirements (contract MIN_BET = 0.001 BNB)
   // For gasless: need slightly more to cover 0.5% facilitator fee
-  const MIN_BET = 0.01;
-  const MIN_BET_GASLESS = 0.0101; // 0.01 + 0.5% fee buffer
+  const MIN_BET = 0.001;
+  const MIN_BET_GASLESS = 0.00101; // 0.001 + 0.5% fee buffer
 
   const { potentialWinnings, odds: _odds } = useCalculateWinnings(
     marketId,
