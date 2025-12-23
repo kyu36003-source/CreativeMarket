@@ -321,11 +321,18 @@ export function getFacilitator(chainId?: number): X402Facilitator {
                    process.env.X402_FACILITATOR_PRIVATE_KEY ||
                    process.env.PRIVATE_KEY;
     
+    console.log('[X402 Facilitator] Initializing...');
+    console.log('[X402 Facilitator] Chain ID:', chainId || process.env.NEXT_PUBLIC_CHAIN_ID || '97');
+    console.log('[X402 Facilitator] Betting contract:', process.env.NEXT_PUBLIC_X402_BETTING_ADDRESS);
+    console.log('[X402 Facilitator] Private key present:', !!rawKey, rawKey ? `(length: ${rawKey.length})` : '');
+    
     const formattedKey = formatPrivateKey(rawKey);
     
     if (!formattedKey) {
-      console.warn('⚠️ X402 Facilitator: No valid private key found. Gasless betting will be disabled.');
-      console.warn('Set FACILITATOR_PRIVATE_KEY in .env.local with a valid private key (64 hex chars)');
+      console.error('❌ X402 Facilitator: No valid private key found. Gasless betting will NOT work!');
+      console.error('Set FACILITATOR_PRIVATE_KEY in Vercel environment variables with a valid private key (64 hex chars)');
+    } else {
+      console.log('✅ X402 Facilitator: Private key configured successfully');
     }
     
     facilitatorInstance = new X402Facilitator(

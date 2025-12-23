@@ -57,9 +57,20 @@ export async function POST(
     }
 
     // Step 2: Process payment with signature
-    const paymentPayload: PaymentPayload = JSON.parse(
-      Buffer.from(paymentSignature, 'base64').toString('utf-8')
-    );
+    console.log('[X402] Processing payment with signature...');
+    
+    let paymentPayload: PaymentPayload;
+    try {
+      paymentPayload = JSON.parse(
+        Buffer.from(paymentSignature, 'base64').toString('utf-8')
+      );
+    } catch (parseError) {
+      console.error('[X402] Failed to parse payment signature:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid payment signature format' },
+        { status: 400 }
+      );
+    }
 
     const facilitator = getFacilitator();
     const paymentRequirements = facilitator.getPaymentRequirements(
@@ -68,6 +79,8 @@ export async function POST(
       `/api/markets/${marketId}/bet`
     );
 
+    console.log('[X402] Settling payment for market', marketId, 'position', position);
+    
     // Settle payment (facilitator executes on-chain)
     const settlement = await facilitator.settlePayment(
       {
@@ -78,12 +91,16 @@ export async function POST(
       position
     );
 
+    console.log('[X402] Settlement result:', settlement);
+
     if (!settlement.success) {
+      // Return 500 for server-side errors, not 402 (which would trigger payment flow again)
       return NextResponse.json(
         {
-          error: settlement.errorReason || 'Payment failed',
+          error: settlement.errorReason || 'Payment settlement failed',
+          details: 'The facilitator could not execute the transaction. Check server logs.',
         },
-        { status: 402 }
+        { status: 500 }
       );
     }
 

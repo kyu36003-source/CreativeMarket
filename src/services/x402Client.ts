@@ -295,6 +295,7 @@ export class X402Client {
       );
 
       // Step 6: Retry with payment signature
+      console.log('[X402 Client] Sending payment with signature...');
       const paymentResponse = await fetch(`${this.baseUrl}/api/markets/${marketId}/bet`, {
         method: 'POST',
         headers: {
@@ -308,11 +309,14 @@ export class X402Client {
         }),
       });
 
+      console.log('[X402 Client] Payment response status:', paymentResponse.status);
+
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json();
+        console.error('[X402 Client] Payment failed:', errorData);
         return {
           success: false,
-          error: errorData.error || 'Payment failed',
+          error: errorData.error || errorData.details || 'Payment failed',
         };
       }
 
