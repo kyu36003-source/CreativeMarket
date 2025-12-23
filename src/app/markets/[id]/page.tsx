@@ -84,6 +84,11 @@ export default function MarketDetailPage() {
   const [useGasless, setUseGasless] = useState(true); // Default to gasless
   const [useGaslessClaim, setUseGaslessClaim] = useState(true); // Gasless claim
 
+  // Minimum bet requirements (contract MIN_BET = 0.01 BNB)
+  // For gasless: need slightly more to cover 0.5% facilitator fee
+  const MIN_BET = 0.01;
+  const MIN_BET_GASLESS = 0.0101; // 0.01 + 0.5% fee buffer
+
   const { potentialWinnings, odds: _odds } = useCalculateWinnings(
     marketId,
     selectedPosition ?? true,
@@ -554,7 +559,12 @@ export default function MarketDetailPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Amount (BNB)</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Amount (BNB)
+                    {useGasless && canUseGasless && (
+                      <span className="text-xs text-muted-foreground ml-2">min: {MIN_BET_GASLESS} for gasless</span>
+                    )}
+                  </label>
                   <input
                     type="number"
                     value={selectedPosition === true ? betAmount : '0.1'}
@@ -563,8 +573,8 @@ export default function MarketDetailPage() {
                       setSelectedPosition(true);
                     }}
                     onFocus={() => setSelectedPosition(true)}
-                    step="0.01"
-                    min="0.01"
+                    step="0.001"
+                    min={useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET}
                     placeholder="0.1"
                     className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-background"
                   />
@@ -589,7 +599,7 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(true)}
-                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < 0.01}
+                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < (useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET)}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                   size="lg"
                 >
@@ -634,7 +644,12 @@ export default function MarketDetailPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Amount (BNB)</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Amount (BNB)
+                    {useGasless && canUseGasless && (
+                      <span className="text-xs text-muted-foreground ml-2">min: {MIN_BET_GASLESS} for gasless</span>
+                    )}
+                  </label>
                   <input
                     type="number"
                     value={selectedPosition === false ? betAmount : '0.1'}
@@ -643,8 +658,8 @@ export default function MarketDetailPage() {
                       setSelectedPosition(false);
                     }}
                     onFocus={() => setSelectedPosition(false)}
-                    step="0.01"
-                    min="0.01"
+                    step="0.001"
+                    min={useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET}
                     placeholder="0.1"
                     className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background"
                   />
@@ -669,7 +684,7 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(false)}
-                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < 0.01}
+                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < (useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET)}
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                   size="lg"
                 >
