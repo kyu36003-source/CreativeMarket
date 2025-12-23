@@ -309,7 +309,7 @@ export class X402Facilitator {
       description: `Place ${position ? 'YES' : 'NO'} bet on market #${marketId}`,
       mimeType: 'application/json',
       extra: {
-        name: 'WBNB3009',
+        name: 'Wrapped BNB with x402',  // Must match WBNB3009 contract's EIP-712 domain
         version: '1',
         isNative: false, // User pays with WBNB3009
         wbnbAddress: wbnbAddress,

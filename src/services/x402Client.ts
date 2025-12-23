@@ -118,7 +118,7 @@ export class X402Client {
     
     // EIP-3009 TransferWithAuthorization for WBNB3009
     const domain = {
-      name: 'WBNB3009',  // Must match WBNB3009 contract's EIP-712 domain
+      name: 'Wrapped BNB with x402',  // Must match WBNB3009 contract's EIP-712 domain name
       version: '1',
       chainId: params.chainId,
       verifyingContract: wbnbAddress,
@@ -289,7 +289,7 @@ export class X402Client {
           validBefore: now + selectedPayment.maxTimeoutSeconds,
           nonce,
           tokenAddress: selectedPayment.asset,
-          tokenName: selectedPayment.extra?.name || 'WBNB3009',
+          tokenName: selectedPayment.extra?.name || 'Wrapped BNB with x402',
           tokenVersion: selectedPayment.extra?.version || '1',
           chainId,
           isNative: selectedPayment.extra?.isNative || false,
