@@ -3,7 +3,7 @@
  */
 const { ethers } = require('hardhat');
 
-const PREDICTION_MARKET_ADDRESS = '0x7F0335eC0157a113840D2dcB257BE971774F2226';
+const PREDICTION_MARKET_ADDRESS = '0x6C8A1610eedAa2BA449b9a409384cE4a0b22F81F';
 
 const PREDICTION_MARKET_ABI = [
   'function createMarket(string memory _question, string memory _description, string memory _category, uint256 _endTime, bool _aiOracleEnabled) external returns (uint256)',

@@ -19,6 +19,8 @@ import {
 } from '@/hooks/useContracts';
 import { useX402Bet, useCanUseX402, useGasSponsorship } from '@/hooks/useX402Bet';
 import { useClaimGasless } from '@/hooks/useX402Extended';
+import { useWBNB } from '@/hooks/useWBNB';
+import { WrapBNBModal } from '@/components/WrapBNBModal';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -104,6 +106,10 @@ export default function MarketDetailPage() {
   
   const { canUse: canUseGasless, reason: gaslessReason } = useCanUseX402();
   const { sponsoredAmount, fetchSponsorship } = useGasSponsorship();
+  
+  // WBNB3009 for gasless betting
+  const { wbnbBalance, wbnbFormatted, bnbFormatted, refetch: refetchWBNB } = useWBNB();
+  const [showWrapModal, setShowWrapModal] = useState(false);
   
   const [gaslessTxHash, setGaslessTxHash] = useState<string | null>(null);
   const { claimGasless, isPending: isGaslessClaimPending } = useClaimGasless();
@@ -319,6 +325,41 @@ export default function MarketDetailPage() {
           </div>
         </div>
       </Card>
+
+      {/* WBNB3009 Balance Card - Required for Gasless */}
+      {isConnected && useGasless && canUseGasless && (
+        <Card className="p-4 mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                <span className="text-xl">💰</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-yellow-900">WBNB3009 Balance</h4>
+                <p className="text-2xl font-bold text-yellow-800">
+                  {parseFloat(wbnbFormatted).toFixed(4)} WBNB3009
+                </p>
+                <p className="text-xs text-yellow-700">
+                  BNB: {parseFloat(bnbFormatted).toFixed(4)} • Required for gasless betting
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowWrapModal(true)}
+              className="border-yellow-400 text-yellow-800 hover:bg-yellow-100"
+            >
+              Wrap/Unwrap
+            </Button>
+          </div>
+          {wbnbBalance !== undefined && wbnbBalance < BigInt(1e15) && (
+            <div className="mt-3 p-2 bg-yellow-100 rounded-lg text-xs text-yellow-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Low WBNB3009 balance. Wrap some BNB to enable gasless betting.
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* Platform Features Banner */}
       <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -906,6 +947,16 @@ export default function MarketDetailPage() {
           </Card>
         </div>
       )}
+
+      {/* Wrap BNB Modal */}
+      <WrapBNBModal 
+        isOpen={showWrapModal} 
+        onClose={() => {
+          setShowWrapModal(false);
+          refetchWBNB();
+        }}
+        requiredAmount={betAmount}
+      />
     </div>
   );
 }

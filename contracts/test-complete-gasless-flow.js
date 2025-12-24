@@ -9,10 +9,10 @@
  */
 const { ethers } = require('hardhat');
 
-// Contract addresses (BSC Testnet)
+// Contract addresses (BSC Testnet) - Updated January 22, 2025
 const WBNB3009_ADDRESS = '0x70e4730A3b4aC6E6E395e8ED9c46B9c0f753A4fA';
-const X402_BETTING_ADDRESS = '0xCA983EF481b53Ee14E67278501DdC1De466999F9';
-const PREDICTION_MARKET_ADDRESS = '0x7F0335eC0157a113840D2dcB257BE971774F2226';
+const X402_BETTING_ADDRESS = '0x8B0d07E7D0a4DE30E6acDb8df0FAc3425a22569E';
+const PREDICTION_MARKET_ADDRESS = '0x6C8A1610eedAa2BA449b9a409384cE4a0b22F81F';
 
 // ABIs
 const WBNB3009_ABI = [
@@ -83,13 +83,13 @@ async function main() {
   // ═══════════════════════════════════════════════════════════════
   console.log('\n💰 STEP 2: Ensuring WBNB3009 balance...');
   
-  const betAmount = ethers.parseEther('0.0101'); // MIN_BET + fee buffer (0.5% fee)
+  const betAmount = ethers.parseEther('0.00101'); // MIN_BET (0.001) + fee buffer (0.5% fee)
   
   if (wbnbBalance < betAmount) {
     console.log(`  Need to wrap more BNB. Current: ${ethers.formatEther(wbnbBalance)}, Need: ${ethers.formatEther(betAmount)}`);
-    const wrapTx = await wbnb.deposit({ value: ethers.parseEther('0.005') });
+    const wrapTx = await wbnb.deposit({ value: ethers.parseEther('0.002') });
     await wrapTx.wait();
-    console.log(`  ✅ Wrapped 0.005 BNB -> WBNB3009`);
+    console.log(`  ✅ Wrapped 0.002 BNB -> WBNB3009`);
   } else {
     console.log(`  ✅ Sufficient WBNB3009 balance`);
   }

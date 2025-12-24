@@ -1,7 +1,7 @@
 const { ethers } = require('hardhat');
 
 async function main() {
-  const pm = await ethers.getContractAt('PredictionMarket', '0x7F0335eC0157a113840D2dcB257BE971774F2226');
+  const pm = await ethers.getContractAt('PredictionMarket', '0x6C8A1610eedAa2BA449b9a409384cE4a0b22F81F');
   
   console.log('Creating new markets with Movies, Music, Relationships categories...\n');
 
