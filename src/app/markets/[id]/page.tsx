@@ -21,6 +21,8 @@ import { useX402Bet, useCanUseX402, useGasSponsorship } from '@/hooks/useX402Bet
 import { useClaimGasless } from '@/hooks/useX402Extended';
 import { useWBNB } from '@/hooks/useWBNB';
 import { WrapBNBModal } from '@/components/WrapBNBModal';
+import { useBNBBet, useFacilitatorStatus } from '@/hooks/useBNBBet';
+import { useX402Pool } from '@/hooks/useX402Pool';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -107,9 +109,34 @@ export default function MarketDetailPage() {
   const { canUse: canUseGasless, reason: gaslessReason } = useCanUseX402();
   const { sponsoredAmount, fetchSponsorship } = useGasSponsorship();
   
-  // WBNB3009 for gasless betting
-  const { wbnbBalance, wbnbFormatted, bnbFormatted, refetch: refetchWBNB } = useWBNB();
+  // x402 Pool - True gasless betting (deposit once, bet forever gasless)
+  const {
+    credit: _x402Credit,
+    creditFormatted: x402CreditFormatted,
+    hasCredit: hasX402Credit,
+    canBetGasless: canUseX402Pool,
+    deposit: depositToPool,
+    isDepositing: isDepositingToPool,
+    placeBet: placeBetX402Pool,
+    isBetting: isX402PoolBetting,
+    betError: _x402PoolError,
+    refetchCredit: refetchX402Credit,
+  } = useX402Pool();
+  
+  // WBNB3009 for legacy gasless betting
+  const { wbnbBalance: _wbnbBalance, wbnbFormatted, bnbFormatted, refetch: refetchWBNB } = useWBNB();
   const [showWrapModal, setShowWrapModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('0.1');
+  
+  // Pure BNB betting (simpler flow - facilitator handles WBNB internally)
+  const { placeBet: _placeBetPureBNB, isPending: _isPureBNBPending, step: _pureBNBStep, error: _pureBNBError } = useBNBBet();
+  const { status: _facilitatorStatus, checkStatus: checkFacilitatorStatus } = useFacilitatorStatus();
+  
+  // Check facilitator status on mount
+  useEffect(() => {
+    checkFacilitatorStatus();
+  }, [checkFacilitatorStatus]);
   
   const [gaslessTxHash, setGaslessTxHash] = useState<string | null>(null);
   const { claimGasless, isPending: isGaslessClaimPending } = useClaimGasless();
@@ -204,17 +231,32 @@ export default function MarketDetailPage() {
     try {
       setSelectedPosition(position);
       
-      // Use x402 protocol for gasless if available and enabled
-      if (useGasless && canUseGasless) {
+      // PRIORITY 1: x402 Pool (100% gasless if user has credit)
+      if (useGasless && canUseX402Pool && parseFloat(x402CreditFormatted) >= parseFloat(betAmount)) {
+        console.log('[Bet] Using x402 Pool - 100% GASLESS!');
+        const result = await placeBetX402Pool(marketId, position, betAmount);
+        
+        if (result.success) {
+          setGaslessTxHash(result.transactionHash || null);
+          setIsGaslessSuccess(true);
+          await refetchX402Credit();
+        }
+      }
+      // PRIORITY 2: x402 with WBNB3009 signature
+      else if (useGasless && canUseGasless && parseFloat(wbnbFormatted) >= parseFloat(betAmount)) {
+        console.log('[Bet] Using x402 gasless with WBNB3009');
         const amount = BigInt(Math.floor(parseFloat(betAmount) * 1e18));
         const result = await placeBetGasless(marketId, position, amount);
         
         if (result.success) {
           setGaslessTxHash(result.transactionHash || null);
           setIsGaslessSuccess(true);
-          await fetchSponsorship(); // Update sponsorship amount
+          await fetchSponsorship();
         }
-      } else {
+      }
+      // Standard flow: User pays gas directly
+      else {
+        console.log('[Bet] Using standard bet (user pays gas)');
         await placeBet(marketId, position, betAmount);
       }
       // Transaction modal will show automatically via useEffect
@@ -326,8 +368,120 @@ export default function MarketDetailPage() {
         </div>
       </Card>
 
-      {/* WBNB3009 Balance Card - Required for Gasless */}
-      {isConnected && useGasless && canUseGasless && (
+      {/* x402 Gasless Betting Card */}
+      {isConnected && useGasless && (
+        <Card className="p-4 mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                <span className="text-xl">⚡</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-green-900">x402 Gasless Mode</h4>
+                {hasX402Credit ? (
+                  <>
+                    <p className="text-2xl font-bold text-green-700">
+                      {parseFloat(x402CreditFormatted).toFixed(4)} BNB Credit
+                    </p>
+                    <p className="text-xs text-green-600">
+                      ✅ 100% gasless betting active! Just sign to bet.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-green-800">
+                      Deposit BNB once → All bets become 100% gasless!
+                    </p>
+                    <p className="text-xs text-green-600">
+                      0.5% fee • Your BNB: {parseFloat(bnbFormatted).toFixed(4)}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDepositModal(true)}
+              className="border-green-400 text-green-800 hover:bg-green-100"
+            >
+              {hasX402Credit ? 'Add Credit' : 'Deposit BNB'}
+            </Button>
+          </div>
+          {!hasX402Credit && (
+            <div className="mt-3 p-2 bg-green-100 rounded-lg text-xs text-green-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Deposit BNB to start gasless betting. You only pay gas once for the deposit!
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Deposit to x402 Pool</h3>
+              <button onClick={() => setShowDepositModal(false)} className="text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Deposit BNB once, then all your bets are <strong>100% gasless</strong>. Just sign with your wallet - no gas fees!
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Amount (BNB)</label>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  step="0.01"
+                  min="0.01"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-background"
+                />
+              </div>
+              <div className="p-3 bg-muted rounded-lg text-sm">
+                <div className="flex justify-between mb-1">
+                  <span>Current Credit:</span>
+                  <span className="font-medium">{parseFloat(x402CreditFormatted).toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span>Your BNB Balance:</span>
+                  <span className="font-medium">{parseFloat(bnbFormatted).toFixed(4)} BNB</span>
+                </div>
+                <div className="flex justify-between text-green-600">
+                  <span>After Deposit:</span>
+                  <span className="font-medium">
+                    {(parseFloat(x402CreditFormatted) + parseFloat(depositAmount || '0')).toFixed(4)} BNB
+                  </span>
+                </div>
+              </div>
+              <Button
+                onClick={async () => {
+                  const result = await depositToPool(depositAmount);
+                  if (result.success) {
+                    await refetchX402Credit();
+                    setShowDepositModal(false);
+                  }
+                }}
+                disabled={isDepositingToPool || parseFloat(depositAmount) <= 0}
+                className="w-full bg-green-500 hover:bg-green-600"
+              >
+                {isDepositingToPool ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Depositing...
+                  </>
+                ) : (
+                  'Deposit BNB'
+                )}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Legacy WBNB3009 Balance Card - Fallback */}
+      {isConnected && useGasless && !hasX402Credit && parseFloat(wbnbFormatted) > 0 && (
         <Card className="p-4 mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -335,12 +489,12 @@ export default function MarketDetailPage() {
                 <span className="text-xl">💰</span>
               </div>
               <div>
-                <h4 className="font-semibold text-yellow-900">WBNB3009 Balance</h4>
-                <p className="text-2xl font-bold text-yellow-800">
+                <h4 className="font-semibold text-yellow-900">WBNB3009 Balance (Legacy)</h4>
+                <p className="text-sm text-yellow-800">
                   {parseFloat(wbnbFormatted).toFixed(4)} WBNB3009
                 </p>
                 <p className="text-xs text-yellow-700">
-                  BNB: {parseFloat(bnbFormatted).toFixed(4)} • Required for gasless betting
+                  Can also be used for gasless betting via EIP-3009
                 </p>
               </div>
             </div>
@@ -349,15 +503,9 @@ export default function MarketDetailPage() {
               onClick={() => setShowWrapModal(true)}
               className="border-yellow-400 text-yellow-800 hover:bg-yellow-100"
             >
-              Wrap/Unwrap
+              Manage
             </Button>
           </div>
-          {wbnbBalance !== undefined && wbnbBalance < BigInt(1e15) && (
-            <div className="mt-3 p-2 bg-yellow-100 rounded-lg text-xs text-yellow-800 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              Low WBNB3009 balance. Wrap some BNB to enable gasless betting.
-            </div>
-          )}
         </Card>
       )}
 
@@ -640,18 +788,19 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(true)}
-                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < (useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET)}
+                  disabled={!isConnected || isBetting || isGaslessPending || isX402PoolBetting || Number(betAmount) < (useGasless && canUseX402Pool ? MIN_BET_GASLESS : MIN_BET)}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                   size="lg"
                 >
-                  {((isBetting || isGaslessPending) && selectedPosition === true) ? (
+                  {((isBetting || isGaslessPending || isX402PoolBetting) && selectedPosition === true) ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      {useGasless && canUseGasless ? '🆓 Gasless...' : 'Buying...'}
+                      {useGasless && hasX402Credit ? '⚡ Gasless...' : useGasless ? '🆓 Signing...' : 'Buying...'}
                     </>
                   ) : (
                     <>
-                      {useGasless && canUseGasless && '🆓 '}
+                      {useGasless && hasX402Credit && '⚡ '}
+                      {useGasless && !hasX402Credit && canUseGasless && '🆓 '}
                       Buy YES
                     </>
                   )}
@@ -725,18 +874,19 @@ export default function MarketDetailPage() {
 
                 <Button
                   onClick={() => handlePlaceBet(false)}
-                  disabled={!isConnected || isBetting || isGaslessPending || Number(betAmount) < (useGasless && canUseGasless ? MIN_BET_GASLESS : MIN_BET)}
+                  disabled={!isConnected || isBetting || isGaslessPending || isX402PoolBetting || Number(betAmount) < (useGasless && canUseX402Pool ? MIN_BET_GASLESS : MIN_BET)}
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                   size="lg"
                 >
-                  {((isBetting || isGaslessPending) && selectedPosition === false) ? (
+                  {((isBetting || isGaslessPending || isX402PoolBetting) && selectedPosition === false) ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      {useGasless && canUseGasless ? '🆓 Gasless...' : 'Buying...'}
+                      {useGasless && hasX402Credit ? '⚡ Gasless...' : useGasless ? '🆓 Signing...' : 'Buying...'}
                     </>
                   ) : (
                     <>
-                      {useGasless && canUseGasless && '🆓 '}
+                      {useGasless && hasX402Credit && '⚡ '}
+                      {useGasless && !hasX402Credit && canUseGasless && '🆓 '}
                       Buy NO
                     </>
                   )}
